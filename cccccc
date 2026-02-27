@@ -1,0 +1,277 @@
+// DPR Process Screen: - >
+// Reduce shadow of Box
+// Remove Line of seperation in Box
+// Date --->
+
+// const validateEmail = (email) => {
+//     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+//     return re.test(email);
+//   };
+
+//   const validatePassword = (password) => {
+//     return password.length >= 6;
+//   };
+
+// if (!validateEmail(email)) {
+//   showErrorMessage(en.LOGIN.VALIDATION.INVALID_EMAIL);
+//   return;
+// }
+
+// if (!validatePassword(password)) {
+//   showErrorMessage(en.LOGIN.VALIDATION.WEAK_PASSWORD);
+//   return;
+// }
+// const response = {
+//   name: "Ashish Ranjan",
+//   email: email,
+//   password: password,
+// };
+
+// const handleSubmit = async () => {
+//   try {
+//     setLoading(true);
+//     for (const entry of parentEntries) {
+//       const { formData } = entry;
+
+//       if (!formData.requiredDate) {
+//         showErrorMessage("Please select a date for all entries");
+//         return;
+//       }
+
+//       if (!formData.workType) {
+//         showErrorMessage("Please select work type for all entries");
+//         return;
+//       }
+
+//       if (!formData.seedClass) {
+//         showErrorMessage("Please select seed class for all entries");
+//         return;
+//       }
+
+//       if (!formData.squareId) {
+//         showErrorMessage("Please select square for all entries");
+//         return;
+//       }
+
+//       if (!formData.operationId) {
+//         showErrorMessage("Please select operation for all entries");
+//         return;
+//       }
+
+//       if (!formData.financialYearId) {
+//         showErrorMessage("Please select financial year for all entries");
+//         return;
+//       }
+
+//       if (!formData.seasonId) {
+//         showErrorMessage("Please select season for all entries");
+//         return;
+//       }
+
+//       if (!formData.cropId) {
+//         showErrorMessage("Please select crop for all entries");
+//         return;
+//       }
+
+//       if (!formData.varietyId) {
+//         showErrorMessage("Please select seed variety for all entries");
+//         return;
+//       }
+
+//       if (!formData.requiredOutput) {
+//         showErrorMessage("Please enter required output for all entries");
+//         return;
+//       }
+//     }
+
+//     // Prepare payload for each parent entry
+//     const payloads = parentEntries.map((entry) => {
+//       const { formData } = entry;
+//       return {
+//         blockId: userData?.blockId || "",
+//         blockName: userData?.blockName || "",
+//         class: formData.seedClass,
+//         crop: formData.crop,
+//         cropId: formData.cropId,
+//         date: formatDateForAPI(formData.requiredDate),
+//         dprMechanicals: formData.equipmentList.map((item) => ({
+//           equipmentId: item.equipmentId,
+//           equipmentName: item.equipmentName,
+//           estimatedHours: item.estimatedHours,
+//           operator: item.operator,
+//           operatorName: item.operatorName || "",
+//         })),
+//         equipment: formData.equipment ? 1 : 0,
+//         finYear: formData.financialYear,
+//         finYearId: formData.financialYearId,
+//         financialYear: formData.financialYear,
+//         fromSeedClass: formData.seedClass,
+//         operation: formData.operation,
+//         operationId: formData.operationId,
+//         operationName: formData.operation,
+//         output: formData.requiredOutput,
+//         reportDate: formatDateForAPI(formData.requiredDate),
+//         requiredOutputArea: formData.requiredOutput,
+//         season: formData.season,
+//         seasonId: formData.seasonId,
+//         seedVariety: formData.variety,
+//         seedVarietyId: formData.varietyId,
+//         square: formData.square,
+//         squareId: formData.squareId,
+//         squareName: formData.square,
+//         stage: "",
+// unitId:
+//   userData?.unitType === "CHAK"
+//     ? userData?.chakId
+//     : userData?.blockId,
+//         unitType: userData?.unitType,
+//         workType: formData.workType.toLowerCase(),
+//       };
+//     });
+
+//     const encryptedPayload = encryptWholeObject(payloads);
+//     const response = await apiRequest(
+//       API_ROUTES.DP_REPORT_SAVE,
+//       "POST",
+//       encryptedPayload
+//     );
+//     const decryptedResponse = decryptAES(response);
+//     const parsedResponse = JSON.parse(decryptedResponse);
+//     if (
+//       parsedResponse?.status === "SUCCESS" &&
+//       parsedResponse?.statusCode === "200"
+//     ) {
+//       showSuccessMessage(`${parsedResponse?.message} `);
+//       navigation.goBack();
+//     } else if (
+//       parsedResponse?.status === "FAILED" &&
+//       parsedResponse?.statusCode === "300"
+//     ) {
+//       showErrorMessage(`${parsedResponse?.message} `);
+//     } else {
+//       showErrorMessage("Error in filling form");
+//     }
+//   } catch (error) {
+//     console.error("Error creating DPR:", error);
+//     showErrorMessage("Error creating DPR. Please try again.");
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+
+// const fethcProgramListDetails = async () => {
+//   const payloadData = {
+//     id: item?.id,
+//   };
+//   try {
+//     setLoading(true);
+//     const encryptedPayload = encryptWholeObject(payloadData);
+//     const response = await apiRequest(
+//       API_ROUTES.PROGRAMME_LIST_DETAILS,
+//       "post",
+//       encryptedPayload
+//     );
+//     const decrypted = decryptAES(response);
+//     const parsedDecrypted = JSON.parse(decrypted);
+//     if (
+//       parsedDecrypted &&
+//       parsedDecrypted?.status === "SUCCESS" &&
+//       parsedDecrypted?.statusCode === "200"
+//     ) {
+//       const inspectionLandIds = Array.isArray(
+//         parsedDecrypted?.data?.schedule?.landDetails
+//       )
+//         ? parsedDecrypted.data.schedule.landDetails.map((ld) => ld.landId)
+//         : [];
+
+//       try {
+//         const payloadData2 = {
+//           id: parsedDecrypted?.data?.growerId,
+//         };
+//         const encryptedPayload2 = encryptWholeObject(payloadData2);
+//         const growerResponse = await apiRequest(
+//           API_ROUTES.GROWER_DETAILS,
+//           "post",
+//           encryptedPayload2
+//         );
+//         const growerDecrypted = decryptAES(growerResponse);
+//         const growerParsedDecrypted = JSON.parse(growerDecrypted);
+
+//         if (
+//           growerParsedDecrypted &&
+//           growerParsedDecrypted?.status === "SUCCESS" &&
+//           growerParsedDecrypted?.statusCode === "200"
+//         ) {
+//           const cropFirId = parsedDecrypted?.data?.crop?.cropFirType?.id;
+//           const scheduleId = parsedDecrypted?.data?.schedule?.id;
+//           const inspectionPayloadData = { scheduleId };
+//           const encryptedInspectionPayloadData = encryptWholeObject(
+//             inspectionPayloadData
+//           );
+
+//           const inspectionResponseData = await apiRequest(
+//             (cropFirId === 1 && API_ROUTES.PRODUCTION_INSPECTION_A) ||
+//               (cropFirId === 2 && API_ROUTES.PRODUCTION_INSPECTION_B) ||
+//               (cropFirId === 3 && API_ROUTES.PRODUCTION_INSPECTION_C),
+//             "post",
+//             encryptedInspectionPayloadData
+//           );
+//           const inspectionDecrypted = decryptAES(inspectionResponseData);
+//           const inspectionParsedDecrypted = JSON.parse(inspectionDecrypted);
+//           if (
+//             inspectionParsedDecrypted &&
+//             inspectionParsedDecrypted?.status === "SUCCESS" &&
+//             inspectionParsedDecrypted?.statusCode === "200"
+//           ) {
+//             let growerData =
+//               growerParsedDecrypted?.data &&
+//               Array.isArray(growerParsedDecrypted.data)
+//                 ? growerParsedDecrypted.data[0]
+//                 : growerParsedDecrypted.data;
+
+//             if (
+//               growerData &&
+//               Array.isArray(growerData.landDetails) &&
+//               inspectionLandIds.length > 0
+//             ) {
+//               growerData = {
+//                 ...growerData,
+//                 landDetails: growerData.landDetails.filter((ld) =>
+//                   inspectionLandIds.includes(ld.id)
+//                 ),
+//               };
+//             }
+
+//             setDetailsData({
+//               inspection: parsedDecrypted?.data,
+//               grower: growerData,
+//               productionInspection: inspectionParsedDecrypted?.data,
+//             });
+//             setCropFirTypeId(
+//               parsedDecrypted?.data?.crop?.cropFirType?.cropFirTypeId
+//             );
+//           } else {
+//             showErrorMessage("Error in getting Inspection Data");
+//           }
+//         } else {
+//           showErrorMessage("Error in Getting Grower Data");
+//         }
+//       } catch (error) {
+//         console.log(error, "Error in Getting Grower Data");
+//         setDetailsData({
+//           inspection: parsedDecrypted?.data,
+//           grower: null,
+//           productionInspection: null,
+//         });
+//       }
+//     } else {
+//       showErrorMessage("Error");
+//     }
+//   } catch (error) {
+//     console.log(error, "line 133");
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+
+// android:networkSecurityConfig="@xml/network_security_config"

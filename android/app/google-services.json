@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "635134963563",
+    "project_id": "beejprabandhan07",
+    "storage_bucket": "beejprabandhan07.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:635134963563:android:8ed3f97043824bc41be62e",
+        "android_client_info": {
+          "package_name": "com.beejprabandhan"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCXJKD4_LKrKuu1IEixkSte6UGUkOeGCKU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

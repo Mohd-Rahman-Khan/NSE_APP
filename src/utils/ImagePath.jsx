@@ -1,0 +1,16 @@
+export default {
+  noInternet: require("../assets/animation/nointernet.json"),
+  rootedImage: require("../assets/image/rootedimage.png"),
+  splashImage: require("../assets/image/splash.png"),
+  logoImage: require("../assets/image/logo.png"),
+  logoBgImage: require("../assets/image/loginbg.png"),
+  emailIcon: require("../assets/image/email.png"),
+  password: require("../assets/image/lock.png"),
+  userProfile: require("../assets/image/userprofile.png"),
+  notification: require("../assets/image/notification.png"),
+  bannerImage: require("../assets/image/bannerimage.png"),
+  complaint: require("../assets/image/complaint.png"),
+  registrationIcon: require("../assets/image/registration.png"),
+  forgotPasswordBackgroundImage: require("../assets/image/loginBgPattern.jpg"),
+  nsclLogo: require("../assets/image/nsclLogo.png"),
+};
