@@ -82,7 +82,7 @@ const UserProfile = () => {
       const response = await apiRequest(
         API_ROUTES.PROFILE_DETAILS,
         "post",
-        encryptedPayload
+        encryptedPayload,
       );
       const decrypted = decryptAES(response);
       const parsedDecrypted = JSON.parse(decrypted);
@@ -122,10 +122,10 @@ const UserProfile = () => {
       label: en.PROFILE.PRIVACY_POLICY,
       icon: "shield-checkmark-outline",
       onPress: () => {
-        navigation.navigate("WebViewPreview", {
-          title: "Privacy Policy",
-          url: "https://www.npmjs.com/package/@wuba/react-native-echarts",
-        });
+        // navigation.navigate("WebViewPreview", {
+        //   title: "Privacy Policy",
+        //   url: "https://www.npmjs.com/package/@wuba/react-native-echarts",
+        // });
       },
     },
     {
@@ -133,10 +133,10 @@ const UserProfile = () => {
       label: en.PROFILE.TERMS_CONDITIONS,
       icon: "document-text-outline",
       onPress: () => {
-        navigation.navigate("WebViewPreview", {
-          title: "Terms & Conditions",
-          url: "https://www.npmjs.com/package/@wuba/react-native-echarts",
-        });
+        // navigation.navigate("WebViewPreview", {
+        //   title: "Terms & Conditions",
+        //   url: "https://www.npmjs.com/package/@wuba/react-native-echarts",
+        // });
       },
     },
     {
@@ -144,10 +144,10 @@ const UserProfile = () => {
       label: en.PROFILE.ABOUT_US,
       icon: "information-circle-outline",
       onPress: () => {
-        navigation.navigate("WebViewPreview", {
-          title: "About Us",
-          url: "https://www.npmjs.com/package/@wuba/react-native-echarts",
-        });
+        // navigation.navigate("WebViewPreview", {
+        //   title: "About Us",
+        //   url: "https://www.npmjs.com/package/@wuba/react-native-echarts",
+        // });
       },
     },
     {

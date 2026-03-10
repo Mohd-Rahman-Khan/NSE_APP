@@ -40,9 +40,10 @@ const Login = () => {
   const [password, setPassword] = useState("welcome");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [announcement, setAnnouncement] = useState(
-    "Welcome to our App! Securely login to continue. 🚀 Stay connected with us always!",
-  );
+  // const [announcement, setAnnouncement] = useState(
+  //   "Welcome to our App! Securely login to continue. 🚀 Stay connected with us always!",
+  // );
+  const [announcement, setAnnouncement] = useState("");
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
@@ -63,7 +64,7 @@ const Login = () => {
           setAnnouncement(response?.data[0]?.name);
         }
       } else {
-        showErrorMessage(response?.errorMsg);
+        //showErrorMessage(response?.errorMsg);
       }
     } catch (error) {
       showErrorMessage(error?.message);
@@ -84,6 +85,7 @@ const Login = () => {
         "post",
         payloadData,
       );
+      console.log("loginResp", response);
       if (
         response &&
         response?.status === "Success" &&
@@ -140,30 +142,33 @@ const Login = () => {
       style={styles.main}
       keyboardVerticalOffset={Platform.OS === "ios" ? moderateScale(40) : 0}
     >
-      <View
-        style={{
-          borderColor: Colors.greenColor,
-          position: "absolute",
-          width: "100%",
-          zIndex: 1,
-          marginTop:
-            Platform.OS === "ios"
-              ? moderateScaleVertical(50)
-              : moderateScaleVertical(25),
-        }}
-      >
-        <TextTicker
-          style={styles.marqueeText}
-          duration={8000}
-          loop
-          bounce={false}
-          repeatSpacer={50}
-          marqueeDelay={1000}
-          scrollSpeed={25}
+      {announcement && (
+        <View
+          style={{
+            borderColor: Colors.greenColor,
+            position: "absolute",
+            width: "100%",
+            zIndex: 1,
+            marginTop:
+              Platform.OS === "ios"
+                ? moderateScaleVertical(50)
+                : moderateScaleVertical(25),
+          }}
         >
-          {announcement}
-        </TextTicker>
-      </View>
+          <TextTicker
+            style={styles.marqueeText}
+            duration={8000}
+            loop
+            bounce={false}
+            repeatSpacer={50}
+            marqueeDelay={1000}
+            scrollSpeed={25}
+          >
+            {announcement}
+          </TextTicker>
+        </View>
+      )}
+
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled"

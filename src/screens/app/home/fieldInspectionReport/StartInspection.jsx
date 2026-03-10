@@ -43,13 +43,13 @@ const StartInspection = ({ route }) => {
   const toggleLandSelection = (land) => {
     // Check if the land is already selected
     const isSelected = selectedLands.some(
-      (selectedLand) => selectedLand.id === land.id
+      (selectedLand) => selectedLand.id === land.id,
     );
 
     if (isSelected) {
       // Remove from selection
       setSelectedLands(
-        selectedLands.filter((selectedLand) => selectedLand.id !== land.id)
+        selectedLands.filter((selectedLand) => selectedLand.id !== land.id),
       );
     } else {
       // Add to selection
@@ -61,6 +61,7 @@ const StartInspection = ({ route }) => {
     <WrapperContainer>
       <InnerHeader title={"Verify Inspection Details"} />
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+        {console.log("data___", data)}
         <View style={styles.card}>
           <Text style={styles.headerText}>Grower Details</Text>
           <DataShownView
@@ -121,7 +122,7 @@ const StartInspection = ({ route }) => {
         {/* Select the Land which is going to be inspected */}
         {data?.grower?.landDetails?.map((item, index) => {
           const isSelected = selectedLands.some(
-            (selectedLand) => selectedLand.id === item.id
+            (selectedLand) => selectedLand.id === item.id,
           );
 
           return (
@@ -225,7 +226,7 @@ StartInspection.propTypes = {
                 PropTypes.string,
                 PropTypes.number,
               ]),
-            })
+            }),
           ),
         }),
         inspection: PropTypes.shape({

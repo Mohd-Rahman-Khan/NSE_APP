@@ -608,7 +608,7 @@ export default function MechanicalIssueDetails({ route }) {
                     style={styles.approveBtn}
                   >
                     <Icon name="check-circle" size={18} color="#fff" />
-                    <Text style={styles.actionText}>Approveewwww</Text>
+                    <Text style={styles.actionText}>Approve</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -636,7 +636,7 @@ export default function MechanicalIssueDetails({ route }) {
                       style={styles.approveBtn}
                     >
                       <Icon name="check-circle" size={18} color="#fff" />
-                      <Text style={styles.actionText}>Approveee</Text>
+                      <Text style={styles.actionText}>Approve</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity

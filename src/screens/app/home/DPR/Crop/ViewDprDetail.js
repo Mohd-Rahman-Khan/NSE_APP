@@ -143,20 +143,13 @@ export default function ViewDprDetail({ route }) {
       if (parsed?.status === "SUCCESS" || parsed?.statusCode === "200") {
         // 🔥 prefill selected materials
 
-        const prefilled = (parsed.data || []).map((m) => {
-          // const matchedLot = dprData?.dprAgricultures?.lotUsages?.find((lu) => {
-          //   console.log("dpr____", lu);
-          //   console.log("dpr____", m.id);
-          //   //lu.runningInventoryId === m.id,
-          // });
+        const prefilled = (parsed.data || []).map((m) => ({
+          ...m,
+          selected: m.requestedQty ? true : false,
+          issueQty: m.requestedQty ? String(m.requestedQty) : "",
+        }));
 
-          return {
-            ...m,
-            // selected: m.requestedQty > 0, // ya backend flag
-            selected: !!matchedLot,
-            issueQty: m.requestedQty?.toString() || "",
-          };
-        });
+        console.log("Prefilled Materials", prefilled);
 
         setMaterialTableData(prefilled);
       }
@@ -685,10 +678,19 @@ export default function ViewDprDetail({ route }) {
                       //   setShowMaterialModal(true);
                       // }}
 
-                      onPress={() => {
-                        if (ag.material?.itemCode) {
-                          fetchMaterialListByItemCode(ag.material.itemCode);
+                      onPress={async () => {
+                        console.log(
+                          "Material ItemCode",
+                          ag?.material?.itemCode,
+                        );
+
+                        if (!ag?.material?.itemCode) {
+                          alert("Please select item first");
+                          return;
                         }
+
+                        await fetchMaterialListByItemCode(ag.material.itemCode);
+
                         setShowMaterialModal(true);
                       }}
                     >

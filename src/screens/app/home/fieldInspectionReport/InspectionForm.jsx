@@ -26,7 +26,10 @@ import CustomButton from "../../../../components/CustomButton";
 import { apiRequest } from "../../../../services/APIRequest";
 import { API_ROUTES } from "../../../../services/APIRoutes";
 import { decryptAES, encryptWholeObject } from "../../../../utils/decryptData";
-import { showSuccessMessage } from "../../../../utils/HelperFunction";
+import {
+  showErrorMessage,
+  showSuccessMessage,
+} from "../../../../utils/HelperFunction";
 import PropTypes from "prop-types";
 import { compareTwoDates } from "../../../../utils/compareTwoDates";
 
@@ -317,7 +320,7 @@ const InspectionForm = ({ route }) => {
         { label: "Name", field: "name" },
         { label: "Designation", field: "designation" },
         { label: "Address", field: "address" },
-        { label: "Remarks", field: "remarks" }
+        { label: "Remarks", field: "remarks" },
       );
     } else if (cropFirTypeId === 2) {
       def.push(
@@ -370,7 +373,7 @@ const InspectionForm = ({ route }) => {
           field: "submittedBy",
         },
         { label: "Designation", field: "designation" },
-        { label: "Remarks", field: "remarks" }
+        { label: "Remarks", field: "remarks" },
       );
     } else if (cropFirTypeId === 3) {
       def.push(
@@ -418,7 +421,7 @@ const InspectionForm = ({ route }) => {
           field: "areaCertifiedHa",
           keyboardType: "numeric",
         },
-        { label: "Remarks", field: "remarks" }
+        { label: "Remarks", field: "remarks" },
       );
     }
     def.forEach((f) => {
@@ -728,7 +731,7 @@ const InspectionForm = ({ route }) => {
         if (isEmptyValue(formData[f])) stepErrors[f] = `${label} is required`;
         else if (
           visibleStep1Fields.find(
-            (i) => i.field === f && i.keyboardType === "numeric"
+            (i) => i.field === f && i.keyboardType === "numeric",
           ) &&
           !isNumericString(String(formData[f]))
         ) {
@@ -1755,7 +1758,7 @@ const InspectionForm = ({ route }) => {
         data?.inspection?.schedule?.inspectionInChargeId ||
         "197",
       scheduleLandId: routeData?.inspection?.schedule?.landDetails?.map(
-        (land) => land.landId
+        (land) => land.landId,
       ) ||
         data?.inspection?.schedule?.landDetails?.map((land) => land.landId) || [
           routeData?.selectedLands?.[0]?.id || data?.selectedLands?.[0]?.id,
@@ -1801,16 +1804,16 @@ const InspectionForm = ({ route }) => {
           Number.parseInt(formData.noOfTimesPollenSheddersRemoved) || 0,
         frequencyOfPollenShedders: formData.frequencyOfPollenShedders || "",
         wasItDoneAtInspectionTime: booleanToYesNo(
-          formData.wasItDoneAtInspectionTime
+          formData.wasItDoneAtInspectionTime,
         ),
         qualityOfSeedProductionWork: formData.qualityOfSeedProductionWork || "",
         doesThisCropConfirmToStandard: booleanToYesNo(
-          formData.doesCropConformToStandards
+          formData.doesCropConformToStandards,
         ),
         estimatedSeedYield:
           Number.parseFloat(formData.estimatedSeedYieldKgPerHa) || 0,
         wasTheGrowerPresent: booleanToYesNo(
-          formData.wasGrowerPresentAtInspectionTime
+          formData.wasGrowerPresentAtInspectionTime,
         ),
         isFinal: booleanToYesNo(formData.isFinalReport),
         areaRejected: Number.parseFloat(formData.areaRejectedHa) || 0,
@@ -1846,7 +1849,7 @@ const InspectionForm = ({ route }) => {
           formData.stageofseedcropatthisinspection || "",
         dateOfSowing: convertDateFormat(formData.dateOfSowing),
         expectedDateOfHarvestFrom: convertDateFormat(
-          formData.expectedHarvestFrom
+          formData.expectedHarvestFrom,
         ),
         expectedDateOfHarvestTo: convertDateFormat(formData.expectedHarvestTo),
         // Step 2 fields
@@ -1891,7 +1894,7 @@ const InspectionForm = ({ route }) => {
         hybridCodeDesignation: formData.codeHybridDesignation || "",
         plantingRatio: formData.plantingRatio || "",
         areBothEndMaleRowsMarked: booleanToYesNo(
-          formData.areBothEndOfMaleRowsMarked
+          formData.areBothEndOfMaleRowsMarked,
         ),
         methodOfMarkingMaleRows: formData.methodOfMarkingMaleRows || "",
         isolationDistanceMeters:
@@ -1910,11 +1913,11 @@ const InspectionForm = ({ route }) => {
           Number.parseInt(formData.noOfTimesDetasselled) || 0,
         frequencyOfDetasselling: formData.frequencyOfDetasselling || "",
         detassellingDoneAtInspectionTime: booleanToYesNo(
-          formData.detassellingDoneAtInspectionTime
+          formData.detassellingDoneAtInspectionTime,
         ),
         qualityOfSeedProductionWork: formData.qualityOfSeedProductionWork || "",
         doesCropConformToStandards: booleanToYesNo(
-          formData.doesCropConformToStandards
+          formData.doesCropConformToStandards,
         ),
         estimatedSeedYieldQtlsOrAcres:
           formData.estimatedSeedYieldKgsPerAcres || "0",
@@ -1966,11 +1969,16 @@ const InspectionForm = ({ route }) => {
         default:
           throw new Error("Invalid crop FIR type");
       }
+
+      console.log("encryptedPayload", payload);
+
       const encryptedPayload = encryptWholeObject(payload);
       const response = await apiRequest(apiEndpoint, "POST", encryptedPayload);
+      console.log("encryptedPayload", response);
       const decrypted = decryptAES(response);
+      console.log("encryptedPayload", decrypted);
       const parsedDecrypted = JSON.parse(decrypted);
-      console.log("API Response:", parsedDecrypted);
+      console.log("encryptedPayload", parsedDecrypted);
       if (
         parsedDecrypted &&
         parsedDecrypted?.status === "SUCCESS" &&
@@ -1979,10 +1987,10 @@ const InspectionForm = ({ route }) => {
         showSuccessMessage(parsedDecrypted?.message);
         navigation.push("FieldInspectionReport");
       } else {
+        showErrorMessage(parsedDecrypted?.message);
         console.log("Error in ELse Block");
       }
     } catch (error) {
-      console.error("Error submitting inspection form:", error?.message);
       alert("Failed to submit inspection form. Please try again.");
     } finally {
       setLoading(false);

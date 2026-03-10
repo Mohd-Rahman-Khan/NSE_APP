@@ -69,10 +69,11 @@ const FiledInspectionReportDetails = ({ route }) => {
 
       try {
         const growerData = await fetchGrowerData(programDetails.data.growerId);
+        console.log("growerData__", growerData);
         await fetchInspectionData(
           programDetails,
           growerData,
-          inspectionLandIds
+          inspectionLandIds,
         );
       } catch (error) {
         console.log(error, "Error in Getting Grower Data");
@@ -96,7 +97,7 @@ const FiledInspectionReportDetails = ({ route }) => {
     const response = await apiRequest(
       API_ROUTES.PROGRAMME_LIST_DETAILS,
       "post",
-      encryptedPayload
+      encryptedPayload,
     );
     const decrypted = decryptAES(response);
     const parsedDecrypted = JSON.parse(decrypted);
@@ -116,7 +117,7 @@ const FiledInspectionReportDetails = ({ route }) => {
     const growerResponse = await apiRequest(
       API_ROUTES.GROWER_DETAILS,
       "post",
-      encryptedPayload2
+      encryptedPayload2,
     );
     const growerDecrypted = decryptAES(growerResponse);
     const growerParsedDecrypted = JSON.parse(growerDecrypted);
@@ -131,42 +132,62 @@ const FiledInspectionReportDetails = ({ route }) => {
   const fetchInspectionData = async (
     programDetails,
     growerData,
-    inspectionLandIds
+    inspectionLandIds,
   ) => {
     const cropFirId = programDetails?.data?.crop?.cropFirType?.id;
     const scheduleId = programDetails?.data?.schedule?.id;
     const inspectionPayloadData = { scheduleId };
     const encryptedInspectionPayloadData = encryptWholeObject(
-      inspectionPayloadData
+      inspectionPayloadData,
     );
 
     const inspectionEndpoint = getInspectionEndpoint(cropFirId);
     const inspectionResponseData = await apiRequest(
       inspectionEndpoint,
       "post",
-      encryptedInspectionPayloadData
+      encryptedInspectionPayloadData,
     );
 
     const inspectionDecrypted = decryptAES(inspectionResponseData);
     const inspectionParsedDecrypted = JSON.parse(inspectionDecrypted);
 
-    if (!isSuccessResponse(inspectionParsedDecrypted)) {
-      showErrorMessage("Error in getting Inspection Data");
-      return;
+    console.log("inspectionResponseData", inspectionParsedDecrypted);
+
+    if (inspectionParsedDecrypted?.statusCode == "403") {
+      const processedGrowerData = processGrowerData(
+        growerData,
+        inspectionLandIds,
+      );
+
+      setDetailsData({
+        inspection: programDetails.data,
+        grower: processedGrowerData,
+        productionInspection: null,
+      });
+
+      setCropFirTypeId(programDetails.data?.crop?.cropFirType?.cropFirTypeId);
+    } else {
+      const inspectionDecrypted = decryptAES(inspectionResponseData);
+      const inspectionParsedDecrypted = JSON.parse(inspectionDecrypted);
+
+      if (!isSuccessResponse(inspectionParsedDecrypted)) {
+        showErrorMessage("Error in getting Inspection Data");
+        return;
+      }
+
+      const processedGrowerData = processGrowerData(
+        growerData,
+        inspectionLandIds,
+      );
+
+      setDetailsData({
+        inspection: programDetails.data,
+        grower: processedGrowerData,
+        productionInspection: inspectionParsedDecrypted.data,
+      });
+
+      setCropFirTypeId(programDetails.data?.crop?.cropFirType?.cropFirTypeId);
     }
-
-    const processedGrowerData = processGrowerData(
-      growerData,
-      inspectionLandIds
-    );
-
-    setDetailsData({
-      inspection: programDetails.data,
-      grower: processedGrowerData,
-      productionInspection: inspectionParsedDecrypted.data,
-    });
-
-    setCropFirTypeId(programDetails.data?.crop?.cropFirType?.cropFirTypeId);
   };
 
   const getInspectionEndpoint = (cropFirId) => {
@@ -192,7 +213,7 @@ const FiledInspectionReportDetails = ({ route }) => {
       processedData = {
         ...processedData,
         landDetails: processedData.landDetails.filter((ld) =>
-          inspectionLandIds.includes(ld.id)
+          inspectionLandIds.includes(ld.id),
         ),
       };
     }

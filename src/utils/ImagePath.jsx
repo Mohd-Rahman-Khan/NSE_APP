@@ -13,4 +13,5 @@ export default {
   registrationIcon: require("../assets/image/registration.png"),
   forgotPasswordBackgroundImage: require("../assets/image/loginBgPattern.jpg"),
   nsclLogo: require("../assets/image/nsclLogo.png"),
+  qrscanner: require("../assets/image/qrscanner.png"),
 };

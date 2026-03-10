@@ -1,14 +1,6 @@
 export const API_ROUTES = {
-  //BASE_URL: "http://192.168.100.102:7930/api/", //(Q.A)
-  //BASE_URL: "http://192.168.100.58:7730/api/", //(UAT)
-  //BASE_URL: "http://160.25.172.19:9052/api/",
-  //BASE_URL: "http://192.168.100.102:7830/api/", //(development)
-  //BASE_URL: "http://192.168.100.102:7630/api/", //UAT Public
-  //BASE_URL: "http://192.168.100.102:7730/api/",
-  // BASE_URL: "http://192.168.80.148:7830/api/",// (Nitesh Ip)
-  //BASE_URL: "http://160.25.172.19:9053/api/", //Public Server
-  //BASE_URL: "http://192.168.100.102:7630/api/",
-  BASE_URL: "http://160.25.172.19:9054/api/",
+  BASE_URL: "http://160.25.172.19:9054/api/", //dev url
+  //BASE_URL: "http://160.25.172.19:9052/api/", //client uat
   AUTHORIZE_LOGIN: "userauth/authenticate/login",
   GET_PROFILE: "userauth/all/get-profile",
   PROFILE_DETAILS: "master/employee-master/find-by-id",

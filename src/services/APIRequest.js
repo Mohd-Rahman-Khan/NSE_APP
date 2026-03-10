@@ -11,7 +11,7 @@ export const apiRequest = async (
   method = "GET",
   data,
   tokenOverride = null,
-  axiosConfig = {}
+  axiosConfig = {},
 ) => {
   const token = tokenOverride || (await getUserToken());
   console.log(token, "line 11");
@@ -37,8 +37,14 @@ export const apiRequest = async (
     console.error("API Request", response);
     return response.data;
   } catch (err) {
-    console.error("API Request Error:", err.response || err.message);
-    throw err;
+    //console.log(err.response.data);
+    //console.error("API Request" + endPoint, err.response || err.message);
+    //console.error("API Request" + endPoint, err.response.data);
+    if (err?.status == 403) {
+      return err.response.data;
+    } else {
+      throw err;
+    }
   }
 };
 
@@ -58,7 +64,7 @@ export const formDataApiRequest = async (endPoint, method = "GET", data) => {
     // Intercept request (will skip encryption for FormData)
     const intercepted = await interceptFetchRequest(
       `${API_ROUTES.BASE_URL}${endPoint}`,
-      options
+      options,
     );
 
     const response = await fetch(intercepted.url, intercepted.options);

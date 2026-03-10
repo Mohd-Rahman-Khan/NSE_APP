@@ -37,6 +37,7 @@ import AddNewDpr from "../screens/app/home/DPR/Crop/AddNewDpr";
 import DealerIndentsList from "../screens/app/home/DealerIndent/DealerIndentsList";
 import DealerIndentDetail from "../screens/app/home/DealerIndent/DealerIndentDetail";
 import CreateDealerIndent from "../screens/app/home/DealerIndent/CreateDealerIndent";
+import ScanQrCode from "../screens/app/home/ScanQrCode/ScanQrCode";
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -108,6 +109,7 @@ const AppNavigation = () => {
       <Stack.Screen name="AddOrchardDpr" component={AddOrchardDpr} />
       <Stack.Screen name="AddNurseryDpr" component={AddNurseryDpr} />
       <Stack.Screen name="AddNewDpr" component={AddNewDpr} />
+      <Stack.Screen name="ScanQrCode" component={ScanQrCode} />
     </Stack.Navigator>
   );
 };

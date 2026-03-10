@@ -19,6 +19,7 @@ import { clearUserData } from "../../redux/slice/UserSlice";
 import { showSuccessMessage } from "../../utils/HelperFunction";
 import { useDispatch } from "react-redux";
 import en from "../../constants/en";
+import { ROLES } from "../../constants/userRole";
 
 const Home = () => {
   const [searchText, setSearchText] = useState("");
@@ -31,11 +32,7 @@ const Home = () => {
   const productOpacityAnim = useRef(new Animated.Value(0)).current;
   const productTranslateAnim = useRef(new Animated.Value(20)).current;
   const dispatch = useDispatch();
-
-  // const userData = {
-  //   name: "Ashish Ranjan",
-  //   userProfileImage: ImagePath.userProfile,
-  // };
+  const [browseProductList, setbrowseProductList] = useState([]);
 
   const bannerImageList = [
     {
@@ -70,54 +67,54 @@ const Home = () => {
     },
   ];
 
-  const browseProductList = [
-    {
-      id: 1,
-      name: "Field Inspection Reports",
-      icon: ImagePath.complaint,
-      backgroundColor: Colors.bg1,
-      navigationScreenName: "FieldInspectionReport",
-    },
-    {
-      id: 2,
-      name: "Daily Progress Reports",
-      icon: ImagePath.registrationIcon,
-      backgroundColor: Colors.bg2,
-      //navigationScreenName: "DailyProgressReportList",
-      navigationScreenName: "SquarePlanList",
-      //navigationScreenName: "AddNewDpr",
-    },
+  // const browseProductList = [
+  //   {
+  //     id: 1,
+  //     name: "Field Inspection Reports",
+  //     icon: ImagePath.complaint,
+  //     backgroundColor: Colors.bg1,
+  //     navigationScreenName: "FieldInspectionReport",
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "Daily Progress Reports",
+  //     icon: ImagePath.registrationIcon,
+  //     backgroundColor: Colors.bg2,
+  //     //navigationScreenName: "DailyProgressReportList",
+  //     navigationScreenName: "SquarePlanList",
+  //     //navigationScreenName: "AddNewDpr",
+  //   },
 
-    {
-      id: 3,
-      name: "Dealer Indent",
-      icon: ImagePath.complaint,
-      backgroundColor: Colors.bg3,
-      navigationScreenName: "DealerIndentsList",
-    },
-    // {
-    //   id: 2,
-    //   name: "Old DPR",
-    //   icon: ImagePath.registrationIcon,
-    //   backgroundColor: Colors.bg2,
-    //   //navigationScreenName: "DailyProgressReportList",
-    //   navigationScreenName: "DailyProgressReportList",
-    // },
-    // {
-    //   id: 3,
-    //   name: "Crop",
-    //   icon: ImagePath.complaint,
-    //   backgroundColor: Colors.bg3,
-    //   // navigationScreenName: "Crop",
-    // },
-    // {
-    //   id: 4,
-    //   name: "Daily Progress Reports",
-    //   icon: ImagePath.registrationIcon,
-    //   backgroundColor: Colors.bg4,
-    //   // navigationScreenName: "FieldInspectionReport",
-    // },
-  ];
+  //   {
+  //     id: 3,
+  //     name: "Dealer Indent",
+  //     icon: ImagePath.complaint,
+  //     backgroundColor: Colors.bg3,
+  //     navigationScreenName: "DealerIndentsList",
+  //   },
+  //   // {
+  //   //   id: 2,
+  //   //   name: "Old DPR",
+  //   //   icon: ImagePath.registrationIcon,
+  //   //   backgroundColor: Colors.bg2,
+  //   //   //navigationScreenName: "DailyProgressReportList",
+  //   //   navigationScreenName: "DailyProgressReportList",
+  //   // },
+  //   // {
+  //   //   id: 3,
+  //   //   name: "Crop",
+  //   //   icon: ImagePath.complaint,
+  //   //   backgroundColor: Colors.bg3,
+  //   //   // navigationScreenName: "Crop",
+  //   // },
+  //   // {
+  //   //   id: 4,
+  //   //   name: "Daily Progress Reports",
+  //   //   icon: ImagePath.registrationIcon,
+  //   //   backgroundColor: Colors.bg4,
+  //   //   // navigationScreenName: "FieldInspectionReport",
+  //   // },
+  // ];
 
   useEffect(() => {
     // Sequence of animations when component mounts
@@ -185,7 +182,9 @@ const Home = () => {
 
   const fethchUserprofileData = async () => {
     const userData = await getUserData();
+    console.log("userData", userData);
     setUserData(userData);
+
     try {
       const payloadData = {
         id: userData?.employeeId,
@@ -198,7 +197,6 @@ const Home = () => {
       );
       const decrypted = decryptAES(response);
       const parsedDecrypted = JSON.parse(decrypted);
-      console.log("uData", parsedDecrypted);
 
       if (parsedDecrypted && parsedDecrypted?.statusCode === "401") {
         setTimeout(() => {
@@ -210,6 +208,113 @@ const Home = () => {
     } catch (error) {
     } finally {
     }
+
+    updateDashboardOptions(userData);
+    //hardCodedDashboardOptions(userData);
+  };
+
+  // const hardCodedDashboardOptions = (userData) => {
+  //   if (
+  //     userData?.roleName?.includes(ROLES.CHAK) ||
+  //     userData?.roleName?.includes(ROLES.MECHANICAL_BLOCK_ENGG) ||
+  //     userData?.roleName?.includes(ROLES.BLOK)
+  //   ) {
+  //     setbrowseProductList([
+  //       {
+  //         id: 2,
+  //         name: "Daily Progress Reports",
+  //         icon: ImagePath.registrationIcon,
+  //         backgroundColor: Colors.bg2,
+
+  //         navigationScreenName: "SquarePlanList",
+  //       },
+  //       ...browseProductList,
+  //     ]);
+  //     return;
+  //   }
+  //   if (userData?.roleName?.includes(ROLES.AO_QC_INCHARGE)) {
+  //     setbrowseProductList([
+  //       {
+  //         id: 1,
+  //         name: "Field Inspection Reports",
+  //         icon: ImagePath.complaint,
+  //         backgroundColor: Colors.bg1,
+  //         navigationScreenName: "FieldInspectionReport",
+  //       },
+  //       ...browseProductList,
+  //     ]);
+  //     return;
+  //   }
+
+  //   if (userData?.roleName?.includes(ROLES.AO_MKT_INCHARGE)) {
+  //     setbrowseProductList([
+  //       {
+  //         id: 3,
+  //         name: "Dealer Indent",
+  //         icon: ImagePath.complaint,
+  //         backgroundColor: Colors.bg3,
+  //         navigationScreenName: "DealerIndentsList",
+  //       },
+  //       ...browseProductList,
+  //     ]);
+  //     return;
+  //   }
+  // };
+
+  const updateDashboardOptions = (userData) => {
+    const applicationRoles = userData?.applicationRole
+      ? JSON.parse(userData.applicationRole)
+      : [];
+
+    //console.log("applicationRoles", applicationRoles);
+
+    const hasRole = (role) =>
+      applicationRoles?.some((item) => item.applicationRoleName === role);
+
+    const menuList = [];
+
+    if (hasRole("FARM FIR") || hasRole("FARM_FIR")) {
+      menuList.push({
+        id: 1,
+        name: "Field Inspection Reports",
+        icon: ImagePath.complaint,
+        backgroundColor: Colors.bg1,
+        navigationScreenName: "FieldInspectionReport",
+      });
+    }
+
+    if (hasRole("DPR") || hasRole("CROP_DPR_CREATE")) {
+      menuList.push({
+        id: 2,
+        name: "Daily Progress Reports",
+        icon: ImagePath.registrationIcon,
+        backgroundColor: Colors.bg2,
+        navigationScreenName: "SquarePlanList",
+      });
+    }
+
+    if (hasRole("DEALER_INDENT")) {
+      menuList.push({
+        id: 3,
+        name: "Dealer Indent",
+        icon: ImagePath.complaint,
+        backgroundColor: Colors.bg3,
+        navigationScreenName: "DealerIndentsList",
+      });
+    }
+
+    let updatedMenu = [
+      ...menuList,
+      {
+        id: 11,
+        name: "Scanner",
+        icon: ImagePath.qrscanner,
+        backgroundColor: "#ffff99",
+        navigationScreenName: "ScanQrCode",
+      },
+    ];
+
+    setbrowseProductList(updatedMenu);
   };
 
   return (

@@ -12,6 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import PropTypes from "prop-types";
 import CustomBottomSheet from "../../../components/CustomBottomSheet";
 import ImagePath from "../../../utils/ImagePath";
+import { ROLES } from "../../../constants/userRole";
 
 const BrowseProduct = ({ browseProductList, userData }) => {
   const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
@@ -113,13 +114,18 @@ const BrowseProduct = ({ browseProductList, userData }) => {
               onPress={() => {
                 if (item?.navigationScreenName) {
                   if (item?.name == "Daily Progress Reports") {
+                    // const findMachenicalRole = userData?.roleName?.includes(
+                    //   "FARM_BLOCK_ENGG_INCHARGE",
+                    // );
                     const findMachenicalRole = userData?.roleName?.includes(
-                      "FARM_BLOCK_ENGG_INCHARGE",
+                      ROLES.MECHANICAL_BLOCK_ENGG,
                     );
-                    const findEPOIncharge =
-                      userData?.roleName?.includes("EPO_INCHARGE");
+                    // const findEPOIncharge =
+                    //   userData?.roleName?.includes("EPO_INCHARGE");
+                    const findEPOIncharge = userData?.roleName?.includes(
+                      ROLES.EPO_INCHARGE,
+                    );
 
-                    //console.log("findRole", findRole);
                     if (findMachenicalRole) {
                       //setBottomSheetVisible(true);
                       navigation.navigate("MechanicalAllocationProcessList");
