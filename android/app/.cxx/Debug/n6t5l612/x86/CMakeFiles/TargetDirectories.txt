@@ -10,6 +10,9 @@
 /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/.cxx/Debug/n6t5l612/x86/lottiereactnative_autolinked_build/CMakeFiles/react_codegen_lottiereactnative.dir
 /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/.cxx/Debug/n6t5l612/x86/lottiereactnative_autolinked_build/CMakeFiles/edit_cache.dir
 /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/.cxx/Debug/n6t5l612/x86/lottiereactnative_autolinked_build/CMakeFiles/rebuild_cache.dir
+/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/.cxx/Debug/n6t5l612/x86/NativeCameraKitSpec_autolinked_build/CMakeFiles/react_codegen_NativeCameraKitSpec.dir
+/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/.cxx/Debug/n6t5l612/x86/NativeCameraKitSpec_autolinked_build/CMakeFiles/edit_cache.dir
+/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/.cxx/Debug/n6t5l612/x86/NativeCameraKitSpec_autolinked_build/CMakeFiles/rebuild_cache.dir
 /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/.cxx/Debug/n6t5l612/x86/rngesturehandler_codegen_autolinked_build/CMakeFiles/react_codegen_rngesturehandler_codegen.dir
 /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/.cxx/Debug/n6t5l612/x86/rngesturehandler_codegen_autolinked_build/CMakeFiles/edit_cache.dir
 /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/.cxx/Debug/n6t5l612/x86/rngesturehandler_codegen_autolinked_build/CMakeFiles/rebuild_cache.dir

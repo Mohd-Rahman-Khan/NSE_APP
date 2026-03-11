@@ -20,6 +20,7 @@ import { showSuccessMessage } from "../../utils/HelperFunction";
 import { useDispatch } from "react-redux";
 import en from "../../constants/en";
 import { ROLES } from "../../constants/userRole";
+import { useIsFocused } from "@react-navigation/native";
 
 const Home = () => {
   const [searchText, setSearchText] = useState("");
@@ -33,6 +34,8 @@ const Home = () => {
   const productTranslateAnim = useRef(new Animated.Value(20)).current;
   const dispatch = useDispatch();
   const [browseProductList, setbrowseProductList] = useState([]);
+
+  const isFocused = useIsFocused();
 
   const bannerImageList = [
     {
@@ -177,8 +180,10 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    fethchUserprofileData();
-  }, []);
+    if (isFocused) {
+      fethchUserprofileData();
+    }
+  }, [isFocused]);
 
   const fethchUserprofileData = async () => {
     const userData = await getUserData();
@@ -283,7 +288,12 @@ const Home = () => {
       });
     }
 
-    if (hasRole("DPR") || hasRole("CROP_DPR_CREATE")) {
+    if (
+      hasRole("DPR") ||
+      hasRole("CROP_DPR_CREATE") ||
+      hasRole("DPR_ENG") ||
+      hasRole("EPO_DPR_CREATE")
+    ) {
       menuList.push({
         id: 2,
         name: "Daily Progress Reports",
@@ -305,13 +315,13 @@ const Home = () => {
 
     let updatedMenu = [
       ...menuList,
-      {
-        id: 11,
-        name: "Scanner",
-        icon: ImagePath.qrscanner,
-        backgroundColor: "#ffff99",
-        navigationScreenName: "ScanQrCode",
-      },
+      // {
+      //   id: 11,
+      //   name: "Scanner",
+      //   icon: ImagePath.qrscanner,
+      //   backgroundColor: "#ffff99",
+      //   navigationScreenName: "ScanQrCode",
+      // },
     ];
 
     setbrowseProductList(updatedMenu);

@@ -31,6 +31,10 @@ import DateTimePicker, {
 } from "@react-native-community/datetimepicker";
 import { getUserData, getUserToken } from "../../../../utils/Storage";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
+import {
+  showErrorMessage,
+  showSuccessMessage,
+} from "../../../../utils/HelperFunction";
 
 /* ================= COMPONENT ================= */
 
@@ -51,6 +55,7 @@ const CreateDealerIndent = ({ route }) => {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [showFilePicker, setShowFilePicker] = useState(false);
   const [indentFile, setindentFile] = useState([]);
+  const [errors, setErrors] = useState({});
 
   const [form, setForm] = useState({
     party: null,
@@ -305,6 +310,11 @@ const CreateDealerIndent = ({ route }) => {
         ...p,
         indentDate: formatDate(selectedDate),
       }));
+      setErrors((prev) => {
+        const copy = { ...prev };
+        delete copy.indentDate;
+        return copy;
+      });
     }
 
     if (activeDateField === "EXPECTED") {
@@ -313,6 +323,11 @@ const CreateDealerIndent = ({ route }) => {
         ...p,
         expectedDate: formatDate(selectedDate),
       }));
+      setErrors((prev) => {
+        const copy = { ...prev };
+        delete copy.expectedDate;
+        return copy;
+      });
     }
   };
 
@@ -367,15 +382,15 @@ const CreateDealerIndent = ({ route }) => {
       console.log("UPLOAD RESPONSE", result);
 
       if (result.statusCode == "200" && result.status == "SUCCESS") {
-        alert("File uploaded successfully ✅");
+        showSuccessMessage("File uploaded successfully ✅");
         setUploadedFile(asset);
         setindentFile((pre) => [...pre, result.data[0]]);
       } else {
-        alert(result?.message || "Upload failed");
+        showErrorMessage(result?.message || "Upload failed");
       }
     } catch (err) {
       console.log("Upload Error ❌", err);
-      alert("File upload error");
+      showErrorMessage("File upload error");
     } finally {
       setLoading(false);
       setShowFilePicker(false);
@@ -393,7 +408,7 @@ const CreateDealerIndent = ({ route }) => {
         if (res.didCancel) return;
 
         if (res.errorCode) {
-          alert(res.errorMessage);
+          showErrorMessage(res.errorMessage);
           return;
         }
 
@@ -415,7 +430,7 @@ const CreateDealerIndent = ({ route }) => {
         if (res.didCancel) return;
 
         if (res.errorCode) {
-          alert(res.errorMessage);
+          showErrorMessage(res.errorMessage);
           return;
         }
 
@@ -450,6 +465,74 @@ const CreateDealerIndent = ({ route }) => {
     }
 
     return "Txn No";
+  };
+
+  const validateForm = () => {
+    let newErrors = {};
+
+    if (!form.party) {
+      newErrors.party = "Party is required";
+    }
+
+    if (!form.communication) {
+      newErrors.communication = "Communication mode required";
+    }
+
+    if (!form.communicationValue) {
+      newErrors.communicationValue = "Communication value required";
+    }
+
+    if (!form.indentDate) {
+      newErrors.indentDate = "Indent date required";
+    }
+
+    if (!form.expectedDate) {
+      newErrors.expectedDate = "Expected delivery date required";
+    }
+
+    if (!form.season) {
+      newErrors.season = "Season required";
+    }
+
+    if (!form.materialType) {
+      newErrors.materialType = "Material type required";
+    }
+
+    if (advancedReceived) {
+      if (!form.amount) {
+        newErrors.amount = "Amount required";
+      }
+
+      if (!form.paymentMode) {
+        newErrors.paymentMode = "Payment mode required";
+      }
+
+      if (!form.paymentDate) {
+        newErrors.paymentDate = "Payment date required";
+      }
+
+      if (
+        form.paymentMode &&
+        form.paymentMode.name !== "CASH" &&
+        !form.txnOrChequeNo
+      ) {
+        newErrors.txnOrChequeNo = "Txn / Cheque number required";
+      }
+    }
+
+    items.forEach((it, index) => {
+      if (!it.item) {
+        newErrors[`item_${index}`] = "Item required";
+      }
+
+      if (!it.qty) {
+        newErrors[`qty_${index}`] = "Quantity required";
+      }
+    });
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
   };
 
   const toApiDate = (ddmmyyyy) => {
@@ -512,6 +595,12 @@ const CreateDealerIndent = ({ route }) => {
   };
 
   const onSubmit = async () => {
+    const valid = validateForm();
+
+    if (!valid) {
+      showErrorMessage("Please fill required fields");
+      return;
+    }
     try {
       setLoading(true);
 
@@ -531,20 +620,26 @@ const CreateDealerIndent = ({ route }) => {
       console.log("onSubmit", parsed);
 
       if (parsed?.status === "SUCCESS") {
-        alert("Dealer Indent Created Successfully ✅");
+        showSuccessMessage("Dealer Indent Created Successfully ✅");
         navigation.goBack();
       } else {
-        alert(parsed?.message || "Submission failed");
+        showErrorMessage(parsed?.message || "Submission failed");
       }
     } catch (e) {
       console.log("Submit error", e);
-      alert("Something went wrong");
+      showErrorMessage("Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
   const onSaveDraft = async () => {
+    const valid = validateForm();
+
+    if (!valid) {
+      showErrorMessage("Please fill required fields");
+      return;
+    }
     try {
       setLoading(true);
 
@@ -563,14 +658,14 @@ const CreateDealerIndent = ({ route }) => {
       const parsed = JSON.parse(decryptAES(response));
 
       if (parsed?.status === "SUCCESS") {
-        alert("Draft saved successfully 📝");
+        showSuccessMessage("Draft saved successfully");
         navigation.goBack();
       } else {
-        alert(parsed?.message || "Draft save failed");
+        showErrorMessage(parsed?.message || "Draft save failed");
       }
     } catch (e) {
       console.log("Save Draft error", e);
-      alert("Something went wrong");
+      showErrorMessage("Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -605,14 +700,14 @@ const CreateDealerIndent = ({ route }) => {
       console.log("UPDATE RESPONSE 👉", parsed);
 
       if (parsed?.status === "SUCCESS") {
-        alert("Dealer Indent Updated Successfully ✅");
+        showSuccessMessage("Dealer Indent Updated Successfully ✅");
         navigation.goBack();
       } else {
-        alert(parsed?.message || "Update failed");
+        showErrorMessage(parsed?.message || "Update failed");
       }
     } catch (e) {
       console.log("Update error", e);
-      alert("Something went wrong");
+      showErrorMessage("Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -702,30 +797,72 @@ const CreateDealerIndent = ({ route }) => {
             selectItem={(item) => {
               getIndentNumber(item);
               setForm((p) => ({ ...p, party: item }));
+              setErrors((prev) => {
+                const copy = { ...prev };
+                delete copy.party;
+                return copy;
+              });
             }}
+            containerStyle={[
+              errors.party && {
+                borderColor: "red",
+                borderWidth: 1,
+              },
+            ]}
           />
+          {errors.party && (
+            <Text style={styles.dropdownErrorText}>{errors.party}</Text>
+          )}
 
           <DropDown
             label="Mode of Communication"
             data={modeList}
             value={form.communication?.name || ""}
-            selectItem={(item) =>
+            selectItem={(item) => {
               setForm((p) => ({
                 ...p,
                 communication: item,
                 communicationValue: "", // 👈 reset on change
-              }))
-            }
+              }));
+              setErrors((prev) => {
+                const copy = { ...prev };
+                delete copy.communication;
+                return copy;
+              });
+            }}
+            containerStyle={[
+              errors.communication && {
+                borderColor: "red",
+                borderWidth: 1,
+              },
+            ]}
           />
+          {errors.communication && (
+            <Text style={styles.dropdownErrorText}>{errors.communication}</Text>
+          )}
           {form.communication && (
             <Input
               label="Communication Details"
               placeholder={getCommPlaceholder()}
               value={form.communicationValue}
-              onChangeText={(v) =>
-                setForm((p) => ({ ...p, communicationValue: v }))
-              }
+              onChangeText={(v) => {
+                setForm((p) => ({ ...p, communicationValue: v }));
+                setErrors((prev) => {
+                  const copy = { ...prev };
+                  delete copy.communicationValue;
+                  return copy;
+                });
+              }}
+              style={[
+                styles.input,
+                errors.communicationValue && { borderColor: "red" },
+              ]}
             />
+          )}
+          {form.communication && errors.communicationValue && (
+            <Text style={styles.textInputErrorText}>
+              {errors.communicationValue}
+            </Text>
           )}
 
           <TouchableOpacity
@@ -739,7 +876,14 @@ const CreateDealerIndent = ({ route }) => {
               placeholder="DD/MM/YYYY"
               value={form.indentDate}
               editable={false}
+              style={[
+                styles.input,
+                errors.indentDate && { borderColor: "red" },
+              ]}
             />
+            {errors.indentDate && (
+              <Text style={styles.textInputErrorText}>{errors.indentDate}</Text>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -753,32 +897,71 @@ const CreateDealerIndent = ({ route }) => {
               placeholder="DD/MM/YYYY"
               value={form.expectedDate}
               editable={false}
+              style={[
+                styles.input,
+                errors.expectedDate && { borderColor: "red" },
+              ]}
             />
+            {errors.expectedDate && (
+              <Text style={styles.textInputErrorText}>
+                {errors.expectedDate}
+              </Text>
+            )}
           </TouchableOpacity>
 
           <DropDown
+            containerStyle={[
+              errors.season && {
+                borderColor: "red",
+                borderWidth: 1,
+              },
+            ]}
             label="Season"
             data={seasonList}
             value={form.season?.seasonType || ""}
-            selectItem={(item) => setForm((p) => ({ ...p, season: item }))}
+            selectItem={(item) => {
+              setForm((p) => ({ ...p, season: item }));
+              setErrors((prev) => {
+                const copy = { ...prev };
+                delete copy.season;
+                return copy;
+              });
+            }}
           />
+          {errors.season && (
+            <Text style={styles.dropdownErrorText}>{errors.season}</Text>
+          )}
           <DropDown
             label="Existing Indent Number"
             data={indentNumbers}
             value={form.indentNumber?.dealerIndentNo || ""}
-            selectItem={(item) =>
-              setForm((p) => ({ ...p, indentNumber: item }))
-            }
+            selectItem={(item) => {
+              setForm((p) => ({ ...p, indentNumber: item }));
+            }}
           />
 
           <DropDown
             label="Material Type"
             data={materialTypeList}
             value={form.materialType?.name || ""}
-            selectItem={(item) =>
-              setForm((p) => ({ ...p, materialType: item }))
-            }
+            containerStyle={[
+              errors.materialType && {
+                borderColor: "red",
+                borderWidth: 1,
+              },
+            ]}
+            selectItem={(item) => {
+              setForm((p) => ({ ...p, materialType: item }));
+              setErrors((prev) => {
+                const copy = { ...prev };
+                delete copy.materialType;
+                return copy;
+              });
+            }}
           />
+          {errors.materialType && (
+            <Text style={styles.dropdownErrorText}>{errors.materialType}</Text>
+          )}
 
           <Card title="Attachment">
             <TouchableOpacity
@@ -823,39 +1006,94 @@ const CreateDealerIndent = ({ route }) => {
               label="Money Received"
               keyboardType="numeric"
               value={form.amount}
-              onChangeText={(v) => setForm((p) => ({ ...p, amount: v }))}
+              onChangeText={(v) => {
+                setForm((p) => ({ ...p, amount: v }));
+                setErrors((prev) => {
+                  const copy = { ...prev };
+                  delete copy.amount;
+                  return copy;
+                });
+              }}
+              style={[styles.input, errors.amount && { borderColor: "red" }]}
             />
+            {errors.amount && (
+              <Text style={styles.textInputErrorText}>{errors.amount}</Text>
+            )}
 
             <DropDown
               label="Payment Mode"
               data={paymentModeList}
               value={form.paymentMode?.name || ""}
-              selectItem={(item) =>
+              selectItem={(item) => {
                 setForm((p) => ({
                   ...p,
                   paymentMode: item,
                   txnOrChequeNo: "", // 👈 reset on change
-                }))
-              }
+                }));
+                setErrors((prev) => {
+                  const copy = { ...prev };
+                  delete copy.paymentMode;
+                  return copy;
+                });
+              }}
+              containerStyle={[
+                errors.paymentMode && {
+                  borderColor: "red",
+                  borderWidth: 1,
+                },
+              ]}
             />
+            {errors.paymentMode && (
+              <Text style={styles.dropdownErrorText}>{errors.paymentMode}</Text>
+            )}
 
             {/* 🔥 NEW FIELD */}
             {form.paymentMode && form.paymentMode.name !== "CASH" && (
               <Input
                 label={getTxnLabel()}
                 value={form.txnOrChequeNo}
-                onChangeText={(v) =>
-                  setForm((p) => ({ ...p, txnOrChequeNo: v }))
-                }
+                style={[
+                  styles.input,
+                  errors.txnOrChequeNo && { borderColor: "red" },
+                ]}
+                onChangeText={(v) => {
+                  setForm((p) => ({ ...p, txnOrChequeNo: v }));
+                  setErrors((prev) => {
+                    const copy = { ...prev };
+                    delete copy.txnOrChequeNo;
+                    return copy;
+                  });
+                }}
               />
+            )}
+            {errors.txnOrChequeNo && (
+              <Text style={styles.textInputErrorText}>
+                {errors.txnOrChequeNo}
+              </Text>
             )}
 
             <Input
               label="Payment Received Date"
               placeholder="DD/MM/YYYY"
               value={form.paymentDate}
-              onChangeText={(v) => setForm((p) => ({ ...p, paymentDate: v }))}
+              style={[
+                styles.input,
+                errors.paymentDate && { borderColor: "red" },
+              ]}
+              onChangeText={(v) => {
+                setForm((p) => ({ ...p, paymentDate: v }));
+                setErrors((prev) => {
+                  const copy = { ...prev };
+                  delete copy.paymentDate;
+                  return copy;
+                });
+              }}
             />
+            {errors.paymentDate && (
+              <Text style={styles.textInputErrorText}>
+                {errors.paymentDate}
+              </Text>
+            )}
           </Card>
         )}
 
@@ -869,24 +1107,54 @@ const CreateDealerIndent = ({ route }) => {
                 label="Item"
                 data={materialList}
                 value={it.item?.itemName || ""}
-                selectItem={(item) =>
+                containerStyle={
+                  errors[`item_${index}`] && {
+                    borderColor: "red",
+                    borderWidth: 1,
+                  }
+                }
+                selectItem={(item) => {
                   setItems((prev) =>
                     prev.map((x) => (x.id === it.id ? { ...x, item } : x)),
-                  )
-                }
+                  );
+                  setErrors((prev) => {
+                    const copy = { ...prev };
+                    delete copy[`item_${index}`];
+                    return copy;
+                  });
+                }}
               />
+              {errors[`item_${index}`] && (
+                <Text style={styles.dropdownErrorText}>
+                  {errors[`item_${index}`]}
+                </Text>
+              )}
 
               <Input
                 label="Qty"
                 placeholder="Qty"
                 keyboardType="numeric"
                 value={it.qty}
-                onChangeText={(v) =>
+                style={[
+                  styles.input,
+                  errors[`qty_${index}`] && { borderColor: "red" },
+                ]}
+                onChangeText={(v) => {
                   setItems((prev) =>
                     prev.map((x) => (x.id === it.id ? { ...x, qty: v } : x)),
-                  )
-                }
+                  );
+                  setErrors((prev) => {
+                    const copy = { ...prev };
+                    delete copy[`qty_${index}`];
+                    return copy;
+                  });
+                }}
               />
+              {errors[`qty_${index}`] && (
+                <Text style={styles.textInputErrorText}>
+                  {errors[`qty_${index}`]}
+                </Text>
+              )}
 
               {items.length > 1 && (
                 <TouchableOpacity
@@ -1097,5 +1365,19 @@ const styles = StyleSheet.create({
   },
   modalBtnText: {
     fontSize: 15,
+  },
+  dropdownErrorText: {
+    color: "red",
+    fontSize: 12,
+    marginTop: -10,
+    marginLeft: 5,
+    marginBottom: 10,
+  },
+  textInputErrorText: {
+    color: "red",
+    fontSize: 12,
+    marginTop: -7,
+    marginLeft: 8,
+    marginBottom: 10,
   },
 });

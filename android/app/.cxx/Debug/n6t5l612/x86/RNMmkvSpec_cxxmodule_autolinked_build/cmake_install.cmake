@@ -1,4 +1,4 @@
-# Install script for directory: /Users/mohdrahmankhan/Documents/React_Native/NSE/BeejPrabandhan/node_modules/react-native-mmkv/android
+# Install script for directory: /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-mmkv/android
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

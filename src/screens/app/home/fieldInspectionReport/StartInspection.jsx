@@ -171,7 +171,8 @@ const StartInspection = ({ route }) => {
         })}
       </ScrollView>
       <CustomButton
-        text={`Continue Inspection for ${totalInspectedArea}`}
+        // text={`Continue Inspection for ${totalInspectedArea}`}
+        text={`Continue Inspection`}
         buttonStyle={styles.buttonStyle2}
         textStyle={styles.textStyle}
         disabled={totalInspectedArea === 0}

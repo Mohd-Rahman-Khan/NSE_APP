@@ -114,12 +114,14 @@ const BrowseProduct = ({ browseProductList, userData }) => {
               onPress={() => {
                 if (item?.navigationScreenName) {
                   if (item?.name == "Daily Progress Reports") {
+                    console.log("_____", userData?.roleName);
                     // const findMachenicalRole = userData?.roleName?.includes(
                     //   "FARM_BLOCK_ENGG_INCHARGE",
                     // );
                     const findMachenicalRole = userData?.roleName?.includes(
                       ROLES.MECHANICAL_BLOCK_ENGG,
                     );
+
                     // const findEPOIncharge =
                     //   userData?.roleName?.includes("EPO_INCHARGE");
                     const findEPOIncharge = userData?.roleName?.includes(
@@ -132,7 +134,8 @@ const BrowseProduct = ({ browseProductList, userData }) => {
                       return;
                     }
                     if (findEPOIncharge) {
-                      setBottomSheetVisible(true);
+                      //setBottomSheetVisible(true);
+                      alert("Orchard DPR not implemented.");
                       return;
                     }
                     navigation.navigate(item.navigationScreenName);

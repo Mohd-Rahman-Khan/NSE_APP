@@ -285,7 +285,7 @@ ReactNativeMmkv_BINARY_DIR:STATIC=/Users/mohdrahmankhan/Documents/React_Native/N
 ReactNativeMmkv_IS_TOP_LEVEL:STATIC=OFF
 
 //Value Computed by CMake
-ReactNativeMmkv_SOURCE_DIR:STATIC=/Users/mohdrahmankhan/Documents/React_Native/NSE/BeejPrabandhan/node_modules/react-native-mmkv/android
+ReactNativeMmkv_SOURCE_DIR:STATIC=/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-mmkv/android
 
 //Value Computed by CMake
 appmodules_BINARY_DIR:STATIC=/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/.cxx/Debug/n6t5l612/x86
@@ -306,7 +306,7 @@ core_IS_TOP_LEVEL:STATIC=OFF
 core_LIB_DEPENDS:STATIC=general;/Users/mohdrahmankhan/Library/Android/sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/i686-linux-android/24/libz.so;
 
 //Value Computed by CMake
-core_SOURCE_DIR:STATIC=/Users/mohdrahmankhan/Documents/React_Native/NSE/BeejPrabandhan/node_modules/react-native-mmkv/MMKV/Core
+core_SOURCE_DIR:STATIC=/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-mmkv/MMKV/Core
 
 //The directory containing a CMake configuration file for fbjni.
 fbjni_DIR:PATH=/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/.cxx/Debug/n6t5l612/prefab/x86/prefab/lib/i686-linux-android/cmake/fbjni
@@ -438,7 +438,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=16
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=17
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP

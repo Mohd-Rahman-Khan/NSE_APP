@@ -590,7 +590,7 @@ export default function ViewDprDetail({ route }) {
                   <Text style={styles.sectionTitle}>Agriculture Inputs</Text>
                   {dprData?.currentDprStatus == "PENDING" && (
                     <TouchableOpacity
-                      onPress={() => addAgriculture(item.activityId)}
+                    //onPress={() => addAgriculture(item.activityId)}
                     >
                       <Text style={styles.addText}>+ Add New</Text>
                     </TouchableOpacity>
@@ -744,6 +744,7 @@ export default function ViewDprDetail({ route }) {
                     <View style={styles.inputContainer}>
                       <Text style={styles.label}>Actual Hours</Text>
                       <TextInput
+                        maxLength={2}
                         keyboardType="numeric"
                         value={String(eq.actualHours || "")}
                         placeholder="Actual Hours"
@@ -829,20 +830,30 @@ export default function ViewDprDetail({ route }) {
                           }
                           placeholder="Labour Name"
                           value={lab.labourName}
-                          onChangeText={(val) =>
+                          // onChangeText={(val) =>
+                          //   updateLabourField(
+                          //     item.activityId,
+                          //     lab.id,
+                          //     "labourName",
+                          //     val,
+                          //   )
+                          // }
+                          onChangeText={(val) => {
+                            const formatted = val.replace(/[^a-zA-Z\s]/g, ""); // allow only letters + space
                             updateLabourField(
                               item.activityId,
                               lab.id,
                               "labourName",
-                              val,
-                            )
-                          }
+                              formatted,
+                            );
+                          }}
                         />
                       </View>
 
                       <View style={styles.inputContainer}>
                         <Text style={styles.label}>Working Hours</Text>
                         <TextInput
+                          maxLength={2}
                           editable={dprData?.currentDprStatus == "APPROVED"}
                           style={
                             dprData?.currentDprStatus == "APPROVED"

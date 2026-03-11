@@ -192,6 +192,7 @@ export default function DropDown({
   data = [],
   disabled = false,
   label,
+  containerStyle = {},
 }) {
   const [visible, setVisible] = useState(false); // ✅ INTERNAL STATE
 
@@ -201,7 +202,10 @@ export default function DropDown({
 
       <TouchableOpacity
         disabled={disabled}
-        style={disabled ? styles.dropdownButtonDisable : styles.dropdownButton}
+        style={[
+          disabled ? styles.dropdownButtonDisable : styles.dropdownButton,
+          containerStyle,
+        ]}
         onPress={() => setVisible(true)} // ✅ ONLY opens on click
       >
         <Text

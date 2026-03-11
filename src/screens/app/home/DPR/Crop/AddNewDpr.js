@@ -53,6 +53,7 @@ export default function AddNewDpr({ route }) {
   const [materialTableData, setMaterialTableData] = useState([]);
   const [userData, setUserData] = useState("");
   const [categoryList, setCategoryList] = useState();
+  const [errors, setErrors] = useState({});
 
   /* ================= MASTER LISTS ================= */
 
@@ -377,11 +378,11 @@ export default function AddNewDpr({ route }) {
       ) {
         setcontractorNameList(parsedDecryptedContractorList?.data || []);
       } else {
-        showErrorMessage("Unable to get the Operation List Data");
+        showErrorMessage("Unable to get the Contractor List.");
       }
     } catch (error) {
       console.log(error, "line error");
-      showErrorMessage("Error fetching dropdown data");
+      showErrorMessage("Contractor not found.");
     } finally {
       setLoading(false);
     }
@@ -415,7 +416,7 @@ export default function AddNewDpr({ route }) {
       }
     } catch (error) {
       console.log(error, "line error");
-      showErrorMessage("Error fetching dropdown data");
+      showErrorMessage("Error fetching Subgroup data");
     } finally {
       setLoading(false);
     }
@@ -556,8 +557,70 @@ export default function AddNewDpr({ route }) {
       },
     ];
   };
+  const validateForm = () => {
+    let newErrors = {};
+
+    entries.forEach((entry, ei) => {
+      entry.activities.forEach((act, ai) => {
+        if (!act.activity) {
+          newErrors[`activity_${ei}_${ai}`] = "Activity is required";
+        }
+
+        if (!act.contractorType) {
+          newErrors[`contractorType_${ei}_${ai}`] = "Contractor Type required";
+        }
+
+        if (!act.contractorName) {
+          newErrors[`contractorName_${ei}_${ai}`] = "Contractor Name required";
+        }
+
+        if (!act.noOfLabour) {
+          newErrors[`labour_${ei}_${ai}`] = "No of labour required";
+        }
+
+        act.agricultures.forEach((ag, agi) => {
+          if (!ag.materialType) {
+            newErrors[`materialType_${ei}_${ai}_${agi}`] =
+              "Material Type required";
+          }
+
+          if (!ag.material) {
+            newErrors[`material_${ei}_${ai}_${agi}`] = "Material Item required";
+          }
+        });
+
+        act.equipments.forEach((eq, eqi) => {
+          if (!eq.equipment) {
+            newErrors[`equipment_${ei}_${ai}_${eqi}`] = "Equipment required";
+          }
+
+          if (!eq.subGroup) {
+            newErrors[`subGroup_${ei}_${ai}_${eqi}`] = "SubGroup required";
+          }
+
+          if (!eq.categoryId) {
+            newErrors[`category_${ei}_${ai}_${eqi}`] = "Category required";
+          }
+
+          if (!eq.estHours) {
+            newErrors[`hours_${ei}_${ai}_${eqi}`] = "Estimated hours required";
+          }
+        });
+      });
+    });
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
 
   const submitDPR = async () => {
+    const valid = validateForm();
+
+    if (!valid) {
+      showErrorMessage("Please fill all required fields");
+      return;
+    }
     try {
       setLoading(true);
 
@@ -626,7 +689,7 @@ export default function AddNewDpr({ route }) {
       }
     } catch (error) {
       console.log(error, "line error");
-      showErrorMessage("Error fetching dropdown data");
+      //showErrorMessage("Error fetching dropdown data");
     } finally {
       setLoading(false);
     }
@@ -929,7 +992,7 @@ export default function AddNewDpr({ route }) {
               </View>
 
               {entry.expanded &&
-                entry.activities.map((act) => (
+                entry.activities.map((act, ai) => (
                   <View key={act.id} style={styles.activityCard}>
                     {/* ACTIVITY */}
                     <DropDown
@@ -947,8 +1010,24 @@ export default function AddNewDpr({ route }) {
                             agreementType: "ACTIVITY_WISE_CONTRACTOR",
                           },
                         }));
+                        setErrors((prev) => {
+                          const copy = { ...prev };
+                          delete copy[`activity_${ei}_${ai}`];
+                          return copy;
+                        });
                       }}
+                      containerStyle={[
+                        errors[`activity_${ei}_${ai}`] && {
+                          borderColor: "red",
+                          borderWidth: 1,
+                        },
+                      ]}
                     />
+                    {errors[`activity_${ei}_${ai}`] && (
+                      <Text style={styles.dropdownErrorMessageText}>
+                        {errors[`activity_${ei}_${ai}`]}
+                      </Text>
+                    )}
 
                     <DropDown
                       label="Contractor Type"
@@ -961,35 +1040,82 @@ export default function AddNewDpr({ route }) {
                           contractorType: item,
                           contractorName: null,
                         }));
+                        setErrors((prev) => {
+                          const copy = { ...prev };
+                          delete copy[`contractorType_${ei}_${ai}`];
+                          return copy;
+                        });
                       }}
+                      containerStyle={[
+                        errors[`contractorType_${ei}_${ai}`] && {
+                          borderColor: "red",
+                          borderWidth: 1,
+                        },
+                      ]}
                     />
+                    {errors[`contractorType_${ei}_${ai}`] && (
+                      <Text style={styles.dropdownErrorMessageText}>
+                        {errors[`contractorType_${ei}_${ai}`]}
+                      </Text>
+                    )}
 
                     <DropDown
                       label="Contractor Name"
                       data={contractorNameList}
                       value={act.contractorName?.name || ""}
-                      selectItem={(item) =>
+                      selectItem={(item) => {
                         updateActivity(entry.id, act.id, (a) => ({
                           ...a,
                           contractorName: item,
-                        }))
-                      }
+                        }));
+                        setErrors((prev) => {
+                          const copy = { ...prev };
+                          delete copy[`contractorName_${ei}_${ai}`];
+                          return copy;
+                        });
+                      }}
+                      containerStyle={[
+                        errors[`contractorName_${ei}_${ai}`] && {
+                          borderColor: "red",
+                          borderWidth: 1,
+                        },
+                      ]}
                     />
+                    {errors[`contractorName_${ei}_${ai}`] && (
+                      <Text style={styles.dropdownErrorMessageText}>
+                        {errors[`contractorName_${ei}_${ai}`]}
+                      </Text>
+                    )}
 
                     <View style={styles.inputContainer}>
                       <Text style={styles.label}>No of Labour</Text>
                       <TextInput
-                        style={styles.input}
+                        style={[
+                          styles.input,
+                          errors[`labour_${ei}_${ai}`] && {
+                            borderColor: "red",
+                          },
+                        ]}
                         placeholder="No of Labour"
                         keyboardType="numeric"
                         value={act.noOfLabour}
-                        onChangeText={(v) =>
+                        onChangeText={(v) => {
                           updateActivity(entry.id, act.id, (a) => ({
                             ...a,
                             noOfLabour: v,
-                          }))
-                        }
+                          }));
+                          setErrors((prev) => {
+                            const copy = { ...prev };
+                            delete copy[`labour_${ei}_${ai}`];
+                            return copy;
+                          });
+                        }}
                       />
+                      {errors[`labour_${ei}_${ai}`] && (
+                        <Text style={styles.textInputErrorText}>
+                          {errors[`labour_${ei}_${ai}`]}
+                        </Text>
+                      )}
                     </View>
 
                     {/* AGRICULTURE */}
@@ -1046,8 +1172,24 @@ export default function AddNewDpr({ route }) {
                                   : x,
                               ),
                             }));
+                            setErrors((prev) => {
+                              const copy = { ...prev };
+                              delete copy[`materialType_${ei}_${ai}_${index}`];
+                              return copy;
+                            });
                           }}
+                          containerStyle={[
+                            errors[`materialType_${ei}_${ai}_${index}`] && {
+                              borderColor: "red",
+                              borderWidth: 1,
+                            },
+                          ]}
                         />
+                        {errors[`materialType_${ei}_${ai}_${index}`] && (
+                          <Text style={styles.dropdownErrorMessageText}>
+                            {errors[`materialType_${ei}_${ai}_${index}`]}
+                          </Text>
+                        )}
 
                         <DropDown
                           label="Item"
@@ -1061,8 +1203,24 @@ export default function AddNewDpr({ route }) {
                                 x.id === ag.id ? { ...x, material: item } : x,
                               ),
                             }));
+                            setErrors((prev) => {
+                              const copy = { ...prev };
+                              delete copy[`material_${ei}_${ai}_${index}`];
+                              return copy;
+                            });
                           }}
+                          containerStyle={[
+                            errors[`material_${ei}_${ai}_${index}`] && {
+                              borderColor: "red",
+                              borderWidth: 1,
+                            },
+                          ]}
                         />
+                        {errors[`material_${ei}_${ai}_${index}`] && (
+                          <Text style={styles.dropdownErrorMessageText}>
+                            {errors[`material_${ei}_${ai}_${index}`]}
+                          </Text>
+                        )}
                         <TouchableOpacity
                           style={styles.selectMaterialBtn}
                           onPress={() => {
@@ -1093,7 +1251,7 @@ export default function AddNewDpr({ route }) {
                       </View>
                     </View>
 
-                    {act.equipments.map((eq, index) => (
+                    {act.equipments.map((eq, eqi) => (
                       <View>
                         <View key={eq.id} style={styles.rowBox}>
                           <View
@@ -1110,7 +1268,7 @@ export default function AddNewDpr({ route }) {
                                 color: "black",
                               }}
                             >
-                              S.N. {index + 1}
+                              S.N. {eqi + 1}
                             </Text>
                             <TouchableOpacity
                               onPress={() =>
@@ -1135,8 +1293,24 @@ export default function AddNewDpr({ route }) {
                                     : x,
                                 ),
                               }));
+                              setErrors((prev) => {
+                                const copy = { ...prev };
+                                delete copy[`equipment_${ei}_${ai}_${eqi}`];
+                                return copy;
+                              });
                             }}
+                            containerStyle={[
+                              errors[`equipment_${ei}_${ai}_${eqi}`] && {
+                                borderColor: "red",
+                                borderWidth: 1,
+                              },
+                            ]}
                           />
+                          {errors[`equipment_${ei}_${ai}_${eqi}`] && (
+                            <Text style={styles.dropdownErrorMessageText}>
+                              {errors[`equipment_${ei}_${ai}_${eqi}`]}
+                            </Text>
+                          )}
 
                           <DropDown
                             label="Sub Group"
@@ -1157,8 +1331,24 @@ export default function AddNewDpr({ route }) {
                                     : x,
                                 ),
                               }));
+                              setErrors((prev) => {
+                                const copy = { ...prev };
+                                delete copy[`subGroup_${ei}_${ai}_${eqi}`];
+                                return copy;
+                              });
                             }}
+                            containerStyle={[
+                              errors[`subGroup_${ei}_${ai}_${eqi}`] && {
+                                borderColor: "red",
+                                borderWidth: 1,
+                              },
+                            ]}
                           />
+                          {errors[`subGroup_${ei}_${ai}_${eqi}`] && (
+                            <Text style={styles.dropdownErrorMessageText}>
+                              {errors[`subGroup_${ei}_${ai}_${eqi}`]}
+                            </Text>
+                          )}
 
                           <DropDown
                             label="Category"
@@ -1177,24 +1367,55 @@ export default function AddNewDpr({ route }) {
                                     : x,
                                 ),
                               }));
+                              setErrors((prev) => {
+                                const copy = { ...prev };
+                                delete copy[`category_${ei}_${ai}_${eqi}`];
+                                return copy;
+                              });
                             }}
+                            containerStyle={[
+                              errors[`category_${ei}_${ai}_${eqi}`] && {
+                                borderColor: "red",
+                                borderWidth: 1,
+                              },
+                            ]}
                           />
+                          {errors[`category_${ei}_${ai}_${eqi}`] && (
+                            <Text style={styles.dropdownErrorMessageText}>
+                              {errors[`category_${ei}_${ai}_${eqi}`]}
+                            </Text>
+                          )}
 
                           <View style={styles.inputContainer}>
                             <Text style={styles.label}>Estimated Hours</Text>
                             <TextInput
-                              style={styles.input}
+                              style={[
+                                styles.input,
+                                errors[`hours_${ei}_${ai}_${eqi}`] && {
+                                  borderColor: "red",
+                                },
+                              ]}
                               placeholder="Estimated Hours"
                               value={eq.estHours}
-                              onChangeText={(v) =>
+                              onChangeText={(v) => {
+                                setErrors((prev) => {
+                                  const copy = { ...prev };
+                                  delete copy[`hours_${ei}_${ai}_${eqi}`];
+                                  return copy;
+                                });
                                 updateActivity(entry.id, act.id, (a) => ({
                                   ...a,
                                   equipments: a.equipments.map((x) =>
                                     x.id === eq.id ? { ...x, estHours: v } : x,
                                   ),
-                                }))
-                              }
+                                }));
+                              }}
                             />
+                            {errors[`hours_${ei}_${ai}_${eqi}`] && (
+                              <Text style={styles.textInputErrorText}>
+                                {errors[`hours_${ei}_${ai}_${eqi}`]}
+                              </Text>
+                            )}
                           </View>
 
                           <View style={styles.switchRow}>
@@ -1425,5 +1646,19 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     color: Colors.greenColor,
     fontWeight: "bold",
+  },
+  dropdownErrorMessageText: {
+    color: "red",
+    fontSize: 12,
+    marginTop: -10,
+    marginLeft: 5,
+    marginBottom: 10,
+  },
+  textInputErrorText: {
+    color: "red",
+    fontSize: 12,
+    marginTop: -3,
+    marginLeft: 8,
+    marginBottom: 10,
   },
 });
