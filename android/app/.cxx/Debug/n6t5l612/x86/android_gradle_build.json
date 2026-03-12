@@ -1,20 +1,21 @@
 {
   "buildFiles": [
-    "/Users/mohdrahmankhan/Documents/React_Native/NSE/BeejPrabandhan/node_modules/@react-native-community/datetimepicker/android/build/generated/source/codegen/jni/CMakeLists.txt",
-    "/Users/mohdrahmankhan/Documents/React_Native/NSE/BeejPrabandhan/node_modules/@react-native-picker/picker/android/src/main/jni/CMakeLists.txt",
-    "/Users/mohdrahmankhan/Documents/React_Native/NSE/BeejPrabandhan/node_modules/lottie-react-native/android/build/generated/source/codegen/jni/CMakeLists.txt",
-    "/Users/mohdrahmankhan/Documents/React_Native/NSE/BeejPrabandhan/node_modules/react-native-gesture-handler/android/build/generated/source/codegen/jni/CMakeLists.txt",
-    "/Users/mohdrahmankhan/Documents/React_Native/NSE/BeejPrabandhan/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/CMakeLists.txt",
-    "/Users/mohdrahmankhan/Documents/React_Native/NSE/BeejPrabandhan/node_modules/react-native-mmkv/MMKV/Core/CMakeLists.txt",
-    "/Users/mohdrahmankhan/Documents/React_Native/NSE/BeejPrabandhan/node_modules/react-native-mmkv/android/CMakeLists.txt",
-    "/Users/mohdrahmankhan/Documents/React_Native/NSE/BeejPrabandhan/node_modules/react-native-mmkv/android/build/generated/source/codegen/jni/CMakeLists.txt",
-    "/Users/mohdrahmankhan/Documents/React_Native/NSE/BeejPrabandhan/node_modules/react-native-pager-view/android/build/generated/source/codegen/jni/CMakeLists.txt",
-    "/Users/mohdrahmankhan/Documents/React_Native/NSE/BeejPrabandhan/node_modules/react-native-reanimated/android/build/generated/source/codegen/jni/CMakeLists.txt",
-    "/Users/mohdrahmankhan/Documents/React_Native/NSE/BeejPrabandhan/node_modules/react-native-safe-area-context/android/src/main/jni/CMakeLists.txt",
-    "/Users/mohdrahmankhan/Documents/React_Native/NSE/BeejPrabandhan/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt",
-    "/Users/mohdrahmankhan/Documents/React_Native/NSE/BeejPrabandhan/node_modules/react-native-vector-icons/android/build/generated/source/codegen/jni/CMakeLists.txt",
-    "/Users/mohdrahmankhan/Documents/React_Native/NSE/BeejPrabandhan/node_modules/react-native-webview/android/build/generated/source/codegen/jni/CMakeLists.txt",
-    "/Users/mohdrahmankhan/Documents/React_Native/NSE/BeejPrabandhan/node_modules/react-native-worklets/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/@react-native-community/datetimepicker/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/@react-native-picker/picker/android/src/main/jni/CMakeLists.txt",
+    "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/lottie-react-native/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-camera-kit/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-gesture-handler/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-mmkv/MMKV/Core/CMakeLists.txt",
+    "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-mmkv/android/CMakeLists.txt",
+    "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-mmkv/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-pager-view/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-reanimated/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-safe-area-context/android/src/main/jni/CMakeLists.txt",
+    "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt",
+    "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-vector-icons/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-webview/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-worklets/android/build/generated/source/codegen/jni/CMakeLists.txt",
     "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native/ReactAndroid/cmake-utils/default-app-setup/CMakeLists.txt"
   ],
   "cleanCommandsComponents": [
@@ -63,6 +64,11 @@
         "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/be474e380fd26ca8f633f96daa0f1716/transformed/jetified-react-android-0.80.2-debug/prefab/modules/jsi/libs/android.x86/libjsi.so",
         "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/be474e380fd26ca8f633f96daa0f1716/transformed/jetified-react-android-0.80.2-debug/prefab/modules/reactnative/libs/android.x86/libreactnative.so"
       ]
+    },
+    "react_codegen_NativeCameraKitSpec::@56ccb1a98efdd6d45482": {
+      "toolchain": "toolchain",
+      "abi": "x86",
+      "artifactName": "react_codegen_NativeCameraKitSpec"
     },
     "react_codegen_RNCWebViewSpec::@eb48929f9f7453740a6c": {
       "toolchain": "toolchain",

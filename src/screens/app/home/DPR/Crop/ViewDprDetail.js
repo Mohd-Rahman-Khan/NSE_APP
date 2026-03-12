@@ -425,7 +425,7 @@ export default function ViewDprDetail({ route }) {
       }
     } catch (error) {
       console.log(error, "line error");
-      showErrorMessage("Error fetching dropdown data");
+      showErrorMessage("Material list is empty.");
     } finally {
       setLoading(false);
     }
@@ -588,13 +588,15 @@ export default function ViewDprDetail({ route }) {
               <>
                 <View style={styles.sectionHeader}>
                   <Text style={styles.sectionTitle}>Agriculture Inputs</Text>
-                  {dprData?.currentDprStatus == "PENDING" && (
-                    <TouchableOpacity
-                    //onPress={() => addAgriculture(item.activityId)}
-                    >
-                      <Text style={styles.addText}>+ Add New</Text>
-                    </TouchableOpacity>
-                  )}
+                  {userData?.unitType == "CHAK"
+                    ? null
+                    : dprData?.currentDprStatus == "PENDING" && (
+                        <TouchableOpacity
+                          onPress={() => addAgriculture(item.activityId)}
+                        >
+                          <Text style={styles.addText}>+ Add New</Text>
+                        </TouchableOpacity>
+                      )}
                 </View>
 
                 {item.agricultures.map((ag, i) => (
@@ -607,22 +609,28 @@ export default function ViewDprDetail({ route }) {
                       }}
                     >
                       <Text style={styles.serial}>S.N. {i + 1}</Text>
-                      {dprData?.currentDprStatus == "PENDING" &&
-                        item.agricultures?.length > i && (
-                          <TouchableOpacity
-                            onPress={() =>
-                              removeAgriculture(item.activityId, ag.id)
-                            }
-                          >
-                            <Icon name="delete" size={20} color="red" />
-                          </TouchableOpacity>
-                        )}
+                      {userData?.unitType == "CHAK"
+                        ? null
+                        : dprData?.currentDprStatus == "PENDING" &&
+                          item.agricultures?.length > i && (
+                            <TouchableOpacity
+                              onPress={() =>
+                                removeAgriculture(item.activityId, ag.id)
+                              }
+                            >
+                              <Icon name="delete" size={20} color="red" />
+                            </TouchableOpacity>
+                          )}
                     </View>
 
                     <View style={styles.divider} />
                     <DropDown
                       disabled={
-                        dprData?.currentDprStatus == "PENDING" ? false : true
+                        userData?.unitType == "CHAK"
+                          ? true
+                          : dprData?.currentDprStatus == "PENDING"
+                          ? false
+                          : true
                       }
                       label="Material Type"
                       data={materialTypeList}
@@ -649,7 +657,11 @@ export default function ViewDprDetail({ route }) {
 
                     <DropDown
                       disabled={
-                        dprData?.currentDprStatus == "PENDING" ? false : true
+                        userData?.unitType == "CHAK"
+                          ? true
+                          : dprData?.currentDprStatus == "PENDING"
+                          ? false
+                          : true
                       }
                       label="Item"
                       data={ag.materialList || []}
@@ -679,19 +691,19 @@ export default function ViewDprDetail({ route }) {
                       // }}
 
                       onPress={async () => {
-                        console.log(
-                          "Material ItemCode",
-                          ag?.material?.itemCode,
-                        );
+                        if (userData?.unitType == "CHAK") {
+                        } else {
+                          if (!ag?.material?.itemCode) {
+                            alert("Please select item first");
+                            return;
+                          }
 
-                        if (!ag?.material?.itemCode) {
-                          alert("Please select item first");
-                          return;
+                          await fetchMaterialListByItemCode(
+                            ag.material.itemCode,
+                          );
+
+                          setShowMaterialModal(true);
                         }
-
-                        await fetchMaterialListByItemCode(ag.material.itemCode);
-
-                        setShowMaterialModal(true);
                       }}
                     >
                       <Text style={styles.selectMaterialText}>
@@ -1333,14 +1345,16 @@ export default function ViewDprDetail({ route }) {
             renderItem={renderActivity}
           />
 
-          {dprData?.currentDprStatus == "PENDING" && (
-            <CustomButton
-              text="Submit"
-              buttonStyle={styles.buttonStyle}
-              textStyle={styles.buttonTextStyle}
-              handleAction={submitUpdateDpr}
-            />
-          )}
+          {userData?.unitType == "CHAK"
+            ? null
+            : dprData?.currentDprStatus == "PENDING" && (
+                <CustomButton
+                  text="Submit"
+                  buttonStyle={styles.buttonStyle}
+                  textStyle={styles.buttonTextStyle}
+                  handleAction={submitUpdateDpr}
+                />
+              )}
 
           {dprData?.currentDprStatus == "APPROVED" && (
             <CustomButton

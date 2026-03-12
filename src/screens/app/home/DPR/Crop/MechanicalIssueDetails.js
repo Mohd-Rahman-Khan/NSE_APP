@@ -601,25 +601,27 @@ export default function MechanicalIssueDetails({ route }) {
 
               {/* ACTIONS */}
 
-              {macItem?.dprMechStatus == "PENDING" && (
-                <View style={styles.actionRow}>
-                  <TouchableOpacity
-                    onPress={() => approveMechanical(macItem)}
-                    style={styles.approveBtn}
-                  >
-                    <Icon name="check-circle" size={18} color="#fff" />
-                    <Text style={styles.actionText}>Approve</Text>
-                  </TouchableOpacity>
+              {dprData?.currentDprStatus == "PENDING"
+                ? null
+                : macItem?.dprMechStatus == "PENDING" && (
+                    <View style={styles.actionRow}>
+                      <TouchableOpacity
+                        onPress={() => approveMechanical(macItem)}
+                        style={styles.approveBtn}
+                      >
+                        <Icon name="check-circle" size={18} color="#fff" />
+                        <Text style={styles.actionText}>Approve</Text>
+                      </TouchableOpacity>
 
-                  <TouchableOpacity
-                    onPress={() => rejectMechanical(macItem)}
-                    style={styles.rejectBtn}
-                  >
-                    <Icon name="cancel" size={18} color="#fff" />
-                    <Text style={styles.actionText}>Reject</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
+                      <TouchableOpacity
+                        onPress={() => rejectMechanical(macItem)}
+                        style={styles.rejectBtn}
+                      >
+                        <Icon name="cancel" size={18} color="#fff" />
+                        <Text style={styles.actionText}>Reject</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
 
               {!macItem.isIdleLocked &&
                 !macItem.isRunningLocked &&

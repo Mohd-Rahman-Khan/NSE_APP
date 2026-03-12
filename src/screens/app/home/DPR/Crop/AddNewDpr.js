@@ -1467,6 +1467,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     marginBottom: 20,
+    marginTop: 15,
   },
   addEntryText: { color: "#fff", marginLeft: 8 },
 

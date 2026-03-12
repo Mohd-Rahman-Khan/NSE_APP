@@ -329,6 +329,18 @@ const CreateDealerIndent = ({ route }) => {
         return copy;
       });
     }
+    if (activeDateField === "PAYMENT") {
+      setForm((p) => ({
+        ...p,
+        paymentDate: formatDate(selectedDate),
+      }));
+
+      setErrors((prev) => {
+        const copy = { ...prev };
+        delete copy.paymentDate;
+        return copy;
+      });
+    }
   };
 
   /* ================= ITEM HANDLERS ================= */
@@ -857,6 +869,20 @@ const CreateDealerIndent = ({ route }) => {
                 styles.input,
                 errors.communicationValue && { borderColor: "red" },
               ]}
+              keyboardType={
+                form.communication?.name === "Phone"
+                  ? "numeric"
+                  : form.communication?.name === "Email"
+                  ? "email-address"
+                  : "default"
+              }
+              maxLength={
+                form.communication?.name === "Phone"
+                  ? 10
+                  : form.communication?.name === "Email"
+                  ? 100
+                  : 200
+              }
             />
           )}
           {form.communication && errors.communicationValue && (
@@ -1072,7 +1098,7 @@ const CreateDealerIndent = ({ route }) => {
               </Text>
             )}
 
-            <Input
+            {/* <Input
               label="Payment Received Date"
               placeholder="DD/MM/YYYY"
               value={form.paymentDate}
@@ -1089,6 +1115,29 @@ const CreateDealerIndent = ({ route }) => {
                 });
               }}
             />
+            {errors.paymentDate && (
+              <Text style={styles.textInputErrorText}>
+                {errors.paymentDate}
+              </Text>
+            )} */}
+            <TouchableOpacity
+              onPress={() => {
+                setActiveDateField("PAYMENT");
+                setShowDatePicker(true);
+              }}
+            >
+              <Input
+                label="Payment Received Date"
+                placeholder="DD/MM/YYYY"
+                value={form.paymentDate}
+                editable={false}
+                style={[
+                  styles.input,
+                  errors.paymentDate && { borderColor: "red" },
+                ]}
+              />
+            </TouchableOpacity>
+
             {errors.paymentDate && (
               <Text style={styles.textInputErrorText}>
                 {errors.paymentDate}
