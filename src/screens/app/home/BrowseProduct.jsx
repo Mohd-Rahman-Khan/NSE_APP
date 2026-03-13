@@ -135,7 +135,7 @@ const BrowseProduct = ({ browseProductList, userData }) => {
                     }
                     if (findEPOIncharge) {
                       //setBottomSheetVisible(true);
-                      alert("Orchard DPR not implemented.");
+                      //alert("Orchard DPR not implemented.");
                       return;
                     }
                     navigation.navigate(item.navigationScreenName);

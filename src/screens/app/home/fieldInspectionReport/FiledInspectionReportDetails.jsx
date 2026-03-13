@@ -134,7 +134,7 @@ const FiledInspectionReportDetails = ({ route }) => {
     growerData,
     inspectionLandIds,
   ) => {
-    const cropFirId = programDetails?.data?.crop?.cropFirType?.id;
+    const cropFirId = programDetails?.data?.crop?.cropFirType?.cropFirTypeId;
     const scheduleId = programDetails?.data?.schedule?.id;
     const inspectionPayloadData = { scheduleId };
     const encryptedInspectionPayloadData = encryptWholeObject(
