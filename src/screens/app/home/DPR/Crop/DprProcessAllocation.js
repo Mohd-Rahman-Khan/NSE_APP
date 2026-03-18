@@ -144,7 +144,7 @@ export default function DprProcessAllocation({ route }) {
 
         setActivityList(newData);
       } else {
-        showErrorMessage(parsed?.message || "Data not available.");
+        showErrorMessage(parsed?.message || "DPR List is empty.");
       }
     } catch (err) {
       console.log("Fetch error", err);
@@ -301,7 +301,19 @@ export default function DprProcessAllocation({ route }) {
     <WrapperContainer isLoading={loading}>
       <InnerHeader
         title={"Process Allocation"}
+        // rightIcon={
+        //   showAddNewButton && (
+        //     <TouchableOpacity
+        //       onPress={() => navigation.navigate("AddNewDpr", { landData })}
+        //       style={styles.notificationHolder}
+        //     >
+        //       <Icon name="add" size={25} color={Colors.white} />
+        //     </TouchableOpacity>
+        //   )
+        // }
+
         rightIcon={
+          userData?.unitType == "CHAK" &&
           showAddNewButton && (
             <TouchableOpacity
               onPress={() => navigation.navigate("AddNewDpr", { landData })}

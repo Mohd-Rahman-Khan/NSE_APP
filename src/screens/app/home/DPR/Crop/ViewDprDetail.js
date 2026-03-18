@@ -588,7 +588,7 @@ export default function ViewDprDetail({ route }) {
               <>
                 <View style={styles.sectionHeader}>
                   <Text style={styles.sectionTitle}>Agriculture Inputs</Text>
-                  {userData?.unitType == "CHAK"
+                  {/* {userData?.unitType == "CHAK"
                     ? null
                     : dprData?.currentDprStatus == "PENDING" && (
                         <TouchableOpacity
@@ -596,7 +596,7 @@ export default function ViewDprDetail({ route }) {
                         >
                           <Text style={styles.addText}>+ Add New</Text>
                         </TouchableOpacity>
-                      )}
+                      )} */}
                 </View>
 
                 {item.agricultures.map((ag, i) => (
@@ -609,7 +609,7 @@ export default function ViewDprDetail({ route }) {
                       }}
                     >
                       <Text style={styles.serial}>S.N. {i + 1}</Text>
-                      {userData?.unitType == "CHAK"
+                      {/* {userData?.unitType == "CHAK"
                         ? null
                         : dprData?.currentDprStatus == "PENDING" &&
                           item.agricultures?.length > i && (
@@ -620,7 +620,7 @@ export default function ViewDprDetail({ route }) {
                             >
                               <Icon name="delete" size={20} color="red" />
                             </TouchableOpacity>
-                          )}
+                          )} */}
                     </View>
 
                     <View style={styles.divider} />
@@ -1015,7 +1015,41 @@ export default function ViewDprDetail({ route }) {
     }
   };
 
+  const validateMaterialSelection = () => {
+    let isValid = true;
+
+    activityGroups.forEach((act) => {
+      act.agricultures.forEach((ag) => {
+        // check item selected
+        if (ag.material?.itemCode) {
+          const selectedMaterials = materialTableData.filter((m) => m.selected);
+
+          if (selectedMaterials.length === 0) {
+            alert(
+              `Please select at least one material for ${act.activityName}`,
+            );
+            isValid = false;
+            return;
+          }
+
+          for (let m of selectedMaterials) {
+            if (!m.issueQty || m.issueQty.trim() === "") {
+              alert(`Please enter Issue Qty for ${m.itemName}`);
+              isValid = false;
+              return;
+            }
+          }
+        }
+      });
+    });
+
+    return isValid;
+  };
+
   const submitUpdateDpr = async () => {
+    if (!validateMaterialSelection()) {
+      return;
+    }
     try {
       setLoading(true);
 
