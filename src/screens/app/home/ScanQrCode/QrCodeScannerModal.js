@@ -25,7 +25,7 @@ export default function QrCodeScannerModal(props) {
       setScanned(true);
 
       setTimeout(() => {
-        alert(JSON.stringify(value));
+        // alert(JSON.stringify(value));
         props.qrScanningData(value);
         props.onClose();
         setScanned(false);

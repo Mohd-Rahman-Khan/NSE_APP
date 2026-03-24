@@ -884,86 +884,129 @@ const InspectionForm = ({ route }) => {
   };
 
   const validateStep = (currentStep) => {
+    //alert(cropFirTypeId);
     const stepErrors = {};
-
     if (currentStep === 1) {
-      // Date fields required based on type
+      // ---------- DATE VALIDATION ----------
+      const checkDate = (field) => {
+        if (isEmptyValue(formData[field])) {
+          stepErrors[field] = `${STEP1_LABEL_MAP[field]} is required`;
+        } else if (!isValidDateDDMMYYYY(formData[field])) {
+          stepErrors[field] = `${STEP1_LABEL_MAP[field]} must be in dd/mm/yyyy`;
+        }
+      };
+
+      const checkTime = (field) => {
+        if (isEmptyValue(formData[field])) {
+          stepErrors[field] = `${STEP1_LABEL_MAP[field]} is required`;
+        } else if (!isValidTimeHHMM(formData[field])) {
+          stepErrors[field] = `${STEP1_LABEL_MAP[field]} must be HH:MM`;
+        }
+      };
+
       if (cropFirTypeId === 1) {
-        ["dateOfSowing", "expectedHarvest", "dateOfInspection"].forEach((f) => {
-          if (isEmptyValue(formData[f]))
-            stepErrors[f] = `${STEP1_LABEL_MAP[f]} is required`;
-          else if (!isValidDateDDMMYYYY(formData[f]))
-            stepErrors[
-              f
-            ] = `${STEP1_LABEL_MAP[f]} must be in dd/mm/yyyy format`;
-        });
-        ["timeFrom", "timeTo"].forEach((f) => {
-          if (isEmptyValue(formData[f]))
-            stepErrors[f] = `${STEP1_LABEL_MAP[f]} is required`;
-          else if (!isValidTimeHHMM(formData[f]))
-            stepErrors[f] = `${STEP1_LABEL_MAP[f]} must be in HH:MM format`;
-        });
+        ["dateOfSowing", "expectedHarvest", "dateOfInspection"].forEach(
+          checkDate,
+        );
+        ["timeFrom", "timeTo"].forEach(checkTime);
+
+        // 👉 Time relation
+        if (formData.timeFrom && formData.timeTo) {
+          if (formData.timeFrom >= formData.timeTo) {
+            stepErrors.timeTo = "Time To must be greater than Time From";
+          }
+        }
       }
-      if (cropFirTypeId === 2) {
+
+      if (cropFirTypeId === 3) {
         [
           "dateOfSowing",
           "expectedHarvestFrom",
           "expectedHarvestTo",
           "dateOfInspection",
-        ].forEach((f) => {
-          if (isEmptyValue(formData[f]))
-            stepErrors[f] = `${STEP1_LABEL_MAP[f]} is required`;
-          else if (!isValidDateDDMMYYYY(formData[f]))
-            stepErrors[
-              f
-            ] = `${STEP1_LABEL_MAP[f]} must be in dd/mm/yyyy format`;
-        });
+        ].forEach(checkDate);
+
+        // 👉 Date relation
+        const sow = formData.dateOfSowing;
+        const from = formData.expectedHarvestFrom;
+        const to = formData.expectedHarvestTo;
+
+        if (sow && from && from < sow) {
+          stepErrors.expectedHarvestFrom = "Harvest From ≥ Sowing date";
+        }
+        if (from && to && to < from) {
+          stepErrors.expectedHarvestTo = "Harvest To ≥ Harvest From";
+        }
       }
 
-      // Visible text fields (exclude switches)
-      const requiredFields = visibleStep1Fields
+      // ---------- TEXT + NUMERIC ----------
+      visibleStep1Fields
         .filter((i) => i.type !== "switch")
-        .map((i) => i.field);
-      requiredFields.forEach((f) => {
-        const label = STEP1_LABEL_MAP[f] || f;
-        if (isEmptyValue(formData[f])) stepErrors[f] = `${label} is required`;
-        else if (
-          visibleStep1Fields.find(
-            (i) => i.field === f && i.keyboardType === "numeric",
-          ) &&
-          !isNumericString(String(formData[f]))
-        ) {
-          stepErrors[f] = `${label} must be a number`;
-        }
-      });
-    }
+        .forEach((item) => {
+          const value = formData[item.field];
+          const label = item.label;
 
+          if (isEmptyValue(value)) {
+            stepErrors[item.field] = `${label} is required`;
+          } else if (
+            item.keyboardType === "numeric" &&
+            !isNumericString(String(value))
+          ) {
+            stepErrors[item.field] = `${label} must be a number`;
+          }
+        });
+    }
+    // if (currentStep === 2) {
+    //   const fields = currentStep2Config.fields;
+
+    //   formData.counts.forEach((row, idx) => {
+    //     fields.forEach((f) => {
+    //       const key = `counts.${idx}.${f}`;
+    //       const value = row[f];
+    //       const label = currentStep2Config.headers[fields.indexOf(f) + 1] || f;
+
+    //       // ✅ Required validation
+    //       if (isEmptyValue(value)) {
+    //         stepErrors[key] = `${label} (Row ${idx + 1}) is required`;
+    //       }
+
+    //       // ✅ Numeric validation
+    //       else if (!isNumericString(String(value))) {
+    //         stepErrors[key] = `${label} (Row ${idx + 1}) must be number`;
+    //       }
+    //     });
+    //   });
+    // }
     if (currentStep === 2) {
+      const fields = currentStep2Config.fields;
+
       formData.counts.forEach((row, idx) => {
-        const fields = currentStep2Config.fields;
-        const isFirstRow = idx === 0;
+        // 👉 check if any field is filled in row
         const anyFilled = fields.some((f) => !isEmptyValue(row[f]));
-        if (isFirstRow || anyFilled) {
+
+        // 👉 only validate if row has at least 1 value
+        if (anyFilled) {
           fields.forEach((f) => {
-            const headerIdx = fields.indexOf(f);
-            const headerLabel = currentStep2Config.headers[headerIdx + 1] || f;
             const key = `counts.${idx}.${f}`;
             const value = row[f];
+            const label =
+              currentStep2Config.headers[fields.indexOf(f) + 1] || f;
+
+            // ❌ empty field → error
             if (isEmptyValue(value)) {
-              stepErrors[key] = `${headerLabel} (Row ${idx + 1}) is required`;
-            } else if (!isNumericString(String(value))) {
-              stepErrors[key] = `${headerLabel} (Row ${
-                idx + 1
-              }) must be a number`;
+              stepErrors[key] = `${label} (Row ${idx + 1}) is required`;
+            }
+
+            // ❌ invalid number
+            else if (!isNumericString(String(value))) {
+              stepErrors[key] = `${label} (Row ${idx + 1}) must be number`;
             }
           });
         }
       });
     }
-
     if (currentStep === 3) {
-      // Required fields per crop type (exclude switches)
-      const step3FieldsByType = {
+      const requiredFieldsByType = {
         1: [
           "noOfBorderRow",
           "cropCondition",
@@ -979,6 +1022,18 @@ const InspectionForm = ({ route }) => {
           "remarks",
         ],
         2: [
+          "sideOfFieldFromWhichInspectionWasStarted",
+          "cropCondition",
+          "noOfTimesDetasselled",
+          "frequencyOfDetasselling",
+          "qualityOfSeedProductionWork",
+          "estimatedSeedYieldKgsPerAcres",
+          "noOfBorderRow",
+          "areaRejectedHa",
+          "areaCertifiedHa",
+          "remarks",
+        ],
+        3: [
           "offTypePercentage",
           "inseparableOtherCropsPercentage",
           "objectionableWeedsPercentage",
@@ -995,55 +1050,203 @@ const InspectionForm = ({ route }) => {
           "designation",
           "remarks",
         ],
-        3: [
-          "sideOfFieldFromWhichInspectionWasStarted",
-          "cropCondition",
-          "noOfTimesDetasselled",
-          "frequencyOfDetasselling",
-          "qualityOfSeedProductionWork",
-          "estimatedSeedYieldKgsPerAcres",
-          "noOfBorderRow",
-          "areaRejectedHa",
-          "areaCertifiedHa",
-          "remarks",
-        ],
       };
-      const req = step3FieldsByType[cropFirTypeId] || [];
-      req.forEach((f) => {
-        const label = STEP3_LABEL_MAP[f] || f;
+
+      const numericFields = [
+        "noOfBorderRow",
+        "noOfTimesPollenSheddersRemoved",
+        "estimatedSeedYieldKgPerHa",
+        "areaRejectedHa",
+        "areaCertifiedHa",
+        "offTypePercentage",
+        "inseparableOtherCropsPercentage",
+        "objectionableWeedsPercentage",
+        "seedBorneDiseasesPercentage",
+        "estimatedRawSeedYield",
+        "noOfTimesDetasselled",
+        "estimatedSeedYieldKgsPerAcres",
+      ];
+
+      const fields = requiredFieldsByType[cropFirTypeId] || [];
+
+      fields.forEach((f) => {
         const value = formData[f];
-        if (isEmptyValue(value)) stepErrors[f] = `${label} is required`;
-        else if (
-          [
-            "noOfBorderRow",
-            "noOfTimesPollenSheddersRemoved",
-            "estimatedSeedYieldKgPerHa",
-            "areaRejectedHa",
-            "areaCertifiedHa",
-            "offTypePercentage",
-            "inseparableOtherCropsPercentage",
-            "objectionableWeedsPercentage",
-            "seedBorneDiseasesPercentage",
-            "estimatedRawSeedYield",
-            "noOfTimesDetasselled",
-            "estimatedSeedYieldKgsPerAcres",
-          ].includes(f) &&
+        const label = STEP3_LABEL_MAP[f] || f;
+
+        if (isEmptyValue(value)) {
+          stepErrors[f] = `${label} is required`;
+        } else if (
+          numericFields.includes(f) &&
           !isNumericString(String(value))
         ) {
           stepErrors[f] = `${label} must be a number`;
         }
       });
     }
-
+    console.log(stepErrors);
     return stepErrors;
   };
 
+  // const validateStep = (currentStep) => {
+  //   const stepErrors = {};
+
+  //   if (currentStep === 1) {
+  //     // Date fields required based on type
+  //     if (cropFirTypeId === 1) {
+  //       ["dateOfSowing", "expectedHarvest", "dateOfInspection"].forEach((f) => {
+  //         if (isEmptyValue(formData[f]))
+  //           stepErrors[f] = `${STEP1_LABEL_MAP[f]} is required`;
+  //         else if (!isValidDateDDMMYYYY(formData[f]))
+  //           stepErrors[
+  //             f
+  //           ] = `${STEP1_LABEL_MAP[f]} must be in dd/mm/yyyy format`;
+  //       });
+  //       ["timeFrom", "timeTo"].forEach((f) => {
+  //         if (isEmptyValue(formData[f]))
+  //           stepErrors[f] = `${STEP1_LABEL_MAP[f]} is required`;
+  //         else if (!isValidTimeHHMM(formData[f]))
+  //           stepErrors[f] = `${STEP1_LABEL_MAP[f]} must be in HH:MM format`;
+  //       });
+  //     }
+  //     if (cropFirTypeId === 2) {
+  //       [
+  //         "dateOfSowing",
+  //         "expectedHarvestFrom",
+  //         "expectedHarvestTo",
+  //         "dateOfInspection",
+  //       ].forEach((f) => {
+  //         if (isEmptyValue(formData[f]))
+  //           stepErrors[f] = `${STEP1_LABEL_MAP[f]} is required`;
+  //         else if (!isValidDateDDMMYYYY(formData[f]))
+  //           stepErrors[
+  //             f
+  //           ] = `${STEP1_LABEL_MAP[f]} must be in dd/mm/yyyy format`;
+  //       });
+  //     }
+
+  //     // Visible text fields (exclude switches)
+  //     const requiredFields = visibleStep1Fields
+  //       .filter((i) => i.type !== "switch")
+  //       .map((i) => i.field);
+  //     requiredFields.forEach((f) => {
+  //       const label = STEP1_LABEL_MAP[f] || f;
+  //       if (isEmptyValue(formData[f])) stepErrors[f] = `${label} is required`;
+  //       else if (
+  //         visibleStep1Fields.find(
+  //           (i) => i.field === f && i.keyboardType === "numeric",
+  //         ) &&
+  //         !isNumericString(String(formData[f]))
+  //       ) {
+  //         stepErrors[f] = `${label} must be a number`;
+  //       }
+  //     });
+  //   }
+
+  //   if (currentStep === 2) {
+  //     formData.counts.forEach((row, idx) => {
+  //       const fields = currentStep2Config.fields;
+  //       const isFirstRow = idx === 0;
+  //       const anyFilled = fields.some((f) => !isEmptyValue(row[f]));
+  //       if (isFirstRow || anyFilled) {
+  //         fields.forEach((f) => {
+  //           const headerIdx = fields.indexOf(f);
+  //           const headerLabel = currentStep2Config.headers[headerIdx + 1] || f;
+  //           const key = `counts.${idx}.${f}`;
+  //           const value = row[f];
+  //           if (isEmptyValue(value)) {
+  //             stepErrors[key] = `${headerLabel} (Row ${idx + 1}) is required`;
+  //           } else if (!isNumericString(String(value))) {
+  //             stepErrors[key] = `${headerLabel} (Row ${
+  //               idx + 1
+  //             }) must be a number`;
+  //           }
+  //         });
+  //       }
+  //     });
+  //   }
+
+  //   if (currentStep === 3) {
+  //     // Required fields per crop type (exclude switches)
+  //     const step3FieldsByType = {
+  //       1: [
+  //         "noOfBorderRow",
+  //         "cropCondition",
+  //         "noOfTimesPollenSheddersRemoved",
+  //         "frequencyOfPollenShedders",
+  //         "qualityOfSeedProductionWork",
+  //         "estimatedSeedYieldKgPerHa",
+  //         "areaRejectedHa",
+  //         "areaCertifiedHa",
+  //         "name",
+  //         "designation",
+  //         "address",
+  //         "remarks",
+  //       ],
+  //       2: [
+  //         "offTypePercentage",
+  //         "inseparableOtherCropsPercentage",
+  //         "objectionableWeedsPercentage",
+  //         "seedBorneDiseasesPercentage",
+  //         "inseparableOtherCropsName",
+  //         "objectionableWeedsName",
+  //         "seedBorneDiseasesName",
+  //         "nonSeedBorneDiseases",
+  //         "conditionOfCrop",
+  //         "productionQuality",
+  //         "estimatedRawSeedYield",
+  //         "growerName",
+  //         "submittedBy",
+  //         "designation",
+  //         "remarks",
+  //       ],
+  //       3: [
+  //         "sideOfFieldFromWhichInspectionWasStarted",
+  //         "cropCondition",
+  //         "noOfTimesDetasselled",
+  //         "frequencyOfDetasselling",
+  //         "qualityOfSeedProductionWork",
+  //         "estimatedSeedYieldKgsPerAcres",
+  //         "noOfBorderRow",
+  //         "areaRejectedHa",
+  //         "areaCertifiedHa",
+  //         "remarks",
+  //       ],
+  //     };
+  //     const req = step3FieldsByType[cropFirTypeId] || [];
+  //     req.forEach((f) => {
+  //       const label = STEP3_LABEL_MAP[f] || f;
+  //       const value = formData[f];
+  //       if (isEmptyValue(value)) stepErrors[f] = `${label} is required`;
+  //       else if (
+  //         [
+  //           "noOfBorderRow",
+  //           "noOfTimesPollenSheddersRemoved",
+  //           "estimatedSeedYieldKgPerHa",
+  //           "areaRejectedHa",
+  //           "areaCertifiedHa",
+  //           "offTypePercentage",
+  //           "inseparableOtherCropsPercentage",
+  //           "objectionableWeedsPercentage",
+  //           "seedBorneDiseasesPercentage",
+  //           "estimatedRawSeedYield",
+  //           "noOfTimesDetasselled",
+  //           "estimatedSeedYieldKgsPerAcres",
+  //         ].includes(f) &&
+  //         !isNumericString(String(value))
+  //       ) {
+  //         stepErrors[f] = `${label} must be a number`;
+  //       }
+  //     });
+  //   }
+
+  //   return stepErrors;
+  // };
+
   const nextStep = () => {
-    // const stepErrors = validateStep(step);
-    const stepErrors = true;
-    //console.log("stepErrors", stepErrors);
+    const stepErrors = validateStep(step);
     if (Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors);
+      showErrorMessage("All fields are required.");
       return;
     }
     if (step < 3) setStep(step + 1);
@@ -1091,9 +1294,9 @@ const InspectionForm = ({ route }) => {
                   />
                 </TouchableOpacity>
               </View>
-              {errors.dateOfSowing && (
+              {/* {errors.dateOfSowing && (
                 <Text style={styles.errorText}>{errors.dateOfSowing}</Text>
-              )}
+              )} */}
             </View>
 
             <View style={styles.inputGroup}>
@@ -1120,9 +1323,9 @@ const InspectionForm = ({ route }) => {
                   />
                 </TouchableOpacity>
               </View>
-              {errors.expectedHarvest && (
+              {/* {errors.expectedHarvest && (
                 <Text style={styles.errorText}>{errors.expectedHarvest}</Text>
-              )}
+              )} */}
             </View>
 
             <View style={styles.inputGroup}>
@@ -1149,9 +1352,9 @@ const InspectionForm = ({ route }) => {
                   />
                 </TouchableOpacity>
               </View>
-              {errors.dateOfInspection && (
+              {/* {errors.dateOfInspection && (
                 <Text style={styles.errorText}>{errors.dateOfInspection}</Text>
-              )}
+              )} */}
             </View>
 
             <View style={styles.inputGroup}>
@@ -1180,9 +1383,9 @@ const InspectionForm = ({ route }) => {
                 />
               </TouchableOpacity>
 
-              {errors.timeFrom && (
+              {/* {errors.timeFrom && (
                 <Text style={styles.errorText}>{errors.timeFrom}</Text>
-              )}
+              )} */}
               {show && (
                 <DateTimePicker
                   value={time}
@@ -1218,9 +1421,9 @@ const InspectionForm = ({ route }) => {
                   keyboardType="numbers-and-punctuation"
                   maxLength={5}
                 />
-                {errors.timeTo && (
+                {/* {errors.timeTo && (
                   <Text style={styles.errorText}>{errors.timeTo}</Text>
-                )}
+                )} */}
               </TouchableOpacity>
             </View>
           </>
@@ -1252,9 +1455,9 @@ const InspectionForm = ({ route }) => {
                   />
                 </TouchableOpacity>
               </View>
-              {errors.dateOfSowing && (
+              {/* {errors.dateOfSowing && (
                 <Text style={styles.errorText}>{errors.dateOfSowing}</Text>
-              )}
+              )} */}
             </View>
 
             <View style={styles.inputGroup}>
@@ -1281,11 +1484,11 @@ const InspectionForm = ({ route }) => {
                   />
                 </TouchableOpacity>
               </View>
-              {errors.expectedHarvestFrom && (
+              {/* {errors.expectedHarvestFrom && (
                 <Text style={styles.errorText}>
                   {errors.expectedHarvestFrom}
                 </Text>
-              )}
+              )} */}
             </View>
 
             <View style={styles.inputGroup}>
@@ -1312,9 +1515,9 @@ const InspectionForm = ({ route }) => {
                   />
                 </TouchableOpacity>
               </View>
-              {errors.expectedHarvestTo && (
+              {/* {errors.expectedHarvestTo && (
                 <Text style={styles.errorText}>{errors.expectedHarvestTo}</Text>
-              )}
+              )} */}
             </View>
 
             <View style={styles.inputGroup}>
@@ -1341,9 +1544,9 @@ const InspectionForm = ({ route }) => {
                   />
                 </TouchableOpacity>
               </View>
-              {errors.dateOfInspection && (
+              {/* {errors.dateOfInspection && (
                 <Text style={styles.errorText}>{errors.dateOfInspection}</Text>
-              )}
+              )} */}
             </View>
           </>
         )}
@@ -1429,9 +1632,9 @@ const InspectionForm = ({ route }) => {
                 keyboardType={item.keyboardType || "default"}
               />
             )}
-            {item.type !== "switch" && errors[item.field] && (
+            {/* {item.type !== "switch" && errors[item.field] && (
               <Text style={styles.errorText}>{errors[item.field]}</Text>
-            )}
+            )} */}
           </View>
         ))}
       </ScrollView>
@@ -1497,9 +1700,24 @@ const InspectionForm = ({ route }) => {
                         : null,
                     ]}
                     value={count[field] || ""}
-                    onChangeText={(text) =>
-                      handleCountChange(index, field, text)
-                    }
+                    // onChangeText={(text) =>
+                    //   handleCountChange(index, field, text)
+                    // }
+                    onChangeText={(text) => {
+                      // allow only numbers + optional decimal
+                      let value = text.replace(/[^0-9.]/g, "");
+
+                      // prevent multiple dots
+                      const parts = value.split(".");
+                      if (parts.length > 2) return;
+
+                      // limit decimal to 3 digits
+                      if (parts[1]?.length > 3) {
+                        value = `${parts[0]}.${parts[1].slice(0, 3)}`;
+                      }
+
+                      handleCountChange(index, field, value);
+                    }}
                     keyboardType="numeric"
                     placeholder="0"
                   />
@@ -1665,9 +1883,9 @@ const InspectionForm = ({ route }) => {
                     multiline={!!item.multiline}
                   />
                 )}
-                {item.type !== "switch" && errors[item.field] && (
+                {/* {item.type !== "switch" && errors[item.field] && (
                   <Text style={styles.errorText}>{errors[item.field]}</Text>
-                )}
+                )} */}
               </View>
             ))}
           </>
@@ -1778,6 +1996,12 @@ const InspectionForm = ({ route }) => {
                 },
                 {
                   label:
+                    "Does this crop conform to the standards for certification",
+                  field: "doesCropConformToStandards",
+                  type: "switch",
+                },
+                {
+                  label:
                     "Was Grower or his representative present at the time of inspection",
                   field: "growerPresent",
                   type: "switch",
@@ -1844,9 +2068,9 @@ const InspectionForm = ({ route }) => {
                       multiline={!!item.multiline}
                     />
                   )}
-                  {item.type !== "switch" && errors[item.field] && (
+                  {/* {item.type !== "switch" && errors[item.field] && (
                     <Text style={styles.errorText}>{errors[item.field]}</Text>
-                  )}
+                  )} */}
                 </View>
               ))
             }
@@ -2296,13 +2520,13 @@ const InspectionForm = ({ route }) => {
   };
 
   const handleSubmit = async (inspectionStatus = "APPROVED") => {
-    // const stepErrors = validateStep(3);
-    const stepErrors = true;
+    const stepErrors = validateStep(3);
+    //const stepErrors = true;
     if (Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors);
+      showErrorMessage("All fields are required.");
       return;
     }
-
     setLoading(true);
     try {
       // Map form data to API payload

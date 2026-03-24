@@ -1,6 +1,7 @@
 export const API_ROUTES = {
   BASE_URL: "http://160.25.172.19:9054/api/", //qa url
   //BASE_URL: "http://160.25.172.19:9052/api/", //client uat
+
   AUTHORIZE_LOGIN: "userauth/authenticate/login",
   GET_PROFILE: "userauth/all/get-profile",
   PROFILE_DETAILS: "master/employee-master/find-by-id",
@@ -38,7 +39,7 @@ export const API_ROUTES = {
   MATERIAL_LIST: "master/item-master/dd",
   PLAN_ID_LIST: "prod_plan/prd-schedule/find-planIds",
   forgetPassword: "userauth/public/user/forgot-password",
-  Announcement: "master/BANNER_MASTER/public",
+  Announcement: "master/ANNOUNCEMENT_MASTER/public",
   PLAN_FOR_SQURE_LIST: "prod_farm/DP_REPORT/find-plan-for-square",
   GET_DPR_HISTORY: "prod_farm/dpr/find-by-filter",
   GET_OPERATION_LIST: "master/operation-master/dd",

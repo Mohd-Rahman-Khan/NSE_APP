@@ -37,13 +37,10 @@ import TextTicker from "react-native-text-ticker";
 import { getFcmToken } from "../../utils/firebaseNotification";
 
 const Login = () => {
-  const [email, setEmail] = useState("90909090");
+  const [email, setEmail] = useState("11790101637");
   const [password, setPassword] = useState("welcome");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  // const [announcement, setAnnouncement] = useState(
-  //   "Welcome to our App! Securely login to continue. 🚀 Stay connected with us always!",
-  // );
   const [announcement, setAnnouncement] = useState("");
   const dispatch = useDispatch();
   const navigation = useNavigation();
@@ -56,19 +53,27 @@ const Login = () => {
   const getAnnouncement = async () => {
     try {
       const response = await apiRequest(API_ROUTES.Announcement, "post");
+      console.log("getAnnouncement", response);
       if (
         response &&
         (response?.status === "Success" || response?.status === "SUCCESS") &&
         response?.statusCode === "200"
       ) {
-        if (response?.data[0]?.status == "ACTIVE") {
-          setAnnouncement(response?.data[0]?.name);
-        }
+        const activeAnnouncements = response?.data?.filter(
+          (item) => item.status === "ACTIVE",
+        );
+
+        // ✅ Convert into single scrolling text
+        const announcementText = activeAnnouncements
+          ?.map((item) => item.name)
+          .join("   🔸   ");
+
+        setAnnouncement(announcementText);
       } else {
         //showErrorMessage(response?.errorMsg);
       }
     } catch (error) {
-      showErrorMessage(error?.message);
+      //showErrorMessage(error?.message);
       console.log(error, "Error In announcement API");
     } finally {
     }
@@ -80,7 +85,9 @@ const Login = () => {
       const payloadData = {
         clientId: email,
         secretKey: password,
+        accessToken: fcmToken,
       };
+      console.log("payloadData", payloadData);
       setLoading(true);
       const response = await apiRequest(
         API_ROUTES.AUTHORIZE_LOGIN,
@@ -159,12 +166,12 @@ const Login = () => {
         >
           <TextTicker
             style={styles.marqueeText}
-            duration={8000}
+            duration={15000}
             loop
             bounce={false}
             repeatSpacer={50}
             marqueeDelay={1000}
-            scrollSpeed={25}
+            scrollSpeed={50}
           >
             {announcement}
           </TextTicker>

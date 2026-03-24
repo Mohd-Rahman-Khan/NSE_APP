@@ -315,13 +315,13 @@ const Home = () => {
 
     let updatedMenu = [
       ...menuList,
-      // {
-      //   id: 11,
-      //   name: "Scanner",
-      //   icon: ImagePath.qrscanner,
-      //   backgroundColor: "#ffff99",
-      //   navigationScreenName: "ScanQrCode",
-      // },
+      {
+        id: 11,
+        name: "Scanner",
+        icon: ImagePath.qrscanner,
+        backgroundColor: "#ffff99",
+        navigationScreenName: "ScanQrCode",
+      },
     ];
 
     setbrowseProductList(updatedMenu);

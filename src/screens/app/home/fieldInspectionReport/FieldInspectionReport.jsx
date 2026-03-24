@@ -113,7 +113,7 @@ const FieldInspectionReport = () => {
   const [showOpenShowPreviewModal, setShowOpenShowPreviewModal] =
     useState(false);
   const animationRefs = useRef(
-    PROGRAMMES.map(() => new Animated.Value(0))
+    PROGRAMMES.map(() => new Animated.Value(0)),
   ).current;
 
   const [fileUri, setFileUri] = useState(null);
@@ -126,8 +126,8 @@ const FieldInspectionReport = () => {
           toValue: 1,
           useNativeDriver: true,
           friction: 8,
-        })
-      )
+        }),
+      ),
     ).start();
   }, [animationRefs]);
 
@@ -148,7 +148,7 @@ const FieldInspectionReport = () => {
       const response = await apiRequest(
         API_ROUTES.PLAN_ID_LIST,
         "post",
-        encryptedPayload
+        encryptedPayload,
       );
       const decrypted = decryptAES(response);
       const parsedDecrypted = JSON.parse(decrypted);
@@ -201,7 +201,7 @@ const FieldInspectionReport = () => {
       const response = await apiRequest(
         API_ROUTES.PROGRAMME_LIST,
         "post",
-        encryptedPayload
+        encryptedPayload,
       );
       const decrypted = decryptAES(response);
       const parsedDecrypted = JSON.parse(decrypted);
@@ -229,7 +229,6 @@ const FieldInspectionReport = () => {
 
   const renderProgramme = ({ item, index }) => {
     const animatedValue = animationRefs[index];
-
 
     return (
       <TouchableOpacity
@@ -302,7 +301,7 @@ const FieldInspectionReport = () => {
         "post",
         encryptedPayload,
         null,
-        { responseType: "arraybuffer" }
+        { responseType: "arraybuffer" },
       );
       // console.log(response,"line 281")
       const base64Data = Buffer.from(response, "binary").toString("base64");
@@ -315,10 +314,10 @@ const FieldInspectionReport = () => {
       if (Platform.OS === "android") {
         try {
           await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
           );
           await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
+            PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
           );
         } catch (error) {
           console.log("Permission error", error);
@@ -360,6 +359,11 @@ const FieldInspectionReport = () => {
     <WrapperContainer isLoading={loading}>
       <InnerHeader
         title={"Field Inspection Report"}
+        backHandler
+        goBack={() => {
+          // navigation.goBack();
+          navigation.replace("DrawerNav");
+        }}
         rightIcon={
           <TouchableOpacity
             activeOpacity={0.5}

@@ -101,15 +101,17 @@ const DealerIndentDetail = ({ route }) => {
       const parsed = JSON.parse(decrypted);
 
       if (parsed?.status === "SUCCESS" && parsed?.statusCode === "200") {
-        const newData = parsed?.data || dummy;
+        const newData = parsed?.data;
+        console.log("fetchDealerIndentsDetail", parsed?.data);
 
         setindentDetail(newData);
       } else {
-        //showErrorMessage(parsed?.message || "Invalid response");
-        setindentDetail(dummy);
+        showErrorMessage(parsed?.message || "Server error");
+        setindentDetail("");
       }
     } catch (err) {
-      setindentDetail(dummy);
+      showErrorMessage(err?.message || "Server error");
+      setindentDetail("");
       console.log("Fetch error", err);
     } finally {
       setLoading(false);
@@ -133,7 +135,7 @@ const DealerIndentDetail = ({ route }) => {
           <Info label="Material Type" value={indentDetail.materialType} />
           <Info
             label="Mapped Indent No."
-            value={indentDetail?.mappedIndentNo || "--"}
+            value={indentDetail?.existingIndentNo || "--"}
           />
         </View>
 
