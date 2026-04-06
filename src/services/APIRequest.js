@@ -37,13 +37,14 @@ export const apiRequest = async (
     console.error("API Request", response);
     return response.data;
   } catch (err) {
-    //console.log(err.response.data);
+    console.log(err);
     //console.error("API Request" + endPoint, err.response || err.message);
     //console.error("API Request" + endPoint, err.response.data);
     if (err?.status == 403) {
       return err.response.data;
     } else {
-      throw err;
+      //throw err;
+      return;
     }
   }
 };

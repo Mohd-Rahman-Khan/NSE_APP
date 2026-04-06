@@ -11,7 +11,8 @@ export default function WelcomeScreen({ onSelect }) {
       <Text style={styles.title}>नमस्ते! मैं बीज वाणी हूँ 🌱</Text>
 
       <Text style={styles.subtitle}>
-        NSC की AI सहायक। कृपया नीचे दिए गए विकल्पों में से एक विषय चुनें।
+        NSC की AI सहायक। कृपया नीचे दिए गए विकल्पों में से एक विषय चुनें, फिर
+        अपना सवाल पूछें।
       </Text>
 
       <View style={styles.row}>

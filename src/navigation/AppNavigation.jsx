@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import DrawerNav from "./DrawerNav";
 import Notification from "../screens/app/Notification";
@@ -42,11 +42,29 @@ import ChatButton from "../components/ChatButton";
 import { View } from "react-native";
 import Chat from "../screens/app/home/Chat/Chat";
 import { useNavigation } from "@react-navigation/native";
+import { getUserData } from "../utils/Storage";
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
   const navigation = useNavigation();
   const [currentRoute, setCurrentRoute] = useState("");
+  const [userData, setUserData] = useState("");
+  const [isChatAccess, setisChatAccess] = useState(false);
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    const userData = await getUserData();
+    //console.log("userData____", userData?.userId);
+    //const findHoMarketingOfficer = userData?.roleName?.includes("");
+    if (userData?.userId == "11001000008") {
+      setisChatAccess(true);
+    } else {
+      setisChatAccess(false);
+    }
+    //setUserData(userData);
+  };
   return (
     <View style={{ flex: 1 }}>
       <Stack.Navigator
@@ -136,7 +154,7 @@ const AppNavigation = () => {
         <Stack.Screen name="ScanQrCode" component={ScanQrCode} />
         <Stack.Screen name="Chat" component={Chat} />
       </Stack.Navigator>
-      {currentRoute !== "Chat" && <ChatButton />}
+      {currentRoute !== "Chat" && isChatAccess && <ChatButton />}
     </View>
   );
 };

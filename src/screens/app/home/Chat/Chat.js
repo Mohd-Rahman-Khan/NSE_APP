@@ -11,31 +11,75 @@ import WrapperContainer from "../../../../utils/WrapperContainer";
 import ChatHeader from "./ChatHeader";
 import WelcomeScreen from "./WelcomeScreen";
 import Colors from "../../../../utils/Colors";
+import { API_ROUTES } from "../../../../services/APIRoutes";
+import { apiRequest } from "../../../../services/APIRequest";
 
 export default function Chat() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [messages, setMessages] = useState([
-    { id: "1", text: "नमस्ते! मैं बीज वाणी हूँ 🌱", type: "bot" },
+    {
+      id: "1",
+      text: "नमस्ते! 🌱 मैं बीज वाणी हूँ, NSC की AI सहायक। कृपया नीचे दिए गए विकल्पों में से एक चुनें, फिर अपना सवाल पूछें! 🌱",
+      type: "bot",
+    },
   ]);
   const [input, setInput] = useState("");
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const userMsg = {
-      id: Date.now().toString(),
-      text: input,
-      type: "user",
+    // const userMsg = {
+    //   id: Date.now().toString(),
+    //   text: input,
+    //   type: "user",
+    // };
+
+    // const botMsg = {
+    //   id: Date.now().toString() + "bot",
+    //   text: "आपका सवाल प्राप्त हुआ ✅",
+    //   type: "bot",
+    // };
+
+    // setMessages((prev) => [...prev, userMsg, botMsg]);
+    // setInput("");
+    const payload = {
+      question: "what is the today BANK transaction?",
+      question_type: "FINANCE",
     };
 
-    const botMsg = {
-      id: Date.now().toString() + "bot",
-      text: "आपका सवाल प्राप्त हुआ ✅",
-      type: "bot",
-    };
+    const response = await apiRequest(API_ROUTES.SEND_CHAT, "POST", payload);
+    // console.log("response+++", response);
+    if (response?.status === "SUCCESS" || response?.status == "200") {
+      const userMsg = {
+        id: Date.now().toString(),
+        text: input,
+        type: "user",
+      };
 
-    setMessages((prev) => [...prev, userMsg, botMsg]);
-    setInput("");
+      const botMsg = {
+        id: Date.now().toString() + "bot",
+        text: "आपका सवाल प्राप्त हुआ ✅",
+        type: "bot",
+      };
+
+      setMessages((prev) => [...prev, userMsg, botMsg]);
+      setInput("");
+    } else {
+      const userMsg = {
+        id: Date.now().toString(),
+        text: input,
+        type: "user",
+      };
+
+      const botMsg = {
+        id: Date.now().toString() + "bot",
+        text: "क्षमा करें, कुछ गड़बड़ हो गई। कृपया दोबारा प्रयास करें। 🙏",
+        type: "bot",
+      };
+
+      setMessages((prev) => [...prev, userMsg, botMsg]);
+      setInput("");
+    }
   };
 
   const renderItem = ({ item }) => (
@@ -56,7 +100,19 @@ export default function Chat() {
           onNewChat={() => setSelectedCategory(null)}
         />
         {!selectedCategory ? (
-          <WelcomeScreen onSelect={setSelectedCategory} />
+          <WelcomeScreen
+            onSelect={(item) => {
+              setSelectedCategory(item);
+              const botMsg = {
+                id: Date.now().toString() + "bot",
+                text:
+                  item + " चुना गया। अब आप इस विषय पर अपना सवाल पूछ सकते हैं!",
+                type: "bot",
+              };
+
+              setMessages((prev) => [...prev, botMsg]);
+            }}
+          />
         ) : (
           <>
             <FlatList

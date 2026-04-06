@@ -63,4 +63,5 @@ export const API_ROUTES = {
   DPR_MECHANICAL_UPDATE: "prod_farm/dpr/update-mechanical-item",
   CP_NUMBER_LIST: "inventory/item-inventory/dd",
   FIND_PLOT_BY_EPOID: "prod_farm/dpr/find-plots-by-epoId",
+  SEND_CHAT: "api/context/v1/show-suggestion",
 };
