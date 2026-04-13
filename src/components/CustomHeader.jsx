@@ -8,7 +8,12 @@ import { useNavigation } from "@react-navigation/native";
 import PropTypes from "prop-types";
 import ImagePath from "../utils/ImagePath";
 
-const CustomHeader = ({ data }) => {
+const CustomHeader = ({
+  data,
+  showFilter,
+  showNotf,
+  clickOnFilter = () => {},
+}) => {
   const navigation = useNavigation();
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -45,17 +50,35 @@ const CustomHeader = ({ data }) => {
           </Text>
         </View>
         <View style={styles.leftHolder}>
-          <TouchableOpacity
-            activeOpacity={0.5}
-            style={styles.notificationHolder}
-            onPress={() => navigation.navigate("Notification")}
-          >
-            <Feather
-              name="bell"
-              size={moderateScale(25)}
-              color={Colors.black}
-            />
-          </TouchableOpacity>
+          {showFilter && (
+            <TouchableOpacity
+              activeOpacity={0.5}
+              style={styles.notificationHolder}
+              onPress={() => {
+                clickOnFilter();
+              }}
+            >
+              <Feather
+                name="filter"
+                size={moderateScale(25)}
+                color={Colors.black}
+              />
+            </TouchableOpacity>
+          )}
+          {showNotf && (
+            <TouchableOpacity
+              activeOpacity={0.5}
+              style={styles.notificationHolder}
+              onPress={() => navigation.navigate("Notification")}
+            >
+              <Feather
+                name="bell"
+                size={moderateScale(25)}
+                color={Colors.black}
+              />
+            </TouchableOpacity>
+          )}
+
           <TouchableOpacity
             activeOpacity={0.6}
             onPress={() => navigation.navigate("UserProfile")}

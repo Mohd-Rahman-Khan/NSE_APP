@@ -19,7 +19,7 @@ const BrowseProduct = ({ browseProductList, userData }) => {
   const navigation = useNavigation();
   return (
     <View style={{ padding: moderateScale(10) }}>
-      <Text style={styles.headerText}>Browse Products</Text>
+      {/* <Text style={styles.headerText}>Browse Products</Text> */}
       <CustomBottomSheet
         visible={bottomSheetVisible}
         onRequestClose={() => setBottomSheetVisible(false)}

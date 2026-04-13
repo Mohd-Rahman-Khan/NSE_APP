@@ -362,7 +362,7 @@ const FieldInspectionReport = () => {
         backHandler
         goBack={() => {
           // navigation.goBack();
-          navigation.replace("DrawerNav");
+          navigation.replace("BottomNav");
         }}
         rightIcon={
           <TouchableOpacity

@@ -37,6 +37,31 @@ if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   file(TOUCH_NOCREATE "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/.cxx/Debug/n6t5l612/x86/CMakeFiles/cmake.verify_globs")
 endif()
 
+# react_codegen_SRCS at /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/@react-native-community/netinfo/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/@react-native-community/netinfo/android/build/generated/source/codegen/jni/*.cpp")
+set(OLD_GLOB
+  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/@react-native-community/netinfo/android/build/generated/source/codegen/jni/RNCNetInfoSpec-generated.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  file(TOUCH_NOCREATE "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/.cxx/Debug/n6t5l612/x86/CMakeFiles/cmake.verify_globs")
+endif()
+
+# react_codegen_SRCS at /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/@react-native-community/netinfo/android/build/generated/source/codegen/jni/CMakeLists.txt:9 (file)
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/@react-native-community/netinfo/android/build/generated/source/codegen/jni/react/renderer/components/RNCNetInfoSpec/*.cpp")
+set(OLD_GLOB
+  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/@react-native-community/netinfo/android/build/generated/source/codegen/jni/react/renderer/components/RNCNetInfoSpec/ComponentDescriptors.cpp"
+  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/@react-native-community/netinfo/android/build/generated/source/codegen/jni/react/renderer/components/RNCNetInfoSpec/EventEmitters.cpp"
+  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/@react-native-community/netinfo/android/build/generated/source/codegen/jni/react/renderer/components/RNCNetInfoSpec/Props.cpp"
+  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/@react-native-community/netinfo/android/build/generated/source/codegen/jni/react/renderer/components/RNCNetInfoSpec/RNCNetInfoSpecJSI-generated.cpp"
+  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/@react-native-community/netinfo/android/build/generated/source/codegen/jni/react/renderer/components/RNCNetInfoSpec/ShadowNodes.cpp"
+  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/@react-native-community/netinfo/android/build/generated/source/codegen/jni/react/renderer/components/RNCNetInfoSpec/States.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  file(TOUCH_NOCREATE "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/.cxx/Debug/n6t5l612/x86/CMakeFiles/cmake.verify_globs")
+endif()
+
 # LIB_CUSTOM_SRCS at /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/@react-native-picker/picker/android/src/main/jni/CMakeLists.txt:20 (file)
 file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/@react-native-picker/picker/android/src/main/jni/*.cpp")
 set(OLD_GLOB
@@ -301,19 +326,14 @@ endif()
 # LIB_CUSTOM_SRCS at /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt:23 (file)
 file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/*.cpp")
 set(OLD_GLOB
-  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSBottomTabsShadowNode.cpp"
-  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSBottomTabsState.cpp"
   "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSFullWindowOverlayShadowNode.cpp"
   "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSModalScreenShadowNode.cpp"
-  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSSafeAreaViewShadowNode.cpp"
-  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSSafeAreaViewState.cpp"
   "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSScreenShadowNode.cpp"
   "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSScreenStackHeaderConfigShadowNode.cpp"
   "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSScreenStackHeaderConfigState.cpp"
   "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSScreenStackHeaderSubviewShadowNode.cpp"
   "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSScreenStackHeaderSubviewState.cpp"
   "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSScreenState.cpp"
-  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-screens/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnscreens/RNSSplitViewScreenShadowNode.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")
@@ -338,6 +358,44 @@ set(OLD_GLOB
   "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-screens/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnscreens/ShadowNodes.cpp"
   "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-screens/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnscreens/States.cpp"
   "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-screens/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnscreens/rnscreensJSI-generated.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  file(TOUCH_NOCREATE "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/.cxx/Debug/n6t5l612/x86/CMakeFiles/cmake.verify_globs")
+endif()
+
+# rnsvg_SRCS at /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-svg/android/src/main/jni/CMakeLists.txt:10 (file)
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-svg/android/src/main/jni/*.cpp")
+set(OLD_GLOB
+  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-svg/android/src/main/jni/rnsvg.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  file(TOUCH_NOCREATE "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/.cxx/Debug/n6t5l612/x86/CMakeFiles/cmake.verify_globs")
+endif()
+
+# rnsvg_SRCS at /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-svg/android/src/main/jni/CMakeLists.txt:10 (file)
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-svg/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnsvg/*.cpp")
+set(OLD_GLOB
+  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-svg/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnsvg/RNSVGImageShadowNode.cpp"
+  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-svg/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnsvg/RNSVGImageState.cpp"
+  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-svg/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnsvg/RNSVGLayoutableShadowNode.cpp"
+  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-svg/android/src/main/jni/../../../../common/cpp/react/renderer/components/rnsvg/RNSVGShadowNodes.cpp"
+  )
+if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
+  message("-- GLOB mismatch!")
+  file(TOUCH_NOCREATE "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/.cxx/Debug/n6t5l612/x86/CMakeFiles/cmake.verify_globs")
+endif()
+
+# rnsvg_codegen_SRCS at /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-svg/android/src/main/jni/CMakeLists.txt:11 (file)
+file(GLOB NEW_GLOB LIST_DIRECTORIES true "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-svg/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnsvg/*cpp")
+set(OLD_GLOB
+  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-svg/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnsvg/ComponentDescriptors.cpp"
+  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-svg/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnsvg/EventEmitters.cpp"
+  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-svg/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnsvg/Props.cpp"
+  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-svg/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnsvg/ShadowNodes.cpp"
+  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-svg/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnsvg/States.cpp"
+  "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-svg/android/src/main/jni/../../../build/generated/source/codegen/jni/react/renderer/components/rnsvg/rnsvgJSI-generated.cpp"
   )
 if(NOT "${NEW_GLOB}" STREQUAL "${OLD_GLOB}")
   message("-- GLOB mismatch!")

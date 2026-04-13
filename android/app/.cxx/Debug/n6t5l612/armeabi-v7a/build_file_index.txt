@@ -1,4 +1,5 @@
 /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/@react-native-community/datetimepicker/android/build/generated/source/codegen/jni/CMakeLists.txt
+/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/@react-native-community/netinfo/android/build/generated/source/codegen/jni/CMakeLists.txt
 /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/@react-native-picker/picker/android/src/main/jni/CMakeLists.txt
 /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/lottie-react-native/android/build/generated/source/codegen/jni/CMakeLists.txt
 /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-camera-kit/android/build/generated/source/codegen/jni/CMakeLists.txt
@@ -11,6 +12,7 @@
 /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-reanimated/android/build/generated/source/codegen/jni/CMakeLists.txt
 /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-safe-area-context/android/src/main/jni/CMakeLists.txt
 /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt
+/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-svg/android/src/main/jni/CMakeLists.txt
 /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-vector-icons/android/build/generated/source/codegen/jni/CMakeLists.txt
 /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-webview/android/build/generated/source/codegen/jni/CMakeLists.txt
 /Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-worklets/android/build/generated/source/codegen/jni/CMakeLists.txt

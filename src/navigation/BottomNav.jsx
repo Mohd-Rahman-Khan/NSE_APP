@@ -8,6 +8,7 @@ import { moderateScale, textScale } from "../utils/responsiveSize";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import FontFamily from "../utils/FontFamily";
 import Feather from "react-native-vector-icons/Feather";
+import MoreService from "../screens/app/MoreService";
 
 const Tab = createBottomTabNavigator();
 
@@ -52,6 +53,20 @@ const BottomNav = () => {
           tabBarIcon: ({ focused, color }) => (
             <View style={styles.iconContainer}>
               <Feather name="user" size={moderateScale(25)} color={color} />
+            </View>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="More Service"
+        component={MoreService}
+        options={{
+          tabBarLabel: ({ focused, color }) => (
+            <Text style={[styles.labelText, { color }]}>More Service</Text>
+          ),
+          tabBarIcon: ({ focused, color }) => (
+            <View style={styles.iconContainer}>
+              <Feather name="grid" size={moderateScale(25)} color={color} />
             </View>
           ),
         }}

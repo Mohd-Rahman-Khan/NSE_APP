@@ -43,6 +43,7 @@ import { View } from "react-native";
 import Chat from "../screens/app/home/Chat/Chat";
 import { useNavigation } from "@react-navigation/native";
 import { getUserData } from "../utils/Storage";
+import BottomNav from "./BottomNav";
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -76,7 +77,8 @@ const AppNavigation = () => {
           },
         }}
       >
-        <Stack.Screen name="DrawerNav" component={DrawerNav} />
+        {/* <Stack.Screen name="DrawerNav" component={DrawerNav} /> */}
+        <Stack.Screen name="BottomNav" component={BottomNav} />
         <Stack.Screen name="Notification" component={Notification} />
         <Stack.Screen name="UserProfile" component={UserProfile} />
         <Stack.Screen

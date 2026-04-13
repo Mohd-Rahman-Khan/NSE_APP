@@ -64,4 +64,7 @@ export const API_ROUTES = {
   CP_NUMBER_LIST: "inventory/item-inventory/dd",
   FIND_PLOT_BY_EPOID: "prod_farm/dpr/find-plots-by-epoId",
   SEND_CHAT: "api/context/v1/show-suggestion",
+  DASHBOARD_SUMMARY: "prod_plan/production_dashboard/get-summary",
+  DASHBOARD_GRAPH_DATA: "prod_plan/production_dashboard/get-detail-dashboard",
+  PLAN_DETAILS: "prod_plan/production_plan/find-plans-dtls",
 };

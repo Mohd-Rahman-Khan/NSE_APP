@@ -1,6 +1,7 @@
 {
   "buildFiles": [
     "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/@react-native-community/datetimepicker/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/@react-native-community/netinfo/android/build/generated/source/codegen/jni/CMakeLists.txt",
     "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/@react-native-picker/picker/android/src/main/jni/CMakeLists.txt",
     "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/lottie-react-native/android/build/generated/source/codegen/jni/CMakeLists.txt",
     "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-camera-kit/android/build/generated/source/codegen/jni/CMakeLists.txt",
@@ -13,6 +14,7 @@
     "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-reanimated/android/build/generated/source/codegen/jni/CMakeLists.txt",
     "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-safe-area-context/android/src/main/jni/CMakeLists.txt",
     "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt",
+    "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-svg/android/src/main/jni/CMakeLists.txt",
     "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-vector-icons/android/build/generated/source/codegen/jni/CMakeLists.txt",
     "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-webview/android/build/generated/source/codegen/jni/CMakeLists.txt",
     "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/node_modules/react-native-worklets/android/build/generated/source/codegen/jni/CMakeLists.txt",
@@ -43,9 +45,10 @@
         "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/build/intermediates/cxx/Debug/n6t5l612/obj/armeabi-v7a/libreact-native-mmkv.so",
         "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/build/intermediates/cxx/Debug/n6t5l612/obj/armeabi-v7a/libreact_codegen_safeareacontext.so",
         "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/build/intermediates/cxx/Debug/n6t5l612/obj/armeabi-v7a/libreact_codegen_rnscreens.so",
-        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/30b0647dcc87b3cacda4b8c9fa884646/transformed/jetified-fbjni-0.7.0/prefab/modules/fbjni/libs/android.armeabi-v7a/libfbjni.so",
-        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/be474e380fd26ca8f633f96daa0f1716/transformed/jetified-react-android-0.80.2-debug/prefab/modules/jsi/libs/android.armeabi-v7a/libjsi.so",
-        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/be474e380fd26ca8f633f96daa0f1716/transformed/jetified-react-android-0.80.2-debug/prefab/modules/reactnative/libs/android.armeabi-v7a/libreactnative.so"
+        "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/build/intermediates/cxx/Debug/n6t5l612/obj/armeabi-v7a/libreact_codegen_rnsvg.so",
+        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/57e8495136fbda90fd3a9eaf56bd49cc/transformed/jetified-fbjni-0.7.0/prefab/modules/fbjni/libs/android.armeabi-v7a/libfbjni.so",
+        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/18e1f092da8a25df5bc0ef169491c146/transformed/jetified-react-android-0.80.2-debug/prefab/modules/jsi/libs/android.armeabi-v7a/libjsi.so",
+        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/18e1f092da8a25df5bc0ef169491c146/transformed/jetified-react-android-0.80.2-debug/prefab/modules/reactnative/libs/android.armeabi-v7a/libreactnative.so"
       ]
     },
     "core::@1b9a7d546b295b7d0867": {
@@ -60,15 +63,20 @@
       "artifactName": "react-native-mmkv",
       "output": "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/build/intermediates/cxx/Debug/n6t5l612/obj/armeabi-v7a/libreact-native-mmkv.so",
       "runtimeFiles": [
-        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/30b0647dcc87b3cacda4b8c9fa884646/transformed/jetified-fbjni-0.7.0/prefab/modules/fbjni/libs/android.armeabi-v7a/libfbjni.so",
-        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/be474e380fd26ca8f633f96daa0f1716/transformed/jetified-react-android-0.80.2-debug/prefab/modules/jsi/libs/android.armeabi-v7a/libjsi.so",
-        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/be474e380fd26ca8f633f96daa0f1716/transformed/jetified-react-android-0.80.2-debug/prefab/modules/reactnative/libs/android.armeabi-v7a/libreactnative.so"
+        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/57e8495136fbda90fd3a9eaf56bd49cc/transformed/jetified-fbjni-0.7.0/prefab/modules/fbjni/libs/android.armeabi-v7a/libfbjni.so",
+        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/18e1f092da8a25df5bc0ef169491c146/transformed/jetified-react-android-0.80.2-debug/prefab/modules/jsi/libs/android.armeabi-v7a/libjsi.so",
+        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/18e1f092da8a25df5bc0ef169491c146/transformed/jetified-react-android-0.80.2-debug/prefab/modules/reactnative/libs/android.armeabi-v7a/libreactnative.so"
       ]
     },
     "react_codegen_NativeCameraKitSpec::@56ccb1a98efdd6d45482": {
       "toolchain": "toolchain",
       "abi": "armeabi-v7a",
       "artifactName": "react_codegen_NativeCameraKitSpec"
+    },
+    "react_codegen_RNCNetInfoSpec::@c36c96bfd5b5770618a5": {
+      "toolchain": "toolchain",
+      "abi": "armeabi-v7a",
+      "artifactName": "react_codegen_RNCNetInfoSpec"
     },
     "react_codegen_RNCWebViewSpec::@eb48929f9f7453740a6c": {
       "toolchain": "toolchain",
@@ -116,9 +124,9 @@
       "artifactName": "react_codegen_rnpicker",
       "output": "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/build/intermediates/cxx/Debug/n6t5l612/obj/armeabi-v7a/libreact_codegen_rnpicker.so",
       "runtimeFiles": [
-        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/be474e380fd26ca8f633f96daa0f1716/transformed/jetified-react-android-0.80.2-debug/prefab/modules/reactnative/libs/android.armeabi-v7a/libreactnative.so",
-        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/be474e380fd26ca8f633f96daa0f1716/transformed/jetified-react-android-0.80.2-debug/prefab/modules/jsi/libs/android.armeabi-v7a/libjsi.so",
-        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/30b0647dcc87b3cacda4b8c9fa884646/transformed/jetified-fbjni-0.7.0/prefab/modules/fbjni/libs/android.armeabi-v7a/libfbjni.so"
+        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/18e1f092da8a25df5bc0ef169491c146/transformed/jetified-react-android-0.80.2-debug/prefab/modules/reactnative/libs/android.armeabi-v7a/libreactnative.so",
+        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/18e1f092da8a25df5bc0ef169491c146/transformed/jetified-react-android-0.80.2-debug/prefab/modules/jsi/libs/android.armeabi-v7a/libjsi.so",
+        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/57e8495136fbda90fd3a9eaf56bd49cc/transformed/jetified-fbjni-0.7.0/prefab/modules/fbjni/libs/android.armeabi-v7a/libfbjni.so"
       ]
     },
     "react_codegen_rnreanimated::@8afabad14bfffa3f8b9a": {
@@ -132,9 +140,20 @@
       "artifactName": "react_codegen_rnscreens",
       "output": "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/build/intermediates/cxx/Debug/n6t5l612/obj/armeabi-v7a/libreact_codegen_rnscreens.so",
       "runtimeFiles": [
-        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/be474e380fd26ca8f633f96daa0f1716/transformed/jetified-react-android-0.80.2-debug/prefab/modules/reactnative/libs/android.armeabi-v7a/libreactnative.so",
-        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/be474e380fd26ca8f633f96daa0f1716/transformed/jetified-react-android-0.80.2-debug/prefab/modules/jsi/libs/android.armeabi-v7a/libjsi.so",
-        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/30b0647dcc87b3cacda4b8c9fa884646/transformed/jetified-fbjni-0.7.0/prefab/modules/fbjni/libs/android.armeabi-v7a/libfbjni.so"
+        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/18e1f092da8a25df5bc0ef169491c146/transformed/jetified-react-android-0.80.2-debug/prefab/modules/reactnative/libs/android.armeabi-v7a/libreactnative.so",
+        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/18e1f092da8a25df5bc0ef169491c146/transformed/jetified-react-android-0.80.2-debug/prefab/modules/jsi/libs/android.armeabi-v7a/libjsi.so",
+        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/57e8495136fbda90fd3a9eaf56bd49cc/transformed/jetified-fbjni-0.7.0/prefab/modules/fbjni/libs/android.armeabi-v7a/libfbjni.so"
+      ]
+    },
+    "react_codegen_rnsvg::@4f40eb209d0c0b4a3b65": {
+      "toolchain": "toolchain",
+      "abi": "armeabi-v7a",
+      "artifactName": "react_codegen_rnsvg",
+      "output": "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/build/intermediates/cxx/Debug/n6t5l612/obj/armeabi-v7a/libreact_codegen_rnsvg.so",
+      "runtimeFiles": [
+        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/18e1f092da8a25df5bc0ef169491c146/transformed/jetified-react-android-0.80.2-debug/prefab/modules/reactnative/libs/android.armeabi-v7a/libreactnative.so",
+        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/18e1f092da8a25df5bc0ef169491c146/transformed/jetified-react-android-0.80.2-debug/prefab/modules/jsi/libs/android.armeabi-v7a/libjsi.so",
+        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/57e8495136fbda90fd3a9eaf56bd49cc/transformed/jetified-fbjni-0.7.0/prefab/modules/fbjni/libs/android.armeabi-v7a/libfbjni.so"
       ]
     },
     "react_codegen_rnworklets::@68f58d84d4754f193387": {
@@ -148,9 +167,9 @@
       "artifactName": "react_codegen_safeareacontext",
       "output": "/Users/mohdrahmankhan/Documents/React_Native/NSE/RahmanRepo/NSE_APP/android/app/build/intermediates/cxx/Debug/n6t5l612/obj/armeabi-v7a/libreact_codegen_safeareacontext.so",
       "runtimeFiles": [
-        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/30b0647dcc87b3cacda4b8c9fa884646/transformed/jetified-fbjni-0.7.0/prefab/modules/fbjni/libs/android.armeabi-v7a/libfbjni.so",
-        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/be474e380fd26ca8f633f96daa0f1716/transformed/jetified-react-android-0.80.2-debug/prefab/modules/jsi/libs/android.armeabi-v7a/libjsi.so",
-        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/be474e380fd26ca8f633f96daa0f1716/transformed/jetified-react-android-0.80.2-debug/prefab/modules/reactnative/libs/android.armeabi-v7a/libreactnative.so"
+        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/57e8495136fbda90fd3a9eaf56bd49cc/transformed/jetified-fbjni-0.7.0/prefab/modules/fbjni/libs/android.armeabi-v7a/libfbjni.so",
+        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/18e1f092da8a25df5bc0ef169491c146/transformed/jetified-react-android-0.80.2-debug/prefab/modules/jsi/libs/android.armeabi-v7a/libjsi.so",
+        "/Users/mohdrahmankhan/.gradle/caches/8.14.1/transforms/18e1f092da8a25df5bc0ef169491c146/transformed/jetified-react-android-0.80.2-debug/prefab/modules/reactnative/libs/android.armeabi-v7a/libreactnative.so"
       ]
     }
   },
