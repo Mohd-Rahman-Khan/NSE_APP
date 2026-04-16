@@ -91,44 +91,70 @@ export default function ScanQrCode() {
     }
   };
 
+  const parseQrString = (qrString) => {
+    const obj = {};
+
+    const lines = qrString?.split("\n");
+
+    lines.forEach((line) => {
+      const trimmed = line?.trim();
+      if (!trimmed) return;
+
+      const [key, ...rest] = trimmed?.split(":");
+
+      if (key && rest?.length) {
+        obj[key.trim()] = rest?.join(":").trim();
+      }
+    });
+
+    return obj;
+  };
+
   const renderItem = ({ item }) => {
     return (
       <View
         style={{
-          padding: 16,
-          borderWidth: 1,
-          borderColor: "#ddd",
-          borderRadius: 10,
-          backgroundColor: "#fff",
-          shadowColor: "#000",
-          elevation: 3,
           marginTop: 20,
+          backgroundColor: "#fff",
+          borderRadius: 12,
+          elevation: 4,
+          overflow: "hidden",
         }}
       >
-        {/* Header */}
-        <Text>Bill Number: {item.billNumber}</Text>
-        <Text>Dealer Indent: {item.dealerIndent}</Text>
-        <Text>Bill Date: {item.billDate}</Text>
+        {Object?.entries(item)?.map(([key, value], index) => (
+          <View
+            key={index}
+            style={{
+              flexDirection: "row",
+              paddingVertical: 12,
+              paddingHorizontal: 14,
+              borderBottomWidth:
+                index !== Object.entries(item).length - 1 ? 1 : 0,
+              borderColor: "#eee",
+            }}
+          >
+            {/* LEFT COLUMN (KEY) */}
+            <Text
+              style={{
+                width: "45%",
+                fontWeight: "600",
+                color: "#333",
+              }}
+            >
+              {key}
+            </Text>
 
-        {/* Party Details */}
-        <Text style={{ marginTop: 16, fontWeight: "bold" }}>
-          DETAIL OF PARTY BILL (BILLED TO)
-        </Text>
-
-        <Text>Party Name: {item.party.name}</Text>
-        <Text>Address: {item.party.address}</Text>
-        <Text>GSTIN: {item.party.gstin}</Text>
-        <Text>State: {item.party.state}</Text>
-
-        {/* Bank Details */}
-        <Text style={{ marginTop: 16, fontWeight: "bold" }}>
-          PARTY BANK DETAILS
-        </Text>
-
-        <Text>Bank Name: {item.bank.bankName}</Text>
-        <Text>Account No: {item.bank.accountNo}</Text>
-        <Text>IFSC Code: {item.bank.ifsc}</Text>
-        <Text>Branch: {item.bank.branch}</Text>
+            {/* RIGHT COLUMN (VALUE) */}
+            <Text
+              style={{
+                width: "55%",
+                color: "#555",
+              }}
+            >
+              {value}
+            </Text>
+          </View>
+        ))}
       </View>
     );
   };
@@ -141,9 +167,15 @@ export default function ScanQrCode() {
           onClose={() => {
             setshowScanner(false);
           }}
+          // qrScanningData={(qrData) => {
+          //   setQrDetails((prev) => [...prev, dummyData]);
+          //   //alert(qrData);
+          // }}
           qrScanningData={(qrData) => {
-            setQrDetails((prev) => [...prev, dummyData]);
-            //alert(qrData);
+            console.log("qrScanningData", qrData);
+            const parsedData = parseQrString(qrData);
+            //setQrDetails([parsedData]);
+            setQrDetails((prev) => [...prev, parsedData]);
           }}
         />
       ) : null}
@@ -157,7 +189,6 @@ export default function ScanQrCode() {
       <TouchableOpacity
         onPress={() => {
           setshowScanner(true);
-          //setQrDetails((prev) => [...prev, dummyData]);
         }}
         style={{
           position: "absolute",
