@@ -67,4 +67,10 @@ export const API_ROUTES = {
   DASHBOARD_SUMMARY: "prod_plan/production_dashboard/get-summary",
   DASHBOARD_GRAPH_DATA: "prod_plan/production_dashboard/get-detail-dashboard",
   PLAN_DETAILS: "prod_plan/production_plan/find-plans-dtls",
+  INVENTORY_DASHBOARD: "inventory/dashboard/kpi",
+  SSCA_SEED_DASHBOARD: "quality/dashboard/seed-sample-ssca",
+  QTY_QCL_SEED_DASHBOARD: "quality/dashboard/seed-sample-qty-qcl",
+  QCL_SEED_DASHBOARD: "quality/dashboard/seed-sample-qcl",
+  TOP_DEALER: "inventory/dashboard/dealer-performance",
+  FINANCIAL_YEAR: "master/financial-year-master/dd",
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
+  FlatList,
 } from "react-native";
 import WrapperContainer from "../../utils/WrapperContainer";
 import CustomHeader from "../../components/CustomHeader";
@@ -13,7 +14,10 @@ import { getUserData, removeUserData } from "../../utils/Storage";
 import { decryptAES, encryptWholeObject } from "../../utils/decryptData";
 import { apiRequest } from "../../services/APIRequest";
 import { API_ROUTES } from "../../services/APIRoutes";
-import { showSuccessMessage } from "../../utils/HelperFunction";
+import {
+  showErrorMessage,
+  showSuccessMessage,
+} from "../../utils/HelperFunction";
 import { useDispatch } from "react-redux";
 import { useIsFocused } from "@react-navigation/native";
 import { clearUserData } from "../../redux/slice/UserSlice";
@@ -35,6 +39,8 @@ import { BarChart } from "react-native-gifted-charts";
 import PlanListComp from "./PlanListComp";
 import RejectedPlanList from "./RejectedPlanList";
 import en from "../../constants/en";
+import AnimatedNumbers from "react-native-animated-numbers";
+import ProductionFilterComp from "./ProductionFilterComp";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -50,6 +56,7 @@ export default function Home() {
   const [unit, setUnit] = useState(null);
   const [crop, setCrop] = useState(null);
   const [variety, setVariety] = useState(null);
+  const [selectedQC, setselectedQC] = useState({ id: 1, name: "SSCA Seed" });
   const [dashbooardData, setdashbooardData] = useState({
     // growers: {
     //   totalGrowers: 27,
@@ -228,6 +235,11 @@ export default function Home() {
     // ],
   });
   const [planDetailsList, setPlanDetailsList] = useState([]);
+  const [qcDashboardData, setqcDashboardData] = useState("");
+  const [marketingDashData, setmarketingDashData] = useState("");
+  const [topDealer, settopDealer] = useState([]);
+  const [financialYear, setfinancialYear] = useState([]);
+  const [season, setseason] = useState([]);
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
 
@@ -238,51 +250,198 @@ export default function Home() {
   }, [isFocused]);
 
   useEffect(() => {
-    if (!isFocused) return;
+    if (userData) {
+      switch (selectedTab) {
+        case "Production":
+          getProductionDashboardSummary();
+          getProductionGraphData();
+          getProductionPlanDetail();
+          break;
 
-    switch (selectedTab) {
-      case "Production":
-        getProductionDashboardSummary();
-        getProductionGraphData();
-        getProductionPlanDetail();
-        break;
+        case "Marketing":
+          getMarketingData();
+          getTopDealer();
+          break;
 
-      case "Marketing":
-        getMarketingData();
-        break;
+        case "Inventory":
+          break;
 
-      case "Inventory":
-        getInventoryData();
-        break;
+        case "QC":
+          getQCData("SSCA Seed");
+          break;
 
-      case "QC":
-        getQCData();
-        break;
-
-      default:
-        break;
+        default:
+          break;
+      }
     }
-  }, [selectedTab, isFocused]);
+  }, [selectedTab, userData]);
+  useEffect(() => {
+    getFinacialYears();
+    getSeasonList();
+  }, []);
+  const getFinacialYears = async () => {
+    try {
+      const payloadData = {};
+      const encryptedPayload = encryptWholeObject(payloadData);
+      const response = await apiRequest(
+        API_ROUTES.FINANCIAL_YEAR,
+        "post",
+        encryptedPayload,
+      );
+      const decrypted = decryptAES(response);
+      const parsedDecrypted = JSON.parse(decrypted);
+      console.log("getFinacialYears", parsedDecrypted);
+
+      if (
+        parsedDecrypted &&
+        (parsedDecrypted?.statusCode === "200" ||
+          parsedDecrypted?.statusCode === "201")
+      ) {
+        setfinancialYear(parsedDecrypted?.data);
+      } else {
+        showErrorMessage(parsedDecrypted?.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.log(error, "line error");
+      showErrorMessage("something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const getSeasonList = async () => {
+    try {
+      const payloadData = {};
+      const encryptedPayload = encryptWholeObject(payloadData);
+      const response = await apiRequest(
+        API_ROUTES.SEASON_MASTER_DD,
+        "post",
+        encryptedPayload,
+      );
+      const decrypted = decryptAES(response);
+      const parsedDecrypted = JSON.parse(decrypted);
+
+      if (
+        parsedDecrypted &&
+        (parsedDecrypted?.statusCode === "200" ||
+          parsedDecrypted?.statusCode === "201")
+      ) {
+        setseason(parsedDecrypted?.data);
+      } else {
+        showErrorMessage(parsedDecrypted?.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.log(error, "line error");
+      showErrorMessage("something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getMarketingData = async () => {
     try {
-      const res = await apiRequest(API_ROUTES.MARKETING_DASHBOARD, "post", {});
-      console.log("Marketing Data", res);
-    } catch (e) {}
+      const payloadData = {
+        unit: {
+          unitId: 36,
+          unitName: "WARANGAL AO",
+        },
+        unitType: "AO",
+        startDate: "2025-10-16",
+        endDate: "2026-04-16",
+      };
+      const encryptedPayload = encryptWholeObject(payloadData);
+      const response = await apiRequest(
+        API_ROUTES.INVENTORY_DASHBOARD,
+        "post",
+        encryptedPayload,
+      );
+      const decrypted = decryptAES(response);
+      const parsedDecrypted = JSON.parse(decrypted);
+
+      console.log("getInventoryData", parsedDecrypted);
+      if (
+        parsedDecrypted &&
+        (parsedDecrypted?.statusCode === "200" ||
+          parsedDecrypted?.statusCode === "201")
+      ) {
+        setmarketingDashData(parsedDecrypted?.data);
+      } else {
+        showErrorMessage(parsedDecrypted?.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.log(error, "line error");
+      showErrorMessage("something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const getTopDealer = async () => {
+    try {
+      const payloadData = {
+        startDate: "2024-10-17",
+        endDate: "2026-04-17",
+        hoId: "",
+        aoId: [36],
+        roId: [],
+      };
+      const encryptedPayload = encryptWholeObject(payloadData);
+      const response = await apiRequest(
+        API_ROUTES.TOP_DEALER,
+        "post",
+        encryptedPayload,
+      );
+      const decrypted = decryptAES(response);
+      const parsedDecrypted = JSON.parse(decrypted);
+
+      console.log("getTopDealer", parsedDecrypted);
+      if (
+        parsedDecrypted &&
+        (parsedDecrypted?.statusCode === "200" ||
+          parsedDecrypted?.statusCode === "201")
+      ) {
+        settopDealer(parsedDecrypted?.data);
+      } else {
+        showErrorMessage(parsedDecrypted?.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.log(error, "line error");
+      showErrorMessage("something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getInventoryData = async () => {
+  const getQCData = async (selectedQC) => {
     try {
-      const res = await apiRequest(API_ROUTES.INVENTORY_DASHBOARD, "post", {});
-      console.log("Inventory Data", res);
-    } catch (e) {}
-  };
-
-  const getQCData = async () => {
-    try {
-      const res = await apiRequest(API_ROUTES.QC_DASHBOARD, "post", {});
-      console.log("QC Data", res);
-    } catch (e) {}
+      let url;
+      if (selectedQC == "QTC-QCL Seed") {
+        url = API_ROUTES.QTY_QCL_SEED_DASHBOARD;
+      } else if (selectedQC == "QCL Seed") {
+        url = API_ROUTES.QCL_SEED_DASHBOARD;
+      } else {
+        url = API_ROUTES.SSCA_SEED_DASHBOARD;
+      }
+      const payloadData = {};
+      const encryptedPayload = encryptWholeObject(payloadData);
+      const response = await apiRequest(url, "post", encryptedPayload);
+      const decrypted = decryptAES(response);
+      const parsedDecrypted = JSON.parse(decrypted);
+      console.log("getQCData", url);
+      console.log("getQCData", parsedDecrypted);
+      if (
+        parsedDecrypted &&
+        (parsedDecrypted?.statusCode === "200" ||
+          parsedDecrypted?.statusCode === "201")
+      ) {
+        setqcDashboardData(parsedDecrypted?.data);
+      } else {
+        showErrorMessage(parsedDecrypted?.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.log(error, "line error");
+      showErrorMessage("something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fethchUserprofileData = async () => {
@@ -317,11 +476,12 @@ export default function Home() {
     }
   };
 
-  const getProductionDashboardSummary = async () => {
-    console.log("userData___", userData);
+  const getProductionDashboardSummary = async (filter = {}) => {
+    //console.log("getProductionDashboardSummary___", userData);
     try {
       const payloadData = {
         roId: userData?.roId,
+        ...filter,
       };
       const encryptedPayload = encryptWholeObject(payloadData);
       const response = await apiRequest(
@@ -331,6 +491,7 @@ export default function Home() {
       );
       const decrypted = decryptAES(response);
       const parsedDecrypted = JSON.parse(decrypted);
+      console.log("getProductionDashboardSummary___", payloadData);
       console.log("getProductionDashboardSummary___", parsedDecrypted);
 
       if (
@@ -345,15 +506,16 @@ export default function Home() {
     }
   };
 
-  const getProductionGraphData = async () => {
+  const getProductionGraphData = async (filter = {}) => {
     try {
       const payloadData = {
-        finYearId: 19,
-        roId: "",
-        aoId: "",
-        pcId: "",
+        finYearId: financialYear[0]?.id,
+        roId: userData?.roId,
+        aoId: userData?.aoId,
+        pcId: userData?.pcId,
         page: 0,
         pageSize: 25,
+        ...filter,
       };
       const encryptedPayload = encryptWholeObject(payloadData);
       const response = await apiRequest(
@@ -363,6 +525,8 @@ export default function Home() {
       );
       const decrypted = decryptAES(response);
       const parsedDecrypted = JSON.parse(decrypted);
+      console.log("getProductionGraphData__", userData);
+      console.log("getProductionGraphData__", payloadData);
       console.log("getProductionGraphData__", parsedDecrypted);
 
       if (
@@ -370,22 +534,23 @@ export default function Home() {
         (parsedDecrypted?.statusCode === "200" ||
           parsedDecrypted?.statusCode === "201")
       ) {
-        //setGraphData(parsedDecrypted?.data);
+        setGraphData(parsedDecrypted?.data);
       }
     } catch (error) {
     } finally {
     }
   };
 
-  const getProductionPlanDetail = async () => {
+  const getProductionPlanDetail = async (filter = {}) => {
     try {
       const payloadData = {
-        finYearId: 19,
-        roId: "",
-        aoId: "",
-        pcId: "",
+        finYearId: financialYear[0]?.id,
+        roId: userData?.roId,
+        aoId: userData?.aoId,
+        pcId: userData?.pcId,
         page: 0,
         pageSize: 25,
+        ...filter,
       };
       const encryptedPayload = encryptWholeObject(payloadData);
       const response = await apiRequest(
@@ -444,6 +609,32 @@ export default function Home() {
     );
   };
 
+  const apllyProductionFillterCallback = useCallback(
+    (
+      selectedFinancialYear,
+      selectedSeason,
+      selectedCrop,
+      selectedVariety,
+      selectedClass,
+    ) => {
+      if (userData) {
+        const filterData = {
+          finYearId: selectedFinancialYear?.id || null,
+          seasonId: selectedSeason?.id || null,
+          cropId: selectedCrop?.id || null,
+          varietyId: selectedVariety?.id || null,
+          class: selectedClass?.name || null,
+        };
+        getProductionDashboardSummary(filterData);
+        getProductionGraphData(filterData);
+        getProductionPlanDetail(filterData);
+
+        setshowFilterSheet(false);
+      }
+    },
+    [userData],
+  );
+
   return (
     <WrapperContainer isLoading={loading}>
       <CustomHeader
@@ -484,10 +675,15 @@ export default function Home() {
           onRequestClose={() => setshowFilterSheet(false)}
         >
           <View style={styles.sheetContainer}>
-            {/* Header */}
-            <Text style={styles.filterTitle}>Filter by:</Text>
-
-            {/* Date Range */}
+            {selectedTab == "Production" && (
+              <ProductionFilterComp
+                applyFilter={apllyProductionFillterCallback}
+                financialYear={financialYear}
+                season={season}
+              />
+            )}
+            {/* <Text style={styles.filterTitle}>Filter by:</Text>
+            Date Range
             <View style={styles.section}>
               <View style={styles.rowBetween}>
                 <Text style={styles.sectionTitle}>Date Range</Text>
@@ -514,7 +710,6 @@ export default function Home() {
                 </TouchableOpacity>
               </View>
 
-              {/* Quick Filters */}
               <View style={styles.quickRow}>
                 {["Today", "This Week", "This Month"].map((item) => (
                   <TouchableOpacity key={item} style={styles.quickBtn}>
@@ -523,8 +718,6 @@ export default function Home() {
                 ))}
               </View>
             </View>
-
-            {/* Unit + Crop */}
             <View style={styles.row}>
               <View style={{ width: "48%" }}>
                 <DropDown
@@ -550,8 +743,6 @@ export default function Home() {
                 />
               </View>
             </View>
-
-            {/* Variety */}
             <View style={styles.section}>
               <DropDown
                 label="Variety"
@@ -566,16 +757,12 @@ export default function Home() {
                 <Text>All</Text>
               </View>
             </View>
-
-            {/* Class */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Class</Text>
               <View style={styles.dropdownFull}>
                 <Text>All</Text>
               </View>
             </View>
-
-            {/* Buttons */}
             <View style={styles.bottomBtns}>
               <TouchableOpacity style={styles.resetBtn}>
                 <Text style={{ color: "#6b4caf" }}>Reset All</Text>
@@ -584,7 +771,7 @@ export default function Home() {
               <TouchableOpacity style={styles.applyBtn}>
                 <Text style={{ color: "#fff" }}>Apply Filters</Text>
               </TouchableOpacity>
-            </View>
+            </View> */}
           </View>
         </CustomBottomSheet>
       )}
@@ -594,41 +781,144 @@ export default function Home() {
       >
         {/* 🔹 Top Cards */}
         <Tabs selected={selectedTab} setSelected={setSelectedTab} />
-        <View style={styles.grid}>
-          <StatCard
-            title="ACTIVE DEALERS"
-            value={dashbooardData?.growers?.totalDealers}
-            subtitle="Done"
-            color="#2e7d32"
-          />
-          <StatCard
-            title="GROWERS"
-            value={[
-              { label: "FPO", value: dashbooardData?.growers?.fpoGrowers },
-              { label: "NSC", value: dashbooardData?.growers?.selfGrowers },
-            ]}
-            subtitle="Verified"
-            color="#1565c0"
-          />
-          <StatCard
-            title="PROD PLAN"
-            value={dashbooardData?.productionPlan?.totalArea}
-            subtitle="Mapped"
-            color="#c62828"
-          />
-          <StatCard
-            title="SEED INTAKE"
-            value={dashbooardData?.seedIntake?.totalSeed}
-            subtitle="Raw"
-            color="#2e7d32"
-          />
-        </View>
+        {selectedTab == "Production" ? (
+          <>
+            <View style={styles.grid}>
+              <StatCard
+                title="ACTIVE DEALERS"
+                value={dashbooardData?.growers?.totalDealers}
+                subtitle="Done"
+                color="#2e7d32"
+              />
+              <StatCard
+                title="GROWERS"
+                value={[
+                  { label: "FPO", value: dashbooardData?.growers?.fpoGrowers },
+                  { label: "NSC", value: dashbooardData?.growers?.selfGrowers },
+                ]}
+                subtitle="Verified"
+                color="#1565c0"
+              />
+              <StatCard
+                title="PROD PLAN"
+                value={dashbooardData?.productionPlan?.totalArea}
+                subtitle="Mapped"
+                color="#c62828"
+              />
+              <StatCard
+                title="SEED INTAKE"
+                value={dashbooardData?.seedIntake?.totalSeed}
+                subtitle="Raw"
+                color="#2e7d32"
+              />
+            </View>
 
-        {/* <ProductionOverview dashbooardData={dashbooardData} /> */}
-        <ProductionOverview graphData={graphData} />
-        {selectedTab == "Marketing" && <MarketingSection />}
-        <PlanListComp data={planDetailsList} />
-        <RejectedPlanList data={graphData?.rejectedPlansList?.slice(0, 5)} />
+            {/* <ProductionOverview dashbooardData={dashbooardData} /> */}
+            <ProductionOverview graphData={graphData} />
+            <PlanListComp data={planDetailsList} />
+            <RejectedPlanList
+              data={graphData?.rejectedPlansList?.slice(0, 5)}
+            />
+          </>
+        ) : selectedTab == "Inventory" ? (
+          // <MarketingSection />
+          <View></View>
+        ) : selectedTab == "QC" ? (
+          <ScrollView style={{ paddingHorizontal: 20, marginTop: 20 }}>
+            <DropDown
+              label="Select Seed"
+              data={[
+                { id: 1, name: "SSCA Seed" },
+                { id: 2, name: "QTC-QCL Seed" },
+                { id: 3, name: "QCL Seed" },
+              ]}
+              value={selectedQC?.name || ""}
+              selectItem={(item) => {
+                setselectedQC(item);
+                getQCData(item?.name);
+              }}
+            />
+            <View style={styles.grid}>
+              <StatCard
+                title={
+                  selectedQC?.name == "QTC-QCL Seed"
+                    ? "Total Received"
+                    : "Total Received"
+                }
+                value={
+                  qcDashboardData?.totalReceived ||
+                  qcDashboardData?.totalQtyResultReceived ||
+                  0
+                }
+              />
+              <StatCard
+                title={
+                  selectedQC?.name == "QTC-QCL Seed"
+                    ? "Total Awaited"
+                    : "Total Tested"
+                }
+                value={
+                  qcDashboardData?.totalTested ||
+                  qcDashboardData?.totalQtyResultsAwaited ||
+                  0
+                }
+              />
+              <StatCard
+                title={
+                  selectedQC?.name == "QTC-QCL Seed"
+                    ? "Total Sent To QCL"
+                    : "Total To Be Tested"
+                }
+                value={
+                  qcDashboardData?.totalToBeTested ||
+                  qcDashboardData?.totalQtySentToQcl ||
+                  0
+                }
+              />
+            </View>
+          </ScrollView>
+        ) : selectedTab == "Marketing" ? (
+          <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
+            <View style={styles.grid}>
+              <StatCard
+                title={"Cctive Dealer"}
+                value={marketingDashData?.activeDealer || 0}
+              />
+              <StatCard
+                title={"Pending Order"}
+                value={marketingDashData?.pendingOrder || 0}
+              />
+              <StatCard
+                title={"Total Revenue"}
+                value={marketingDashData?.totalRevenue || 0}
+              />
+              <StatCard
+                title={"Total Sale Qty"}
+                value={marketingDashData?.totalSaleQty || 0}
+              />
+            </View>
+            <FlatList
+              data={topDealer}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => (
+                <View
+                  style={{
+                    backgroundColor: "#fff",
+                    padding: 12,
+                    borderRadius: 10,
+                    marginBottom: 10,
+                    elevation: 3,
+                  }}
+                >
+                  <Text style={{ fontWeight: "bold" }}>{item.dealerName}</Text>
+                  <Text>Region: {item.region}</Text>
+                  <Text>Sales: {item.totalSales}</Text>
+                  <Text>Qty: {item.totalQty}</Text>
+                </View>
+              )}
+            />
+          </View>
+        ) : null}
       </ScrollView>
     </WrapperContainer>
   );
@@ -652,7 +942,6 @@ const StatCard = ({ title, value, subtitle, color }) => {
               marginTop: 7,
             }}
           >
-            {console.log("card___", value)}
             <View style={{ width: "49%" }}>
               <Text style={[styles.cardTitle, { marginBottom: -10 }]}>FPO</Text>
               <Text style={styles.cardValue}>{value[0]?.value}</Text>
@@ -673,7 +962,16 @@ const StatCard = ({ title, value, subtitle, color }) => {
           </View>
         </View>
       ) : (
-        <Text style={styles.cardValue}>{value}</Text>
+        // <Text style={styles.cardValue}>{value}</Text>
+        <AnimatedNumbers
+          includeComma
+          animateToNumber={Number(value) || 0}
+          fontStyle={{
+            fontSize: 22,
+            fontWeight: "bold",
+          }}
+          animationDuration={1000}
+        />
       )}
 
       {/* <Text style={styles.cardSub}>{subtitle}</Text> */}

@@ -182,6 +182,9 @@ const getLabel = (val) => {
     val.dealerIndentNo ||
     val.assetCategoryName ||
     val.comName ||
+    val.finYearShortName ||
+    val.seedCropName ||
+    val.seedVarietyName ||
     ""
   );
 };
