@@ -44,6 +44,9 @@ import Chat from "../screens/app/home/Chat/Chat";
 import { useNavigation } from "@react-navigation/native";
 import { getUserData } from "../utils/Storage";
 import BottomNav from "./BottomNav";
+import ViewMorePlansList from "../screens/app/ViewMorePlansList";
+import ViewMoreRejectedPlan from "../screens/app/ViewMoreRejectedPlan";
+import ViewMoreDealerList from "../screens/app/ViewMoreDealerList";
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -154,6 +157,15 @@ const AppNavigation = () => {
         <Stack.Screen name="AddNurseryDpr" component={AddNurseryDpr} />
         <Stack.Screen name="AddNewDpr" component={AddNewDpr} />
         <Stack.Screen name="ScanQrCode" component={ScanQrCode} />
+        <Stack.Screen name="ViewMorePlansList" component={ViewMorePlansList} />
+        <Stack.Screen
+          name="ViewMoreDealerList"
+          component={ViewMoreDealerList}
+        />
+        <Stack.Screen
+          name="ViewMoreRejectedPlan"
+          component={ViewMoreRejectedPlan}
+        />
         <Stack.Screen name="Chat" component={Chat} />
       </Stack.Navigator>
       {currentRoute !== "Chat" && isChatAccess && <ChatButton />}

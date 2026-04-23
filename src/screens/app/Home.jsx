@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Dimensions,
   FlatList,
+  Animated,
 } from "react-native";
 import WrapperContainer from "../../utils/WrapperContainer";
 import CustomHeader from "../../components/CustomHeader";
@@ -41,10 +42,11 @@ import RejectedPlanList from "./RejectedPlanList";
 import en from "../../constants/en";
 import AnimatedNumbers from "react-native-animated-numbers";
 import ProductionFilterComp from "./ProductionFilterComp";
+import { PieChart } from "react-native-gifted-charts";
 
 const screenWidth = Dimensions.get("window").width;
 
-export default function Home() {
+export default function Home({ navigation }) {
   const [selectedTab, setSelectedTab] = useState("Production");
   const [userData, setUserData] = useState("");
   const [loading, setLoading] = useState(false);
@@ -57,189 +59,16 @@ export default function Home() {
   const [crop, setCrop] = useState(null);
   const [variety, setVariety] = useState(null);
   const [selectedQC, setselectedQC] = useState({ id: 1, name: "SSCA Seed" });
-  const [dashbooardData, setdashbooardData] = useState({
-    // growers: {
-    //   totalGrowers: 27,
-    //   fpoGrowers: 2,
-    //   selfGrowers: 25,
-    //   totalDealers: 14,
-    // },
-    // productionPlan: {
-    //   level: "HO",
-    //   totalPlans: 63,
-    //   totalArea: 80217.13,
-    //   totalRawSeed: 255189.35,
-    //   totalGoodSeed: 226524.287,
-    //   mappedRoAndFarm: 6,
-    //   mappedArea: 28254.72,
-    // },
-    // seedIntake: {
-    //   totalSeed: 123517.0,
-    // },
-    // productionOverview: {
-    //   targetArea: 80217.13,
-    //   targetRawSeed: 255189.35,
-    //   totalSeedIntake: 123517.0,
-    //   achievementPercentage: 48.4,
-    //   quarterlyData: {
-    //     Q1: { target: 63797, achieved: 0 },
-    //     Q2: { target: 63797, achieved: 0 },
-    //     Q3: { target: 63797, achieved: 63570 },
-    //     Q4: { target: 63797, achieved: 59947 },
-    //   },
-    // },
-  });
-  const [graphData, setGraphData] = useState({
-    // status: null,
-    // page: 0,
-    // pageSize: 10,
-    // id: null,
-    // roId: null,
-    // roName: null,
-    // aoId: null,
-    // aoName: null,
-    // pcId: null,
-    // pcName: null,
-    // growerId: null,
-    // growerName: null,
-    // scheduleId: null,
-    // planId: null,
-    // totalPlan: null,
-    // totalTargetRawSeed: null,
-    // totalTargetGoodSeed: null,
-    // registeredGrower: null,
-    // cultivatedArea: null,
-    // growerArea: null,
-    // rejectedLandArea: null,
-    // area: null,
-    // rawSeed: null,
-    // goodSeed: null,
-    // plantingMaterial: null,
-    // totalProgramme: null,
-    // totalPlantingMaterialIssued: null,
-    // totalFinalIntake: null,
-    // achievement: null,
-    // planType: null,
-    // totalSeedIntake: null,
-    // month: null,
-    // year: null,
-    // unitType: "HO",
-    // unitId: null,
-    // selfGrowers: null,
-    // fpoGrowers: null,
-    // expiredGrowers: null,
-    // activeGrowers: null,
-    // totalPlanCompleted: null,
-    // totalPlanInProgress: null,
-    // totalPlanRejected: null,
-    // totalScheduleCompleted: null,
-    // totalScheduleRejected: null,
-    // totalScheduleInProgress: null,
-    // roGroupData: [
-    //   {
-    //     aoGroupData: [],
-    //     roId: 40,
-    //     roName: "LUCKNOW ",
-    //     rawSeed: 4200.454,
-    //     goodSeed: 3700.4539999999997,
-    //     area: 55.45,
-    //     assignedArea: 1243,
-    //     receivedRawSeed: 3000.0,
-    //   },
-    //   {
-    //     aoGroupData: [],
-    //     roId: 46,
-    //     roName: "CHANDIGARH ",
-    //     rawSeed: 100.0,
-    //     goodSeed: 30.0,
-    //     area: 100.0,
-    //     assignedArea: 1243,
-    //     receivedRawSeed: 0.0,
-    //   },
-    //   {
-    //     aoGroupData: [],
-    //     roId: 40,
-    //     roName: "LUCKNOW ",
-    //     rawSeed: 4200.454,
-    //     goodSeed: 3700.4539999999997,
-    //     area: 55.45,
-    //     assignedArea: 1243,
-    //     receivedRawSeed: 3000.0,
-    //   },
-    //   {
-    //     aoGroupData: [],
-    //     roId: 46,
-    //     roName: "CHANDIGARH ",
-    //     rawSeed: 100.0,
-    //     goodSeed: 30.0,
-    //     area: 100.0,
-    //     assignedArea: 1243,
-    //     receivedRawSeed: 0.0,
-    //   },
-    //   {
-    //     aoGroupData: [],
-    //     roId: 40,
-    //     roName: "LUCKNOW ",
-    //     rawSeed: 4200.454,
-    //     goodSeed: 3700.4539999999997,
-    //     area: 55.45,
-    //     assignedArea: 1243,
-    //     receivedRawSeed: 3000.0,
-    //   },
-    //   {
-    //     aoGroupData: [],
-    //     roId: 46,
-    //     roName: "CHANDIGARH ",
-    //     rawSeed: 100.0,
-    //     goodSeed: 30.0,
-    //     area: 100.0,
-    //     assignedArea: 1243,
-    //     receivedRawSeed: 0.0,
-    //   },
-    // ],
-    // aoGroupData: null,
-    // pcGroupData: null,
-    // finYear: null,
-    // finYearId: 19,
-    // seedVariety: null,
-    // seedVarietyId: null,
-    // fromSeedClass: null,
-    // fromSeedStage: null,
-    // toSeedClass: null,
-    // toSeedStage: null,
-    // season: null,
-    // seasonId: null,
-    // crop: null,
-    // cropId: null,
-    // rejectedPlansList: [
-    //   {
-    //     id: 1,
-    //     name: "2026-2027 | Rabi | Spinach | Arka Anupama | FS I",
-    //     programme: "BS - FS I",
-    //     area: 9,
-    //     rawSeed: 1000,
-    //     goodSeed: 900,
-    //     pm: 800,
-    //     status: "ACTIVE",
-    //   },
-    //   {
-    //     id: 2,
-    //     name: "2026-2027 | Rabi | Mustard | RH-749 | CS I",
-    //     programme: "FS III - CS I",
-    //     area: 5,
-    //     rawSeed: 656,
-    //     goodSeed: 654,
-    //     pm: 434,
-    //     status: "ACTIVE",
-    //   },
-    // ],
-  });
+  const [totalSaleByMonth, setTotalSaleByMonth] = useState([]);
+  const [dashbooardData, setdashbooardData] = useState({});
+  const [graphData, setGraphData] = useState({});
   const [planDetailsList, setPlanDetailsList] = useState([]);
   const [qcDashboardData, setqcDashboardData] = useState("");
-  const [marketingDashData, setmarketingDashData] = useState("");
+  const [marketingDashData, setmarketingDashData] = useState();
   const [topDealer, settopDealer] = useState([]);
   const [financialYear, setfinancialYear] = useState([]);
   const [season, setseason] = useState([]);
+  const [selectedSlice, setSelectedSlice] = useState(null);
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
 
@@ -261,13 +90,14 @@ export default function Home() {
         case "Marketing":
           getMarketingData();
           getTopDealer();
+          getTotalSalesByMonth();
           break;
 
         case "Inventory":
           break;
 
         case "QC":
-          getQCData("SSCA Seed");
+          getQCData();
           break;
 
         default:
@@ -341,10 +171,10 @@ export default function Home() {
     try {
       const payloadData = {
         unit: {
-          unitId: 36,
-          unitName: "WARANGAL AO",
+          unitId: userData?.unitId,
+          unitName: userData?.unitName,
         },
-        unitType: "AO",
+        unitType: userData?.unitType,
         startDate: "2025-10-16",
         endDate: "2026-04-16",
       };
@@ -358,6 +188,7 @@ export default function Home() {
       const parsedDecrypted = JSON.parse(decrypted);
 
       console.log("getInventoryData", parsedDecrypted);
+      console.log("getInventoryData", payloadData);
       if (
         parsedDecrypted &&
         (parsedDecrypted?.statusCode === "200" ||
@@ -379,9 +210,9 @@ export default function Home() {
       const payloadData = {
         startDate: "2024-10-17",
         endDate: "2026-04-17",
-        hoId: "",
-        aoId: [36],
-        roId: [],
+        hoId: userData?.hoId,
+        aoId: [userData?.aoId],
+        roId: [userData?.roId],
       };
       const encryptedPayload = encryptWholeObject(payloadData);
       const response = await apiRequest(
@@ -391,14 +222,52 @@ export default function Home() {
       );
       const decrypted = decryptAES(response);
       const parsedDecrypted = JSON.parse(decrypted);
-
+      // console.log("getTopDealer", payloadData);
       console.log("getTopDealer", parsedDecrypted);
+
       if (
         parsedDecrypted &&
         (parsedDecrypted?.statusCode === "200" ||
           parsedDecrypted?.statusCode === "201")
       ) {
-        settopDealer(parsedDecrypted?.data);
+        const dummy = [
+          {
+            dealerName: "Entity LKO PVT LTD",
+            region: "LUCKNOW ",
+            totalSales: 0,
+            totalQty: 0,
+            totalOutStandingPayment: 0,
+          },
+          {
+            dealerName: "Gunjan",
+            region: "LUCKNOW ",
+            totalSales: 0,
+            totalQty: 0,
+            totalOutStandingPayment: 0,
+          },
+          {
+            dealerName: "NAAS",
+            region: "LUCKNOW ",
+            totalSales: 0,
+            totalQty: 0,
+            totalOutStandingPayment: 0,
+          },
+          {
+            dealerName: "test noii",
+            region: "LUCKNOW ",
+            totalSales: 0,
+            totalQty: 0,
+            totalOutStandingPayment: 0,
+          },
+          {
+            dealerName: "VSPL Dealer",
+            region: "LUCKNOW ",
+            totalSales: 0,
+            totalQty: 0,
+            totalOutStandingPayment: 18977,
+          },
+        ];
+        settopDealer(parsedDecrypted?.data || dummy);
       } else {
         showErrorMessage(parsedDecrypted?.message || "Something went wrong");
       }
@@ -410,22 +279,62 @@ export default function Home() {
     }
   };
 
-  const getQCData = async (selectedQC) => {
+  const getTotalSalesByMonth = async () => {
     try {
-      let url;
-      if (selectedQC == "QTC-QCL Seed") {
-        url = API_ROUTES.QTY_QCL_SEED_DASHBOARD;
-      } else if (selectedQC == "QCL Seed") {
-        url = API_ROUTES.QCL_SEED_DASHBOARD;
+      const payloadData = {
+        unit: {
+          unitId: userData?.unitId,
+          unitName: userData?.unitName,
+        },
+        unitType: userData?.unitType,
+      };
+      const encryptedPayload = encryptWholeObject(payloadData);
+      const response = await apiRequest(
+        API_ROUTES.TOTAL_SALES_BY_MONTH,
+        "post",
+        encryptedPayload,
+      );
+      const decrypted = decryptAES(response);
+      const parsedDecrypted = JSON.parse(decrypted);
+      console.log("getTotalSalesByMonth", payloadData);
+      console.log("getTotalSalesByMonth", parsedDecrypted);
+
+      if (
+        parsedDecrypted &&
+        (parsedDecrypted?.statusCode === "200" ||
+          parsedDecrypted?.statusCode === "201")
+      ) {
+        setTotalSaleByMonth(parsedDecrypted?.data);
       } else {
-        url = API_ROUTES.SSCA_SEED_DASHBOARD;
+        showErrorMessage(parsedDecrypted?.message || "Something went wrong");
       }
-      const payloadData = {};
+    } catch (error) {
+      console.log(error, "line error");
+      showErrorMessage("something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getQCData = async () => {
+    try {
+      let url = API_ROUTES.QC_DASHBOARD_DATA;
+      const payloadData = {
+        roId: userData?.roId,
+        aoId: userData?.aoId,
+        toUnitId: userData?.labId,
+        // startDate: "string",
+        // endDate: "string",
+        // cropId: 9007199254740991,
+        // varietyId: 9007199254740991,
+        // seedClass: "string",
+        // labType: "string",
+      };
       const encryptedPayload = encryptWholeObject(payloadData);
       const response = await apiRequest(url, "post", encryptedPayload);
       const decrypted = decryptAES(response);
       const parsedDecrypted = JSON.parse(decrypted);
-      console.log("getQCData", url);
+      console.log("getQCData", payloadData);
       console.log("getQCData", parsedDecrypted);
       if (
         parsedDecrypted &&
@@ -477,7 +386,6 @@ export default function Home() {
   };
 
   const getProductionDashboardSummary = async (filter = {}) => {
-    //console.log("getProductionDashboardSummary___", userData);
     try {
       const payloadData = {
         roId: userData?.roId,
@@ -491,8 +399,8 @@ export default function Home() {
       );
       const decrypted = decryptAES(response);
       const parsedDecrypted = JSON.parse(decrypted);
-      console.log("getProductionDashboardSummary___", payloadData);
-      console.log("getProductionDashboardSummary___", parsedDecrypted);
+      // console.log("getProductionDashboardSummary___", payloadData);
+      // console.log("getProductionDashboardSummary___", parsedDecrypted);
 
       if (
         parsedDecrypted &&
@@ -525,7 +433,7 @@ export default function Home() {
       );
       const decrypted = decryptAES(response);
       const parsedDecrypted = JSON.parse(decrypted);
-      console.log("getProductionGraphData__", userData);
+      //console.log("getProductionGraphData__", userData);
       console.log("getProductionGraphData__", payloadData);
       console.log("getProductionGraphData__", parsedDecrypted);
 
@@ -567,12 +475,49 @@ export default function Home() {
         (parsedDecrypted?.statusCode === "200" ||
           parsedDecrypted?.statusCode === "201")
       ) {
-        const top5Data = parsedDecrypted?.data.slice(0, 5);
-        setPlanDetailsList(top5Data);
+        //const top5Data = parsedDecrypted?.data.slice(0, 5);
+        setPlanDetailsList(parsedDecrypted?.data);
       }
     } catch (error) {
     } finally {
     }
+  };
+
+  const COLORS = [
+    "#3b82f6",
+    "#22c55e",
+    "#f59e0b",
+    "#ef4444",
+    "#8b5cf6",
+    "#14b8a6",
+    "#ec4899",
+    "#f97316",
+    "#06b6d4",
+    "#84cc16",
+  ];
+
+  const getRegionPieData = () => {
+    const data = marketingDashData?.reagionWiseContribution || {};
+    const total = Object.values(data).reduce((a, b) => a + b, 0);
+
+    return Object.keys(data)
+      .filter((key) => data[key] > 0)
+      .map((key, index) => {
+        const cleanKey = key.trim();
+        let value = data[key];
+
+        const percent = (value / total) * 100;
+        if (percent < 3) {
+          value = total * 0.03;
+        }
+
+        return {
+          value,
+          originalValue: data[key],
+          label: cleanKey,
+          color: COLORS[index % COLORS.length], // 🔥 unique color
+        };
+      });
   };
 
   const MarketingSection = () => {
@@ -635,12 +580,42 @@ export default function Home() {
     [userData],
   );
 
+  const getMarketingDualBarData = () => {
+    return totalSaleByMonth.flatMap((item) => [
+      {
+        value: (item.total || 0) * 100, // 🔥 quintal → kg
+        frontColor: "#3b82f6",
+        spacing: 4,
+        onPress: () => {
+          //alert(`${item.month} Qty: ${(item.total * 100).toFixed(2)} kg`);
+        },
+      },
+      {
+        value: item.totalAmount || 0,
+        frontColor: "#22c55e",
+        label: item.month,
+        labelTextStyle: {
+          textAlign: "center",
+          width: 60,
+          marginLeft: -10,
+          fontSize: 10,
+        },
+        spacing: 24,
+        onPress: () => {
+          //alert(`${item.month} Amount: ₹${item.totalAmount}`);
+        },
+      },
+    ]);
+  };
+
   return (
     <WrapperContainer isLoading={loading}>
       <CustomHeader
         data={userData}
         clickOnFilter={() => {
-          setshowFilterSheet(true);
+          if (selectedTab == "Production") {
+            setshowFilterSheet(true);
+          }
         }}
         bgColor="#eef3e8"
         showFilter={true}
@@ -680,6 +655,9 @@ export default function Home() {
                 applyFilter={apllyProductionFillterCallback}
                 financialYear={financialYear}
                 season={season}
+                onCLose={() => {
+                  setshowFilterSheet(false);
+                }}
               />
             )}
             {/* <Text style={styles.filterTitle}>Filter by:</Text>
@@ -775,12 +753,17 @@ export default function Home() {
           </View>
         </CustomBottomSheet>
       )}
+
+      <View style={{}}>
+        <Tabs selected={selectedTab} setSelected={setSelectedTab} />
+      </View>
+
       <ScrollView
         contentContainerStyle={{ paddingBottom: 80 }}
         style={styles.container}
       >
         {/* 🔹 Top Cards */}
-        <Tabs selected={selectedTab} setSelected={setSelectedTab} />
+
         {selectedTab == "Production" ? (
           <>
             <View style={styles.grid}>
@@ -813,75 +796,113 @@ export default function Home() {
               />
             </View>
 
-            {/* <ProductionOverview dashbooardData={dashbooardData} /> */}
             <ProductionOverview graphData={graphData} />
-            <PlanListComp data={planDetailsList} />
-            <RejectedPlanList
-              data={graphData?.rejectedPlansList?.slice(0, 5)}
-            />
+            {planDetailsList?.length > 0 && (
+              <PlanListComp
+                data={planDetailsList?.slice(0, 5)}
+                viewMore={() => {
+                  navigation.navigate("ViewMorePlansList", {
+                    planDetailsList,
+                  });
+                }}
+              />
+            )}
+
+            {graphData?.rejectedPlansList?.length > 0 && (
+              <RejectedPlanList
+                data={graphData?.rejectedPlansList?.slice(0, 5)}
+                viewMore={() => {
+                  navigation.navigate("ViewMoreRejectedPlan", {
+                    planDetailsList: graphData?.rejectedPlansList,
+                  });
+                }}
+              />
+            )}
           </>
         ) : selectedTab == "Inventory" ? (
           // <MarketingSection />
           <View></View>
         ) : selectedTab == "QC" ? (
-          <ScrollView style={{ paddingHorizontal: 20, marginTop: 20 }}>
-            <DropDown
-              label="Select Seed"
-              data={[
-                { id: 1, name: "SSCA Seed" },
-                { id: 2, name: "QTC-QCL Seed" },
-                { id: 3, name: "QCL Seed" },
-              ]}
-              value={selectedQC?.name || ""}
-              selectItem={(item) => {
-                setselectedQC(item);
-                getQCData(item?.name);
-              }}
-            />
-            <View style={styles.grid}>
-              <StatCard
-                title={
-                  selectedQC?.name == "QTC-QCL Seed"
-                    ? "Total Received"
-                    : "Total Received"
-                }
-                value={
-                  qcDashboardData?.totalReceived ||
-                  qcDashboardData?.totalQtyResultReceived ||
-                  0
-                }
-              />
-              <StatCard
-                title={
-                  selectedQC?.name == "QTC-QCL Seed"
-                    ? "Total Awaited"
-                    : "Total Tested"
-                }
-                value={
-                  qcDashboardData?.totalTested ||
-                  qcDashboardData?.totalQtyResultsAwaited ||
-                  0
-                }
-              />
-              <StatCard
-                title={
-                  selectedQC?.name == "QTC-QCL Seed"
-                    ? "Total Sent To QCL"
-                    : "Total To Be Tested"
-                }
-                value={
-                  qcDashboardData?.totalToBeTested ||
-                  qcDashboardData?.totalQtySentToQcl ||
-                  0
-                }
-              />
+          <ScrollView style={{ marginTop: 20 }}>
+            <View style={{ paddingHorizontal: 20 }}>
+              {/* 🔹 SECTION 1 */}
+              <Text style={styles.qcHeader}>
+                Sample coupon tracking — QCL vs SSCA
+              </Text>
+
+              <View style={styles.qcCard}>
+                <QCComparisonRow
+                  label="Total / sent"
+                  qclValue={qcDashboardData?.count?.qcl?.totalReceived || 0}
+                  sscaValue={qcDashboardData?.count?.ssca?.totalReceived || 0}
+                  color="#3b82f6"
+                />
+
+                <View style={styles.divider} />
+
+                <QCComparisonRow
+                  label="Tested / result received"
+                  qclValue={qcDashboardData?.count?.qcl?.totalTested || 0}
+                  sscaValue={qcDashboardData?.count?.ssca?.totalTested || 0}
+                  color="#10b981"
+                />
+
+                <View style={styles.divider} />
+
+                <QCComparisonRow
+                  label="Not tested / awaited"
+                  qclValue={qcDashboardData?.count?.qcl?.totalToBeTested || 0}
+                  sscaValue={qcDashboardData?.count?.ssca?.totalToBeTested || 0}
+                  color="#ef4444"
+                />
+              </View>
+
+              {/* 🔹 SECTION 2 */}
+              <Text style={styles.qcHeader}>
+                Quantity wise tracking — QCL vs SSCA
+              </Text>
+
+              <View style={styles.qcCard}>
+                <QCComparisonRow
+                  label="Total qty sent"
+                  qclValue={qcDashboardData?.quantity?.qcl?.totalQtySent || 0}
+                  sscaValue={qcDashboardData?.quantity?.ssca?.totalQtySent || 0}
+                  color="#3b82f6"
+                />
+
+                <View style={styles.divider} />
+
+                <QCComparisonRow
+                  label="Result received"
+                  qclValue={
+                    qcDashboardData?.quantity?.qcl?.totalQtyResultReceived || 0
+                  }
+                  sscaValue={
+                    qcDashboardData?.quantity?.ssca?.totalQtyResultReceived || 0
+                  }
+                  color="#10b981"
+                />
+
+                <View style={styles.divider} />
+
+                <QCComparisonRow
+                  label="Results awaited"
+                  qclValue={
+                    qcDashboardData?.quantity?.qcl?.totalQtyResultsAwaited || 0
+                  }
+                  sscaValue={
+                    qcDashboardData?.quantity?.ssca?.totalQtyResultsAwaited || 0
+                  }
+                  color="#f59e0b"
+                />
+              </View>
             </View>
           </ScrollView>
         ) : selectedTab == "Marketing" ? (
-          <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
+          <View style={{ marginTop: 10 }}>
             <View style={styles.grid}>
               <StatCard
-                title={"Cctive Dealer"}
+                title={"Active Dealers"}
                 value={marketingDashData?.activeDealer || 0}
               />
               <StatCard
@@ -897,8 +918,195 @@ export default function Home() {
                 value={marketingDashData?.totalSaleQty || 0}
               />
             </View>
+            <View
+              style={{
+                marginTop: 2,
+                backgroundColor: "#fff",
+                padding: 10,
+                borderRadius: 12,
+                marginHorizontal: 10,
+                elevation: 1,
+              }}
+            >
+              <Text style={{ fontWeight: "bold", marginBottom: 10 }}>
+                Monthly Sales (Qty vs Amount)
+              </Text>
+
+              <View
+                style={{
+                  flexDirection: "row",
+                  marginBottom: 10,
+                  alignItems: "center",
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    marginRight: 15,
+                    alignItems: "center",
+                  }}
+                >
+                  <View
+                    style={{
+                      width: 10,
+                      height: 10,
+                      backgroundColor: "#3b82f6",
+                      marginRight: 5,
+                    }}
+                  />
+                  <Text>Total Qty (kg)</Text>
+                </View>
+
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <View
+                    style={{
+                      width: 10,
+                      height: 10,
+                      backgroundColor: "#22c55e",
+                      marginRight: 5,
+                    }}
+                  />
+                  <Text>Total Amount</Text>
+                </View>
+              </View>
+
+              <BarChart
+                data={getMarketingDualBarData()}
+                height={220}
+                width={width - 100}
+                barWidth={18}
+                spacing={12}
+                initialSpacing={20}
+                endSpacing={20}
+                roundedTop
+                noOfSections={5}
+                xAxisThickness={1}
+                yAxisThickness={1}
+                hideRules={false}
+                rulesColor="#e5e7eb"
+                isAnimated
+                xAxisLabelTextStyle={{
+                  textAlign: "center",
+                  width: 60,
+                }}
+              />
+            </View>
+            <View
+              style={{
+                marginTop: 10,
+                backgroundColor: "#fff",
+                padding: 15,
+                borderRadius: 12,
+                elevation: 1,
+                marginHorizontal: 10,
+              }}
+            >
+              <Text style={{ fontWeight: "bold", marginBottom: 10 }}>
+                Region Wise Contribution
+              </Text>
+
+              <View
+                style={{
+                  alignItems: "center", // 🔥 center horizontally
+                  justifyContent: "center",
+                }}
+              >
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  {getRegionPieData().map((item, index) => (
+                    <TouchableOpacity
+                      onPress={() => {
+                        setSelectedSlice(item);
+                      }}
+                      key={index}
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        backgroundColor: "#f1f5f9",
+                        paddingHorizontal: 10,
+                        paddingVertical: 6,
+                        borderRadius: 20,
+                        marginRight: 8,
+                      }}
+                    >
+                      <View
+                        style={{
+                          width: 8,
+                          height: 8,
+                          backgroundColor: item.color,
+                          marginRight: 6,
+                          borderRadius: 4,
+                        }}
+                      />
+                      <Text style={{ fontSize: 12 }}>{item.label}</Text>
+                      <Text style={{ fontSize: 12, fontWeight: "bold" }}>
+                        - {item.originalValue}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+                <PieChart
+                  data={getRegionPieData()}
+                  donut
+                  radius={120}
+                  innerRadius={70}
+                  //focusOnPress
+                  sectionAutoFocus
+                  isAnimated
+                  animationDuration={1200}
+                  onPress={(item) => {
+                    setSelectedSlice(item);
+                  }} // 🔥 important
+                />
+                <View
+                  style={{
+                    position: "absolute",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text style={{ fontWeight: "bold", fontSize: 14 }}>
+                    {selectedSlice?.label || "Total"}
+                  </Text>
+
+                  <Text style={{ fontSize: 12, color: "#555" }}>
+                    ₹
+                    {selectedSlice
+                      ? selectedSlice.originalValue?.toLocaleString()
+                      : marketingDashData?.totalRevenue?.toLocaleString()}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {topDealer?.length > 0 && (
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginHorizontal: 10,
+                  marginTop: 15,
+                  marginBottom: 15,
+                }}
+              >
+                <Text style={styles.heading}>Top 5 Dealer</Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate("ViewMoreDealerList", {
+                      dealerList: topDealer,
+                    });
+                  }}
+                >
+                  <Text
+                    style={[styles.heading, { color: Colors.blueThemeColor }]}
+                  >
+                    View More
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
             <FlatList
-              data={topDealer}
+              data={topDealer.slice(0, 5)}
               keyExtractor={(item, index) => index.toString()}
               renderItem={({ item }) => (
                 <View
@@ -907,10 +1115,13 @@ export default function Home() {
                     padding: 12,
                     borderRadius: 10,
                     marginBottom: 10,
-                    elevation: 3,
+                    elevation: 1,
+                    marginHorizontal: 10,
                   }}
                 >
-                  <Text style={{ fontWeight: "bold" }}>{item.dealerName}</Text>
+                  <Text style={{ fontWeight: "bold" }}>
+                    Name: {item.dealerName}
+                  </Text>
                   <Text>Region: {item.region}</Text>
                   <Text>Sales: {item.totalSales}</Text>
                   <Text>Qty: {item.totalQty}</Text>
@@ -979,6 +1190,93 @@ const StatCard = ({ title, value, subtitle, color }) => {
   );
 };
 
+const QCComparisonRow = React.memo(({ label, qclValue, sscaValue, color }) => {
+  const max = Math.max(qclValue, sscaValue, 1);
+
+  const qclAnim = useRef(new Animated.Value(0)).current;
+  const sscaAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(qclAnim, {
+      toValue: (qclValue / max) * 100,
+      duration: 800,
+      useNativeDriver: false,
+    }).start();
+
+    Animated.timing(sscaAnim, {
+      toValue: (sscaValue / max) * 100,
+      duration: 800,
+      useNativeDriver: false,
+    }).start();
+  }, [qclValue, sscaValue]); // 🔥 ONLY DATA CHANGE
+
+  return (
+    <View style={{ marginBottom: 15 }}>
+      <Text style={{ fontWeight: "600", marginBottom: 6 }}>{label}</Text>
+
+      {/* 🔹 QCL */}
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Text style={{ width: 40 }}>QCL</Text>
+
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "#eee",
+            height: 8,
+            borderRadius: 5,
+            overflow: "hidden",
+          }}
+        >
+          <Animated.View
+            style={{
+              width: qclAnim.interpolate({
+                inputRange: [0, 100],
+                outputRange: ["0%", "100%"],
+              }),
+              backgroundColor: color,
+              height: 8,
+              borderRadius: 5,
+            }}
+          />
+        </View>
+
+        <Text style={{ width: 50, textAlign: "right" }}>{qclValue}</Text>
+      </View>
+
+      {/* 🔹 SSCA */}
+      <View
+        style={{ flexDirection: "row", alignItems: "center", marginTop: 5 }}
+      >
+        <Text style={{ width: 40 }}>SSCA</Text>
+
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "#eee",
+            height: 8,
+            borderRadius: 5,
+            overflow: "hidden",
+          }}
+        >
+          <Animated.View
+            style={{
+              width: sscaAnim.interpolate({
+                inputRange: [0, 100],
+                outputRange: ["0%", "100%"],
+              }),
+              backgroundColor: "#8b5cf6",
+              height: 8,
+              borderRadius: 5,
+            }}
+          />
+        </View>
+
+        <Text style={{ width: 50, textAlign: "right" }}>{sscaValue}</Text>
+      </View>
+    </View>
+  );
+});
+
 /////////////////////////////////////
 // 🔹 Tabs
 /////////////////////////////////////
@@ -1025,7 +1323,7 @@ const ProductionOverview = ({ graphData }) => {
         spacing: 4,
         onPress: () => {
           console.log("Area clicked:", item.roName);
-          alert(`Area: ${item.roName} = ${item.area}`);
+          //alert(`Area: ${item.roName} = ${item.area}`);
         },
       },
       {
@@ -1041,7 +1339,7 @@ const ProductionOverview = ({ graphData }) => {
         spacing: 28, // 👈 🔥 BIG GAP between groups
         onPress: () => {
           console.log("Assigned clicked:", item.roName);
-          alert(`Assigned Area: ${item.roName} = ${item.assignedArea}`);
+          //alert(`Assigned Area: ${item.roName} = ${item.assignedArea}`);
         },
       },
     ]);
@@ -1055,7 +1353,7 @@ const ProductionOverview = ({ graphData }) => {
         spacing: 4,
         onPress: () => {
           console.log("Raw Seed:", item.roName);
-          alert(`Raw Seed: ${item.roName} = ${item.rawSeed}`);
+          //alert(`Raw Seed: ${item.roName} = ${item.rawSeed}`);
         },
       },
       {
@@ -1071,7 +1369,7 @@ const ProductionOverview = ({ graphData }) => {
         spacing: 28,
         onPress: () => {
           console.log("Received Seed:", item.roName);
-          alert(`Received: ${item.roName} = ${item.receivedRawSeed}`);
+          //alert(`Received: ${item.roName} = ${item.receivedRawSeed}`);
         },
       },
     ]);
@@ -1080,13 +1378,21 @@ const ProductionOverview = ({ graphData }) => {
     <View style={styles.overview}>
       <Text style={styles.heading}>Production Overview</Text>
       {/* 🔹 Area vs Assigned */}
-      <Text style={{ fontWeight: "bold", marginTop: 20 }}>
+      <Text style={{ fontWeight: "bold", marginTop: 10 }}>
         Area vs Assigned Area
       </Text>
 
       {/* Legend */}
-      <View style={{ flexDirection: "row", marginTop: 8 }}>
-        <View style={{ flexDirection: "row", marginRight: 15 }}>
+      <View
+        style={{ flexDirection: "row", marginTop: 8, alignItems: "center" }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            marginRight: 15,
+            alignItems: "center",
+          }}
+        >
           <View
             style={{
               width: 10,
@@ -1098,7 +1404,7 @@ const ProductionOverview = ({ graphData }) => {
           <Text>Area</Text>
         </View>
 
-        <View style={{ flexDirection: "row" }}>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
           <View
             style={{
               width: 10,
@@ -1114,7 +1420,7 @@ const ProductionOverview = ({ graphData }) => {
       <BarChart
         data={getAreaChartData()}
         height={220}
-        width={width - 120}
+        width={width - 100}
         barWidth={18} // 👈 thinner bars
         spacing={12} // 👈 overall spacing
         initialSpacing={25}
@@ -1133,13 +1439,21 @@ const ProductionOverview = ({ graphData }) => {
       />
 
       {/* 🔹 Raw Seed vs Received */}
-      <Text style={{ fontWeight: "bold", marginTop: 25 }}>
+      <Text style={{ fontWeight: "bold", marginTop: 15 }}>
         Raw Seed vs Received Raw Seed
       </Text>
 
       {/* Legend */}
-      <View style={{ flexDirection: "row", marginTop: 8 }}>
-        <View style={{ flexDirection: "row", marginRight: 15 }}>
+      <View
+        style={{ flexDirection: "row", marginTop: 8, alignItems: "center" }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            marginRight: 15,
+            alignItems: "center",
+          }}
+        >
           <View
             style={{
               width: 10,
@@ -1151,7 +1465,7 @@ const ProductionOverview = ({ graphData }) => {
           <Text>Raw Seed</Text>
         </View>
 
-        <View style={{ flexDirection: "row" }}>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
           <View
             style={{
               width: 10,
@@ -1167,7 +1481,7 @@ const ProductionOverview = ({ graphData }) => {
       <BarChart
         data={getSeedChartData()}
         height={220}
-        width={width - 120}
+        width={width - 100}
         barWidth={22}
         roundedTop
         noOfSections={5}
@@ -1196,7 +1510,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    padding: 10,
+    paddingHorizontal: 10,
+    marginTop: 10,
   },
 
   card: {
@@ -1242,14 +1557,14 @@ const styles = StyleSheet.create({
     // backgroundColor: "#e0e0e0",
     backgroundColor: "white",
     borderRadius: 10,
-    margin: 10,
+    marginHorizontal: 10,
   },
 
-  tab: {
-    flex: 1,
-    padding: 10,
-    alignItems: "center",
-  },
+  // tab: {
+  //   //flex: 1,
+  //   //padding: 10,
+  //   alignItems: "center",
+  // },
 
   activeTab: {
     backgroundColor: "#2e7d32",
@@ -1258,15 +1573,17 @@ const styles = StyleSheet.create({
 
   overview: {
     backgroundColor: "#fff",
-    margin: 10,
-    padding: 15,
+    //margin: 10,
+    marginHorizontal: 10,
+    padding: 10,
     borderRadius: 12,
+    elevation: 3,
+    marginTop: 5,
   },
 
   heading: {
     fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 10,
   },
 
   row: {
@@ -1413,9 +1730,9 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 6,
   },
-  tabContainer: {
-    paddingHorizontal: 10,
-  },
+  // tabContainer: {
+  //   paddingHorizontal: 10,
+  // },
 
   tab: {
     paddingVertical: 10,
@@ -1522,5 +1839,31 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     alignItems: "center",
+  },
+  qcCard: {
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 15,
+    marginBottom: 15,
+
+    // Shadow (iOS)
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+
+    // Elevation (Android)
+    elevation: 3,
+  },
+  qcHeader: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 10,
+    color: "#1f2937",
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#eee",
+    marginVertical: 10,
   },
 });

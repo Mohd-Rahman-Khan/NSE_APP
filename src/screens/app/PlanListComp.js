@@ -1,10 +1,24 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
+import Colors from "../../utils/Colors";
 
-export default function PlanListComp({ data }) {
+export default function PlanListComp({ data, viewMore = () => {} }) {
   return (
     <View style={{ margin: 10 }}>
-      <Text style={styles.heading}>Plans Detail</Text>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Text style={styles.heading}>Plans Detail</Text>
+        <TouchableOpacity onPress={viewMore}>
+          <Text style={[styles.heading, { color: Colors.blueThemeColor }]}>
+            View More
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       {data?.length > 0 ? (
         data?.map((item) => (
@@ -56,7 +70,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 12,
     marginBottom: 12,
-    elevation: 2,
+    elevation: 1,
   },
 
   planTitle: {

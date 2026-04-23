@@ -10,6 +10,7 @@ export default function ProductionFilterComp({
   applyFilter,
   season,
   financialYear,
+  onCLose = () => {},
 }) {
   const [selectedFinancialYear, setselectedFinancialYear] = useState(
     financialYear[0],
@@ -126,7 +127,7 @@ export default function ProductionFilterComp({
         }}
       />
       <View style={styles.bottomBtns}>
-        <TouchableOpacity style={styles.resetBtn}>
+        <TouchableOpacity onPress={onCLose} style={styles.resetBtn}>
           <Text style={{ color: "#6b4caf" }}>Calncel</Text>
         </TouchableOpacity>
 

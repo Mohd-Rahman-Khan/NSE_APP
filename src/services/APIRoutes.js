@@ -1,6 +1,8 @@
 export const API_ROUTES = {
-  BASE_URL: "http://160.25.172.19:9054/api/", //qa url
+  //BASE_URL: "http://160.25.172.19:9054/api/", //qa url
   //BASE_URL: "http://160.25.172.19:9052/api/", //client uat
+
+  BASE_URL: "http://192.168.100.102:7630/api/", //qa url
 
   AUTHORIZE_LOGIN: "userauth/authenticate/login",
   GET_PROFILE: "userauth/all/get-profile",
@@ -68,9 +70,11 @@ export const API_ROUTES = {
   DASHBOARD_GRAPH_DATA: "prod_plan/production_dashboard/get-detail-dashboard",
   PLAN_DETAILS: "prod_plan/production_plan/find-plans-dtls",
   INVENTORY_DASHBOARD: "inventory/dashboard/kpi",
-  SSCA_SEED_DASHBOARD: "quality/dashboard/seed-sample-ssca",
-  QTY_QCL_SEED_DASHBOARD: "quality/dashboard/seed-sample-qty-qcl",
-  QCL_SEED_DASHBOARD: "quality/dashboard/seed-sample-qcl",
+  // SSCA_SEED_DASHBOARD: "quality/dashboard/seed-sample-ssca",
+  // QTY_QCL_SEED_DASHBOARD: "quality/dashboard/seed-sample-qty-qcl",
+  // QCL_SEED_DASHBOARD: "quality/dashboard/seed-sample-qcl",
   TOP_DEALER: "inventory/dashboard/dealer-performance",
   FINANCIAL_YEAR: "master/financial-year-master/dd",
+  TOTAL_SALES_BY_MONTH: "inventory/dashboard/sales-total-qty-by-month",
+  QC_DASHBOARD_DATA: "quality/dashboard/qc-dashboard",
 };

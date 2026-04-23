@@ -14,7 +14,7 @@ export const apiRequest = async (
   axiosConfig = {},
 ) => {
   const token = tokenOverride || (await getUserToken());
-  console.log(token, "line 11");
+  //console.log(token, "line 11");
   let options = {
     method,
     url: `${API_ROUTES.BASE_URL}${endPoint}`,
@@ -31,10 +31,10 @@ export const apiRequest = async (
   if (data && method !== "GET") {
     options.data = data;
   }
-  console.log(options, "line 27");
+  //console.log(options, "line 27");
   try {
     const response = await axios(options);
-    console.error("API Request", response);
+    //console.error("API Request", response);
     return response.data;
   } catch (err) {
     console.log(err);
