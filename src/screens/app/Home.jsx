@@ -8,6 +8,7 @@ import {
   Dimensions,
   FlatList,
   Animated,
+  TextInput,
 } from "react-native";
 import WrapperContainer from "../../utils/WrapperContainer";
 import CustomHeader from "../../components/CustomHeader";
@@ -167,7 +168,7 @@ export default function Home({ navigation }) {
     }
   };
 
-  const getMarketingData = async () => {
+  const getMarketingData = async (filter = {}) => {
     try {
       const payloadData = {
         unit: {
@@ -175,20 +176,23 @@ export default function Home({ navigation }) {
           unitName: userData?.unitName,
         },
         unitType: userData?.unitType,
-        startDate: "2025-10-16",
-        endDate: "2026-04-16",
+        startDate: filter.startDate || formatDate(fromDate),
+        endDate: filter.endDate || formatDate(toDate),
       };
+
+      console.log("getMarketingData", payloadData);
+
       const encryptedPayload = encryptWholeObject(payloadData);
+
       const response = await apiRequest(
         API_ROUTES.INVENTORY_DASHBOARD,
         "post",
         encryptedPayload,
       );
+
       const decrypted = decryptAES(response);
       const parsedDecrypted = JSON.parse(decrypted);
 
-      console.log("getInventoryData", parsedDecrypted);
-      console.log("getInventoryData", payloadData);
       if (
         parsedDecrypted &&
         (parsedDecrypted?.statusCode === "200" ||
@@ -199,83 +203,43 @@ export default function Home({ navigation }) {
         showErrorMessage(parsedDecrypted?.message || "Something went wrong");
       }
     } catch (error) {
-      console.log(error, "line error");
       showErrorMessage("something went wrong");
-    } finally {
-      setLoading(false);
     }
   };
-  const getTopDealer = async () => {
+  const getTopDealer = async (filter = {}) => {
     try {
       const payloadData = {
-        startDate: "2024-10-17",
-        endDate: "2026-04-17",
+        startDate: filter.startDate || formatDate(fromDate),
+        endDate: filter.endDate || formatDate(toDate),
         hoId: userData?.hoId,
         aoId: [userData?.aoId],
         roId: [userData?.roId],
       };
+
       const encryptedPayload = encryptWholeObject(payloadData);
+
       const response = await apiRequest(
         API_ROUTES.TOP_DEALER,
         "post",
         encryptedPayload,
       );
+
       const decrypted = decryptAES(response);
       const parsedDecrypted = JSON.parse(decrypted);
-      // console.log("getTopDealer", payloadData);
-      console.log("getTopDealer", parsedDecrypted);
+
+      console.log("getTopDealer payload", payloadData);
 
       if (
         parsedDecrypted &&
         (parsedDecrypted?.statusCode === "200" ||
           parsedDecrypted?.statusCode === "201")
       ) {
-        const dummy = [
-          {
-            dealerName: "Entity LKO PVT LTD",
-            region: "LUCKNOW ",
-            totalSales: 0,
-            totalQty: 0,
-            totalOutStandingPayment: 0,
-          },
-          {
-            dealerName: "Gunjan",
-            region: "LUCKNOW ",
-            totalSales: 0,
-            totalQty: 0,
-            totalOutStandingPayment: 0,
-          },
-          {
-            dealerName: "NAAS",
-            region: "LUCKNOW ",
-            totalSales: 0,
-            totalQty: 0,
-            totalOutStandingPayment: 0,
-          },
-          {
-            dealerName: "test noii",
-            region: "LUCKNOW ",
-            totalSales: 0,
-            totalQty: 0,
-            totalOutStandingPayment: 0,
-          },
-          {
-            dealerName: "VSPL Dealer",
-            region: "LUCKNOW ",
-            totalSales: 0,
-            totalQty: 0,
-            totalOutStandingPayment: 18977,
-          },
-        ];
-        settopDealer(parsedDecrypted?.data || dummy);
+        settopDealer(parsedDecrypted?.data || []);
       } else {
         showErrorMessage(parsedDecrypted?.message || "Something went wrong");
       }
     } catch (error) {
-      console.log(error, "line error");
       showErrorMessage("something went wrong");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -608,12 +572,33 @@ export default function Home({ navigation }) {
     ]);
   };
 
+  const formatDate = (date) => {
+    return date.toISOString().split("T")[0];
+  };
+
+  const applyMarketingFilter = () => {
+    if (fromDate > toDate) {
+      showErrorMessage("From Date cannot be greater than To Date");
+      return;
+    }
+    const filterData = {
+      startDate: formatDate(fromDate),
+      endDate: formatDate(toDate),
+    };
+
+    getMarketingData(filterData);
+    getTopDealer(filterData);
+    getTotalSalesByMonth(filterData);
+
+    setshowFilterSheet(false);
+  };
+
   return (
     <WrapperContainer isLoading={loading}>
       <CustomHeader
         data={userData}
         clickOnFilter={() => {
-          if (selectedTab == "Production") {
+          if (selectedTab == "Production" || selectedTab == "Marketing") {
             setshowFilterSheet(true);
           }
         }}
@@ -659,6 +644,53 @@ export default function Home({ navigation }) {
                   setshowFilterSheet(false);
                 }}
               />
+            )}
+            {selectedTab == "Marketing" && (
+              <View style={{}}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowFromPicker(true);
+                  }}
+                >
+                  <Input
+                    label="From Date"
+                    placeholder="DD/MM/YYYY"
+                    value={fromDate.toLocaleDateString()}
+                    editable={false}
+                    style={[styles.input]}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowToPicker(true);
+                  }}
+                >
+                  <Input
+                    label="To Date"
+                    placeholder="DD/MM/YYYY"
+                    value={toDate.toLocaleDateString()}
+                    editable={false}
+                    style={[styles.input]}
+                  />
+                </TouchableOpacity>
+                <View style={styles.bottomBtns}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setshowFilterSheet(false);
+                    }}
+                    style={styles.resetBtn}
+                  >
+                    <Text style={{ color: "#6b4caf" }}>Cancel</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={applyMarketingFilter}
+                    style={styles.applyBtn}
+                  >
+                    <Text style={{ color: "#fff" }}>Apply Filters</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             )}
             {/* <Text style={styles.filterTitle}>Filter by:</Text>
             Date Range
@@ -1499,6 +1531,12 @@ const ProductionOverview = ({ graphData }) => {
     </View>
   );
 };
+const Input = ({ label, ...props }) => (
+  <View style={styles.inputBox}>
+    <Text style={styles.label}>{label}</Text>
+    <TextInput style={styles.input} {...props} />
+  </View>
+);
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -1777,12 +1815,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
 
-  inputBox: {
-    width: "48%",
-    backgroundColor: "#f5f5f5",
-    padding: 10,
-    borderRadius: 10,
-  },
+  // inputBox: {
+  //   width: "48%",
+  //   backgroundColor: "#f5f5f5",
+  //   padding: 10,
+  //   borderRadius: 10,
+  // },
 
   inputText: {
     color: "#333",
@@ -1865,5 +1903,22 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: "#eee",
     marginVertical: 10,
+  },
+  inputBox: {
+    marginBottom: 10,
+  },
+
+  label: {
+    fontSize: 14,
+    color: Colors.grey,
+    marginBottom: 2,
+    fontWeight: "700",
+  },
+
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 6,
+    padding: 10,
   },
 });
