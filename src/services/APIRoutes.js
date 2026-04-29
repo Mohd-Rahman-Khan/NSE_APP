@@ -77,4 +77,5 @@ export const API_ROUTES = {
   FINANCIAL_YEAR: "master/financial-year-master/dd",
   TOTAL_SALES_BY_MONTH: "inventory/dashboard/sales-total-qty-by-month",
   QC_DASHBOARD_DATA: "quality/dashboard/qc-dashboard",
+  QC_COMPLAINT_DASHBOARD: "master/dashboard/complaint-dashboard",
 };

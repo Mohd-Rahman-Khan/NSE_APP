@@ -80,7 +80,11 @@ const Login = () => {
   };
 
   const handleLogin = async () => {
-    const fcmToken = await getFcmToken();
+    let fcmToken = null;
+    if (Platform.OS == "android") {
+      const fcmToken = await getFcmToken();
+    }
+
     try {
       const payloadData = {
         clientId: email,

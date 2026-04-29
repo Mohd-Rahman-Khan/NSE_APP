@@ -70,6 +70,7 @@ export default function Home({ navigation }) {
   const [financialYear, setfinancialYear] = useState([]);
   const [season, setseason] = useState([]);
   const [selectedSlice, setSelectedSlice] = useState(null);
+  const [qcComplaintList, setqcComplaintList] = useState([]);
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
 
@@ -99,6 +100,7 @@ export default function Home({ navigation }) {
 
         case "QC":
           getQCData();
+          getComplaintDashboardData();
           break;
 
         default:
@@ -110,6 +112,16 @@ export default function Home({ navigation }) {
     getFinacialYears();
     getSeasonList();
   }, []);
+
+  useEffect(() => {
+    if (userData) {
+      const tabs = getTabsByRole();
+
+      if (tabs.length > 0) {
+        setSelectedTab(tabs[0]); // first allowed tab
+      }
+    }
+  }, [userData]);
   const getFinacialYears = async () => {
     try {
       const payloadData = {};
@@ -169,6 +181,7 @@ export default function Home({ navigation }) {
   };
 
   const getMarketingData = async (filter = {}) => {
+    setLoading(true);
     try {
       const payloadData = {
         unit: {
@@ -192,6 +205,7 @@ export default function Home({ navigation }) {
 
       const decrypted = decryptAES(response);
       const parsedDecrypted = JSON.parse(decrypted);
+      console.log("getMarketingData", parsedDecrypted);
 
       if (
         parsedDecrypted &&
@@ -204,9 +218,12 @@ export default function Home({ navigation }) {
       }
     } catch (error) {
       showErrorMessage("something went wrong");
+    } finally {
+      setLoading(false);
     }
   };
   const getTopDealer = async (filter = {}) => {
+    setLoading(true);
     try {
       const payloadData = {
         startDate: filter.startDate || formatDate(fromDate),
@@ -240,10 +257,13 @@ export default function Home({ navigation }) {
       }
     } catch (error) {
       showErrorMessage("something went wrong");
+    } finally {
+      setLoading(false);
     }
   };
 
   const getTotalSalesByMonth = async () => {
+    setLoading(true);
     try {
       const payloadData = {
         unit: {
@@ -281,6 +301,7 @@ export default function Home({ navigation }) {
   };
 
   const getQCData = async () => {
+    setLoading(true);
     try {
       let url = API_ROUTES.QC_DASHBOARD_DATA;
       const payloadData = {
@@ -317,6 +338,85 @@ export default function Home({ navigation }) {
     }
   };
 
+  const getComplaintDashboardData = async () => {
+    setLoading(true);
+    try {
+      let url = API_ROUTES.QC_COMPLAINT_DASHBOARD;
+      const payloadData = {
+        roId: userData?.roId,
+        aoId: userData?.aoId,
+        //cropId: 9007199254740991,
+        //varietyId: 9007199254740991,
+        // startDate: "2026-04-27",
+        // endDate: "2026-04-27",
+      };
+      const encryptedPayload = encryptWholeObject(payloadData);
+      const response = await apiRequest(url, "post", encryptedPayload);
+      const decrypted = decryptAES(response);
+      const parsedDecrypted = JSON.parse(decrypted);
+      console.log("getComplaintDashboardData", payloadData);
+      console.log("getComplaintDashboardData", parsedDecrypted);
+      if (
+        parsedDecrypted &&
+        (parsedDecrypted?.statusCode === "200" ||
+          parsedDecrypted?.statusCode === "201")
+      ) {
+        setqcComplaintList(parsedDecrypted?.data);
+      } else {
+        showErrorMessage(parsedDecrypted?.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.log(error, "line error");
+      showErrorMessage("something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const QCTable = ({ data }) => {
+    const tableData = (data || []).filter((item) => item.parameter);
+
+    return (
+      <View style={styles.tableContainer}>
+        {/* HEADER */}
+        <View style={[styles.tableRow, styles.tableHeader]}>
+          <Text style={[styles.tableCell, { flex: 2, borderRightWidth: 2 }]}>
+            Parameter
+          </Text>
+          <Text style={[styles.tableCell, { borderRightWidth: 2 }]}>
+            Received
+          </Text>
+          <Text style={[styles.tableCell, { borderRightWidth: 2 }]}>
+            Settled
+          </Text>
+          <Text style={[styles.tableCell, { borderRightWidth: 0 }]}>
+            In Progress
+          </Text>
+        </View>
+
+        {/* DATA */}
+        {tableData.map((item, index) => (
+          <View
+            key={index}
+            style={[
+              styles.tableRow,
+              index % 2 === 0 ? styles.rowEven : styles.rowOdd,
+            ]}
+          >
+            <Text style={[styles.tableCell, { flex: 2 }]}>
+              {item.parameter}
+            </Text>
+            <Text style={styles.tableCell}>{item.received}</Text>
+            <Text style={styles.tableCell}>{item.settled}</Text>
+            <Text style={[styles.tableCell, { borderRightWidth: 0 }]}>
+              {item.inProgress}
+            </Text>
+          </View>
+        ))}
+      </View>
+    );
+  };
+
   const fethchUserprofileData = async () => {
     setLoading(true);
     const userData = await getUserData();
@@ -350,6 +450,7 @@ export default function Home({ navigation }) {
   };
 
   const getProductionDashboardSummary = async (filter = {}) => {
+    setLoading(true);
     try {
       const payloadData = {
         roId: userData?.roId,
@@ -375,10 +476,12 @@ export default function Home({ navigation }) {
       }
     } catch (error) {
     } finally {
+      setLoading(false);
     }
   };
 
   const getProductionGraphData = async (filter = {}) => {
+    setLoading(true);
     try {
       const payloadData = {
         finYearId: financialYear[0]?.id,
@@ -410,10 +513,12 @@ export default function Home({ navigation }) {
       }
     } catch (error) {
     } finally {
+      setLoading(false);
     }
   };
 
   const getProductionPlanDetail = async (filter = {}) => {
+    setLoading(true);
     try {
       const payloadData = {
         finYearId: financialYear[0]?.id,
@@ -444,6 +549,7 @@ export default function Home({ navigation }) {
       }
     } catch (error) {
     } finally {
+      setLoading(false);
     }
   };
 
@@ -479,43 +585,9 @@ export default function Home({ navigation }) {
           value,
           originalValue: data[key],
           label: cleanKey,
-          color: COLORS[index % COLORS.length], // 🔥 unique color
+          color: COLORS[index % COLORS.length],
         };
       });
-  };
-
-  const MarketingSection = () => {
-    return (
-      <View style={{ marginTop: 10 }}>
-        {/* 🔹 Header */}
-        <View style={styles.marketingHeader}>
-          <Text style={styles.marketingTitle}>Marketing</Text>
-
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>358 / 309 Hug</Text>
-          </View>
-
-          <Text style={styles.viewReports}>View Reports</Text>
-        </View>
-
-        {/* 🔹 Cards Row */}
-        <View style={styles.marketingRow}>
-          {/* Circle Progress */}
-          <View style={styles.circleCard}>
-            <View style={styles.circle}>
-              <Text style={styles.circleText}>72%</Text>
-            </View>
-            <Text style={styles.circleLabel}>Retail Channel</Text>
-          </View>
-
-          {/* Sales Card */}
-          <View style={styles.salesCard}>
-            <Text style={styles.salesTitle}>TOTAL SALES</Text>
-            <Text style={styles.salesValue}>$1.2M</Text>
-          </View>
-        </View>
-      </View>
-    );
   };
 
   const apllyProductionFillterCallback = useCallback(
@@ -543,33 +615,26 @@ export default function Home({ navigation }) {
     },
     [userData],
   );
+  const getQtyChartData = () => {
+    return totalSaleByMonth.map((item) => ({
+      value: item.total || 0,
+      label: item.month,
+      frontColor: "#4f6bdc",
+      onPress: () => {
+        alert(`Month: ${item.month}\nQty: ${item.total} qtl`);
+      },
+    }));
+  };
 
-  const getMarketingDualBarData = () => {
-    return totalSaleByMonth.flatMap((item) => [
-      {
-        value: (item.total || 0) * 100, // 🔥 quintal → kg
-        frontColor: "#3b82f6",
-        spacing: 4,
-        onPress: () => {
-          //alert(`${item.month} Qty: ${(item.total * 100).toFixed(2)} kg`);
-        },
+  const getRevenueChartData = () => {
+    return totalSaleByMonth.map((item) => ({
+      value: (item.totalAmount || 0) / 100000,
+      label: item.month,
+      frontColor: "#22c55e",
+      onPress: () => {
+        alert(`Month: ${item.month}\nRevenue: ₹${item.totalAmount}`);
       },
-      {
-        value: item.totalAmount || 0,
-        frontColor: "#22c55e",
-        label: item.month,
-        labelTextStyle: {
-          textAlign: "center",
-          width: 60,
-          marginLeft: -10,
-          fontSize: 10,
-        },
-        spacing: 24,
-        onPress: () => {
-          //alert(`${item.month} Amount: ₹${item.totalAmount}`);
-        },
-      },
-    ]);
+    }));
   };
 
   const formatDate = (date) => {
@@ -592,6 +657,59 @@ export default function Home({ navigation }) {
 
     setshowFilterSheet(false);
   };
+
+  const totalComplaints = (qcComplaintList || []).reduce(
+    (acc, item) => {
+      if (!item.parameter) return acc;
+
+      acc.received += item.received || 0;
+      acc.resolved += item.settled || 0;
+
+      return acc;
+    },
+    { received: 0, resolved: 0 },
+  );
+
+  const role = (() => {
+    const rawRole = userData?.roleName;
+
+    if (!rawRole) return [];
+
+    if (Array.isArray(rawRole)) return rawRole;
+
+    if (typeof rawRole === "string") {
+      try {
+        return JSON.parse(rawRole);
+      } catch (e) {
+        return rawRole.split(",").map((r) => r.trim());
+      }
+    }
+
+    return [];
+  })();
+
+  const hasAccess = (key) =>
+    Array.isArray(role) && role.some((r) => r?.toUpperCase?.().includes(key));
+
+  const hasMKT = hasAccess("MKT");
+  const hasINV = hasAccess("INV");
+  const hasPROD = hasAccess("PROD");
+  const hasFARM = hasAccess("FARM");
+  const hasQC = hasAccess("QC");
+
+  const getTabsByRole = () => {
+    const tabs = [];
+
+    if (hasPROD) tabs.push("Production");
+    if (hasMKT) tabs.push("Marketing");
+    if (hasINV) tabs.push("Inventory");
+    if (hasQC) tabs.push("QC");
+    if (hasFARM) tabs.push("Farm");
+
+    return tabs;
+  };
+
+  const roleTabs = getTabsByRole();
 
   return (
     <WrapperContainer isLoading={loading}>
@@ -787,16 +905,18 @@ export default function Home({ navigation }) {
       )}
 
       <View style={{}}>
-        <Tabs selected={selectedTab} setSelected={setSelectedTab} />
+        <Tabs
+          selected={selectedTab}
+          setSelected={setSelectedTab}
+          tabs={roleTabs}
+        />
       </View>
 
       <ScrollView
         contentContainerStyle={{ paddingBottom: 80 }}
         style={styles.container}
       >
-        {/* 🔹 Top Cards */}
-
-        {selectedTab == "Production" ? (
+        {selectedTab === "Production" && hasPROD && (
           <>
             <View style={styles.grid}>
               <StatCard
@@ -851,86 +971,9 @@ export default function Home({ navigation }) {
               />
             )}
           </>
-        ) : selectedTab == "Inventory" ? (
-          // <MarketingSection />
-          <View></View>
-        ) : selectedTab == "QC" ? (
-          <ScrollView style={{ marginTop: 20 }}>
-            <View style={{ paddingHorizontal: 20 }}>
-              {/* 🔹 SECTION 1 */}
-              <Text style={styles.qcHeader}>
-                Sample coupon tracking — QCL vs SSCA
-              </Text>
+        )}
 
-              <View style={styles.qcCard}>
-                <QCComparisonRow
-                  label="Total / sent"
-                  qclValue={qcDashboardData?.count?.qcl?.totalReceived || 0}
-                  sscaValue={qcDashboardData?.count?.ssca?.totalReceived || 0}
-                  color="#3b82f6"
-                />
-
-                <View style={styles.divider} />
-
-                <QCComparisonRow
-                  label="Tested / result received"
-                  qclValue={qcDashboardData?.count?.qcl?.totalTested || 0}
-                  sscaValue={qcDashboardData?.count?.ssca?.totalTested || 0}
-                  color="#10b981"
-                />
-
-                <View style={styles.divider} />
-
-                <QCComparisonRow
-                  label="Not tested / awaited"
-                  qclValue={qcDashboardData?.count?.qcl?.totalToBeTested || 0}
-                  sscaValue={qcDashboardData?.count?.ssca?.totalToBeTested || 0}
-                  color="#ef4444"
-                />
-              </View>
-
-              {/* 🔹 SECTION 2 */}
-              <Text style={styles.qcHeader}>
-                Quantity wise tracking — QCL vs SSCA
-              </Text>
-
-              <View style={styles.qcCard}>
-                <QCComparisonRow
-                  label="Total qty sent"
-                  qclValue={qcDashboardData?.quantity?.qcl?.totalQtySent || 0}
-                  sscaValue={qcDashboardData?.quantity?.ssca?.totalQtySent || 0}
-                  color="#3b82f6"
-                />
-
-                <View style={styles.divider} />
-
-                <QCComparisonRow
-                  label="Result received"
-                  qclValue={
-                    qcDashboardData?.quantity?.qcl?.totalQtyResultReceived || 0
-                  }
-                  sscaValue={
-                    qcDashboardData?.quantity?.ssca?.totalQtyResultReceived || 0
-                  }
-                  color="#10b981"
-                />
-
-                <View style={styles.divider} />
-
-                <QCComparisonRow
-                  label="Results awaited"
-                  qclValue={
-                    qcDashboardData?.quantity?.qcl?.totalQtyResultsAwaited || 0
-                  }
-                  sscaValue={
-                    qcDashboardData?.quantity?.ssca?.totalQtyResultsAwaited || 0
-                  }
-                  color="#f59e0b"
-                />
-              </View>
-            </View>
-          </ScrollView>
-        ) : selectedTab == "Marketing" ? (
+        {selectedTab === "Marketing" && hasMKT && (
           <View style={{ marginTop: 10 }}>
             <View style={styles.grid}>
               <StatCard
@@ -950,77 +993,59 @@ export default function Home({ navigation }) {
                 value={marketingDashData?.totalSaleQty || 0}
               />
             </View>
-            <View
-              style={{
-                marginTop: 2,
-                backgroundColor: "#fff",
-                padding: 10,
-                borderRadius: 12,
-                marginHorizontal: 10,
-                elevation: 1,
-              }}
-            >
-              <Text style={{ fontWeight: "bold", marginBottom: 10 }}>
-                Monthly Sales (Qty vs Amount)
+            {/* 🔹 Quantity Chart */}
+            <View style={styles.chartCard}>
+              <Text style={styles.chartTitle}>
+                Monthly Quantity Sold (qtls)
               </Text>
 
-              <View
-                style={{
-                  flexDirection: "row",
-                  marginBottom: 10,
-                  alignItems: "center",
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    marginRight: 15,
-                    alignItems: "center",
-                  }}
-                >
-                  <View
-                    style={{
-                      width: 10,
-                      height: 10,
-                      backgroundColor: "#3b82f6",
-                      marginRight: 5,
-                    }}
-                  />
-                  <Text>Total Qty (kg)</Text>
-                </View>
-
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <View
-                    style={{
-                      width: 10,
-                      height: 10,
-                      backgroundColor: "#22c55e",
-                      marginRight: 5,
-                    }}
-                  />
-                  <Text>Total Amount</Text>
-                </View>
-              </View>
-
               <BarChart
-                data={getMarketingDualBarData()}
-                height={220}
-                width={width - 100}
-                barWidth={18}
-                spacing={12}
+                data={getQtyChartData()}
+                height={240}
+                width={screenWidth - 100}
+                barWidth={20}
+                spacing={25}
                 initialSpacing={20}
                 endSpacing={20}
                 roundedTop
-                noOfSections={5}
-                xAxisThickness={1}
+                /* 🔥 AXIS CONTROL */
+                noOfSections={4} // 4 sections → 5 labels (0–180)
+                maxValue={180} // 🔥 FIXED MAX (like web)
                 yAxisThickness={1}
-                hideRules={false}
+                xAxisThickness={1}
                 rulesColor="#e5e7eb"
+                yAxisTextStyle={{ fontSize: 11 }}
+                /* 🔥 GRID STYLE */
+                dashWidth={4}
+                dashGap={6}
                 isAnimated
-                xAxisLabelTextStyle={{
-                  textAlign: "center",
-                  width: 60,
-                }}
+              />
+            </View>
+
+            {/* 🔹 Revenue Chart */}
+            <View style={styles.chartCard}>
+              <Text style={styles.chartTitle}>Monthly Revenue (₹)</Text>
+
+              <BarChart
+                data={getRevenueChartData()}
+                height={240}
+                width={screenWidth - 100}
+                barWidth={18}
+                spacing={25}
+                initialSpacing={20}
+                endSpacing={20}
+                roundedTop
+                /* 🔥 AXIS CONTROL */
+                noOfSections={5} // 0–10L → 5 parts
+                yAxisThickness={1}
+                xAxisThickness={1}
+                rulesColor="#e5e7eb"
+                /* 🔥 LABEL FORMAT */
+                maxValue={50}
+                yAxisLabelSuffix="L"
+                dashWidth={4}
+                dashGap={6}
+                isAnimated
               />
             </View>
             <View
@@ -1121,7 +1146,7 @@ export default function Home({ navigation }) {
                 }}
               >
                 <Text style={styles.heading}>Top 5 Dealer</Text>
-                <TouchableOpacity
+                {/* <TouchableOpacity
                   onPress={() => {
                     navigation.navigate("ViewMoreDealerList", {
                       dealerList: topDealer,
@@ -1133,7 +1158,7 @@ export default function Home({ navigation }) {
                   >
                     View More
                   </Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
               </View>
             )}
 
@@ -1161,7 +1186,115 @@ export default function Home({ navigation }) {
               )}
             />
           </View>
-        ) : null}
+        )}
+
+        {selectedTab === "Inventory" && hasINV && <View />}
+
+        {selectedTab === "QC" && hasQC && (
+          <ScrollView style={{ marginTop: 20 }}>
+            <View style={{ marginHorizontal: 15 }}>
+              <Text style={styles.qcHeader}>Complaint Summary</Text>
+
+              <View style={[styles.grid, { paddingHorizontal: 0 }]}>
+                <StatCard
+                  title="Total Received Complaints"
+                  value={totalComplaints.received}
+                />
+
+                <StatCard
+                  title="Total Resolved Complaints"
+                  value={totalComplaints.resolved}
+                />
+              </View>
+
+              <QCTable data={qcComplaintList} />
+            </View>
+
+            <View style={{ paddingHorizontal: 20, marginTop: 15 }}>
+              {/* 🔹 SECTION 1 */}
+              <Text style={styles.qcHeader}>
+                Sample coupon tracking — QCL vs SSCA
+              </Text>
+
+              <View style={styles.qcCard}>
+                <QCComparisonRow
+                  label="Total / sent"
+                  qclValue={qcDashboardData?.count?.qcl?.totalReceived || 0}
+                  sscaValue={qcDashboardData?.count?.ssca?.totalReceived || 0}
+                  color="#3b82f6"
+                />
+
+                <View style={styles.divider} />
+
+                <QCComparisonRow
+                  label="Tested / result received"
+                  qclValue={qcDashboardData?.count?.qcl?.totalTested || 0}
+                  sscaValue={qcDashboardData?.count?.ssca?.totalTested || 0}
+                  color="#10b981"
+                />
+
+                <View style={styles.divider} />
+
+                <QCComparisonRow
+                  label="Not tested / awaited"
+                  qclValue={qcDashboardData?.count?.qcl?.totalToBeTested || 0}
+                  sscaValue={qcDashboardData?.count?.ssca?.totalToBeTested || 0}
+                  color="#ef4444"
+                />
+              </View>
+
+              {/* 🔹 SECTION 2 */}
+              <Text style={styles.qcHeader}>
+                Quantity wise tracking — QCL vs SSCA
+              </Text>
+
+              <View style={styles.qcCard}>
+                <QCComparisonRow
+                  label="Total qty sent"
+                  qclValue={qcDashboardData?.quantity?.qcl?.totalQtySent || 0}
+                  sscaValue={qcDashboardData?.quantity?.ssca?.totalQtySent || 0}
+                  color="#3b82f6"
+                />
+
+                <View style={styles.divider} />
+
+                <QCComparisonRow
+                  label="Result received"
+                  qclValue={
+                    qcDashboardData?.quantity?.qcl?.totalQtyResultReceived || 0
+                  }
+                  sscaValue={
+                    qcDashboardData?.quantity?.ssca?.totalQtyResultReceived || 0
+                  }
+                  color="#10b981"
+                />
+
+                <View style={styles.divider} />
+
+                <QCComparisonRow
+                  label="Results awaited"
+                  qclValue={
+                    qcDashboardData?.quantity?.qcl?.totalQtyResultsAwaited || 0
+                  }
+                  sscaValue={
+                    qcDashboardData?.quantity?.ssca?.totalQtyResultsAwaited || 0
+                  }
+                  color="#f59e0b"
+                />
+              </View>
+            </View>
+          </ScrollView>
+        )}
+
+        {roleTabs.length === 0 && (
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          >
+            <Text style={{ textAlign: "center", marginTop: 20 }}>
+              No Dashboard Access
+            </Text>
+          </View>
+        )}
       </ScrollView>
     </WrapperContainer>
   );
@@ -1174,7 +1307,6 @@ const StatCard = ({ title, value, subtitle, color }) => {
     <View style={styles.card}>
       <Text style={styles.cardTitle}>{title}</Text>
 
-      {/* ✅ Value Section */}
       {isMultiple ? (
         <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
           <View
@@ -1206,15 +1338,17 @@ const StatCard = ({ title, value, subtitle, color }) => {
         </View>
       ) : (
         // <Text style={styles.cardValue}>{value}</Text>
-        <AnimatedNumbers
-          includeComma
-          animateToNumber={Number(value) || 0}
-          fontStyle={{
-            fontSize: 22,
-            fontWeight: "bold",
-          }}
-          animationDuration={1000}
-        />
+        // <AnimatedNumbers
+        //   includeComma
+        //   animateToNumber={Number(value) || 0}
+        //   fontStyle={{
+        //     fontSize: 22,
+        //     fontWeight: "bold",
+        //   }}
+        //   animationDuration={1000}
+        //   decimalPlaces={2}
+        // />
+        <Text style={styles.cardValue}>{Number(value || 0).toFixed(2)}</Text>
       )}
 
       {/* <Text style={styles.cardSub}>{subtitle}</Text> */}
@@ -1309,12 +1443,8 @@ const QCComparisonRow = React.memo(({ label, qclValue, sscaValue, color }) => {
   );
 });
 
-/////////////////////////////////////
-// 🔹 Tabs
-/////////////////////////////////////
-
-const Tabs = ({ selected, setSelected }) => {
-  const tabs = ["Production", "Marketing", "Inventory", "QC"];
+const Tabs = ({ selected, setSelected, tabs }) => {
+  if (!tabs || tabs.length === 0) return null;
 
   return (
     <ScrollView
@@ -1342,10 +1472,6 @@ const Tabs = ({ selected, setSelected }) => {
   );
 };
 
-/////////////////////////////////////
-// 🔹 Production Overview
-/////////////////////////////////////
-
 const ProductionOverview = ({ graphData }) => {
   const getAreaChartData = () => {
     return graphData?.roGroupData?.flatMap((item) => [
@@ -1354,8 +1480,7 @@ const ProductionOverview = ({ graphData }) => {
         frontColor: "#2b6cb0",
         spacing: 4,
         onPress: () => {
-          console.log("Area clicked:", item.roName);
-          //alert(`Area: ${item.roName} = ${item.area}`);
+          alert(`RO: ${item.roName}\nArea: ${item.area}`);
         },
       },
       {
@@ -1370,8 +1495,7 @@ const ProductionOverview = ({ graphData }) => {
         },
         spacing: 28, // 👈 🔥 BIG GAP between groups
         onPress: () => {
-          console.log("Assigned clicked:", item.roName);
-          //alert(`Assigned Area: ${item.roName} = ${item.assignedArea}`);
+          alert(`RO: ${item.roName}\nAssigned Area: ${item.assignedArea}`);
         },
       },
     ]);
@@ -1384,8 +1508,7 @@ const ProductionOverview = ({ graphData }) => {
         frontColor: "#2f855a",
         spacing: 4,
         onPress: () => {
-          console.log("Raw Seed:", item.roName);
-          //alert(`Raw Seed: ${item.roName} = ${item.rawSeed}`);
+          alert(`RO: ${item.roName}\nRaw Seed: ${item.rawSeed}`);
         },
       },
       {
@@ -1400,8 +1523,7 @@ const ProductionOverview = ({ graphData }) => {
         },
         spacing: 28,
         onPress: () => {
-          console.log("Received Seed:", item.roName);
-          //alert(`Received: ${item.roName} = ${item.receivedRawSeed}`);
+          alert(`RO: ${item.roName}\nReceived Seed: ${item.receivedRawSeed}`);
         },
       },
     ]);
@@ -1883,6 +2005,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 15,
     marginBottom: 15,
+    marginTop: 10,
 
     // Shadow (iOS)
     shadowColor: "#000",
@@ -1896,7 +2019,7 @@ const styles = StyleSheet.create({
   qcHeader: {
     fontSize: 16,
     fontWeight: "700",
-    marginBottom: 10,
+    //marginBottom: 10,
     color: "#1f2937",
   },
   divider: {
@@ -1920,5 +2043,56 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderRadius: 6,
     padding: 10,
+  },
+  chartCard: {
+    backgroundColor: "#fff",
+    marginHorizontal: 10,
+    marginTop: 10,
+    borderRadius: 12,
+    padding: 10,
+    elevation: 2,
+  },
+
+  chartTitle: {
+    fontWeight: "bold",
+    marginBottom: 10,
+    fontSize: 14,
+  },
+  tableRow: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderColor: "#ddd",
+  },
+
+  tableHeader: {
+    backgroundColor: "#e5e7eb",
+    borderBottomWidth: 1,
+    borderColor: "#ddd",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  tableCell: {
+    flex: 1,
+    padding: 10,
+    fontSize: 12,
+    textAlign: "center",
+    borderRightWidth: 1,
+    borderColor: "#ddd",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  rowEven: {
+    backgroundColor: "#fff",
+  },
+
+  rowOdd: {
+    backgroundColor: "#f9fafb",
+  },
+  tableContainer: {
+    marginTop: 10,
+    borderWidth: 1, // 🔥 FULL BORDER (left + right + top + bottom)
+    borderColor: "#ddd",
   },
 });
