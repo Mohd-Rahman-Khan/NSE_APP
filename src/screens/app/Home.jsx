@@ -1207,7 +1207,7 @@ export default function Home({ navigation }) {
                 />
               </View>
 
-              <QCTable data={qcComplaintList} />
+              {qcComplaintList?.length && <QCTable data={qcComplaintList} />}
             </View>
 
             <View style={{ paddingHorizontal: 20, marginTop: 15 }}>
