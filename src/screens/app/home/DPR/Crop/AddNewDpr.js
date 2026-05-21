@@ -38,6 +38,7 @@ import { getUserData } from "../../../../../utils/Storage";
 export default function AddNewDpr({ route }) {
   const navigation = useNavigation();
   const landData = route?.params?.landData;
+  console.log("landData---", landData);
 
   const [loading, setLoading] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -54,6 +55,9 @@ export default function AddNewDpr({ route }) {
   const [userData, setUserData] = useState("");
   const [categoryList, setCategoryList] = useState();
   const [errors, setErrors] = useState({});
+  const [dprType, setdprType] = useState("");
+  const [noActivity, setnoActivity] = useState(false);
+  const [remark, setremark] = useState("");
 
   /* ================= MASTER LISTS ================= */
 
@@ -180,6 +184,9 @@ export default function AddNewDpr({ route }) {
           contractorType: null,
           contractorName: null,
           noOfLabour: "",
+          area: "",
+          noOfIteration: "",
+          total: "",
 
           agricultures: [
             {
@@ -246,6 +253,9 @@ export default function AddNewDpr({ route }) {
             contractorType: null,
             contractorName: null,
             noOfLabour: "",
+            area: "",
+            noOfIteration: "",
+            total: "",
             agricultures: [
               {
                 id: Date.now() + 2,
@@ -282,29 +292,29 @@ export default function AddNewDpr({ route }) {
   };
 
   /* ================= ACTIVITY ================= */
-  const addActivity = (entryId) => {
-    setEntries((prev) =>
-      prev.map((e) =>
-        e.id === entryId
-          ? {
-              ...e,
-              activities: [
-                ...e.activities,
-                {
-                  id: Date.now(),
-                  activity: null,
-                  contractorType: null,
-                  contractorName: null,
-                  noOfLabour: "",
-                  agricultures: [],
-                  equipments: [],
-                },
-              ],
-            }
-          : e,
-      ),
-    );
-  };
+  // const addActivity = (entryId) => {
+  //   setEntries((prev) =>
+  //     prev.map((e) =>
+  //       e.id === entryId
+  //         ? {
+  //             ...e,
+  //             activities: [
+  //               ...e.activities,
+  //               {
+  //                 id: Date.now(),
+  //                 activity: null,
+  //                 contractorType: null,
+  //                 contractorName: null,
+  //                 noOfLabour: "",
+  //                 agricultures: [],
+  //                 equipments: [],
+  //               },
+  //             ],
+  //           }
+  //         : e,
+  //     ),
+  //   );
+  // };
 
   /* ================= AGRICULTURE ================= */
   const addAgriculture = (entryId, actId) => {
@@ -465,7 +475,7 @@ export default function AddNewDpr({ route }) {
     return date.toISOString().split("T")[0]; // YYYY-MM-DD
   };
 
-  const buildDprPayload = () => {
+  const buildDprPayload = (status) => {
     const planDate = formatDate(date);
 
     return [
@@ -480,48 +490,96 @@ export default function AddNewDpr({ route }) {
         farmName: landData?.farmName,
 
         farmBlockId: String(landData?.farmBlockId),
-        farmBlockName: null,
+        farmBlockName: landData?.farmBlockName,
+        allowMultiple: false,
 
         squareId: landData?.squareId,
         squareName: landData?.squareName,
 
-        farmPlanId: selectedPlan?.planId || null,
+        farmPlanId: landData?.planId || null,
         farmPlanCode: selectedPlan?.planCode || null,
 
         dprType: "CROP",
-        dprStatus: "PENDING",
-        currentDprStatus: "PENDING",
+        dprStatus: status,
+        currentDprStatus: status,
         dprMechanicalSubmit: false,
 
         /* ================= ACTIVITIES ================= */
+        // activities: entries.flatMap((entry) =>
+        //   entry.activities
+        //     .filter((act) => act.activity)
+        //     .map((act) => ({
+        //       activityId: act.activity.id,
+        //       activityName: act.activity.operationName,
+        //       noOfLabour: Number(act.noOfLabour || 0),
+        //       area: Number(act.area || 0),
+        //       noOfIteration: Number(act.noOfIteration || 0),
+        //       total: Number(act.total || 0),
+        //       actualNoOfLabour: "",
+        //       contractorType: act.contractorType?.agreementType,
+        //       contractorId: act.contractorName?.contractorId,
+        //       contractorName: act.contractorName?.name,
+        //     })),
+        // ),
         activities: entries.flatMap((entry) =>
           entry.activities
             .filter((act) => act.activity)
             .map((act) => ({
               activityId: act.activity.id,
+
               activityName: act.activity.operationName,
-              noOfLabour: Number(act.noOfLabour || 0),
+
+              noOfLabour: String(act.noOfLabour || ""),
+
               actualNoOfLabour: "",
+
+              area: String(act.area || ""),
+
+              noOfIteration: String(act.noOfIteration || ""),
+
+              totalOutput: Number(act.total || 0).toFixed(2),
+
               contractorType: act.contractorType?.agreementType,
-              contractorId: act.contractorName?.contractorId,
+
+              contractorId: String(act.contractorName?.contractorId || ""),
+
               contractorName: act.contractorName?.name,
             })),
         ),
 
+        // dprAgricultures: entries.flatMap((entry) =>
+        //   entry.activities.flatMap((act) =>
+        //     act.agricultures
+        //       .filter((ag) => ag.material && ag.materialType)
+        //       .map((ag) => ({
+        //         activityId: act.activity.id,
+        //         activityName: act.activity.operationName,
+        //         itemCode: ag.material.itemCode,
+        //         cashMemoDto: {
+        //           materialType: ag.materialType.name,
+        //           activityId: act.activity.id,
+        //           activityName: act.activity.operationName,
+        //           cashMemoItems: [],
+        //         },
+        //       })),
+        //   ),
+        // ),
         dprAgricultures: entries.flatMap((entry) =>
           entry.activities.flatMap((act) =>
             act.agricultures
               .filter((ag) => ag.material && ag.materialType)
               .map((ag) => ({
                 activityId: act.activity.id,
+
                 activityName: act.activity.operationName,
+
                 itemCode: ag.material.itemCode,
-                cashMemoDto: {
-                  materialType: ag.materialType.name,
-                  activityId: act.activity.id,
-                  activityName: act.activity.operationName,
-                  cashMemoItems: [],
-                },
+
+                itemName: ag.material.itemName || "",
+
+                itemId: ag.material.id,
+
+                materialType: ag.materialType.name,
               })),
           ),
         ),
@@ -545,6 +603,8 @@ export default function AddNewDpr({ route }) {
                 cpNumber: "",
                 mechIdleHours: "",
                 mechWalkingTime: "",
+                outTime: "",
+                inTime: "",
                 activityId: act.activity.id,
                 activityName: act.activity.operationName,
               })),
@@ -614,7 +674,7 @@ export default function AddNewDpr({ route }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const submitDPR = async () => {
+  const submitDPR = async (status) => {
     const valid = validateForm();
 
     if (!valid) {
@@ -624,7 +684,7 @@ export default function AddNewDpr({ route }) {
     try {
       setLoading(true);
 
-      const payload = buildDprPayload();
+      const payload = buildDprPayload(status);
 
       console.log("🚀 FINAL DPR PAYLOAD", JSON.stringify(payload, null, 2));
 
@@ -657,11 +717,34 @@ export default function AddNewDpr({ route }) {
 
   const fetchMaterialList = async (item) => {
     setLoading(true);
+    console.log("parsedDecryptedMaterialList", userData);
     try {
+      // const payloadData = {
+      //   inventoryType: "RUNNING",
+      //   materialType: item?.materialType,
+      //   unitType: userData?.unitType,
+      //   farmId: String(landData?.farmId),
+      //   aoId: userData?.aoId,
+      //   roId: userData?.roId,
+      //   farmBlockId: String(landData?.farmBlockId),
+      //   subUnitId: String(landData?.farmId),
+      //   subUnitName: "",
+      //   subUnitType: "FARM_BLOCK",
+      // };
       const payloadData = {
-        itemCode: item?.itemCode,
-        itemSubType: item?.itemSubType,
+        inventoryType: "RUNNING",
+        materialType: item?.materialType,
+        unitType: "FARM",
+        farmId: String(landData?.farmId),
+        aoId: userData?.aoId,
+        roId: userData?.roId,
+        farmBlockId: String(landData?.farmBlockId),
+        subUnitId: String(landData?.farmBlockId),
+        subUnitName: "",
+        subUnitType: "FARM_BLOCK",
       };
+      console.log("parsedDecryptedMaterialList", payloadData);
+      //return;
       const encryptPayloadData = encryptWholeObject(payloadData);
       const getMaterialItem = await apiRequest(
         API_ROUTES.MATERIAL_LIST_DPR,
@@ -732,7 +815,7 @@ export default function AddNewDpr({ route }) {
   /* ================= UI ================= */
   return (
     <WrapperContainer isLoading={loading}>
-      <InnerHeader title="Add Process Allocation" />
+      <InnerHeader title={`Crop (Square: ${landData?.squareName})`} />
       {showMaterialModal && (
         <Modal visible={showMaterialModal} transparent animationType="fade">
           <View style={styles.modalOverlay}>
@@ -836,96 +919,119 @@ export default function AddNewDpr({ route }) {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView style={{ padding: 10 }}>
-          {/* ADD ENTRY */}
-          <TouchableOpacity style={styles.addEntryBtn} onPress={addEntry}>
-            <Icon name="add" size={24} color="#fff" />
-            <Text style={styles.addEntryText}>Add Activity</Text>
-          </TouchableOpacity>
-
-          {Platform.OS === "android" && show && (
-            <DateTimePicker
-              value={date}
-              mode="date" // "time" or "datetime"
-              display="default"
-              onChange={onChangeDate}
-              maximumDate={new Date(2030, 11, 31)}
-              minimumDate={new Date(2020, 0, 1)}
+          <DropDown
+            label="Select Type"
+            data={[
+              { id: 1, name: "Indent Request" },
+              { id: 2, name: "DPR" },
+            ]}
+            value={dprType?.name || ""}
+            selectItem={(item) => {
+              setdprType(item);
+            }}
+          />
+          <View style={[styles.switchRow, { marginBottom: 20 }]}>
+            <Text style={styles.label}>No Activity</Text>
+            <Switch
+              value={noActivity}
+              onValueChange={(v) => {
+                setnoActivity(v);
+              }}
             />
-          )}
+          </View>
 
-          {Platform.OS === "ios" && show && (
-            <Modal transparent={true} animationType="slide">
+          {!noActivity ? (
+            <>
+              {/* ADD ENTRY */}
+              <TouchableOpacity style={styles.addEntryBtn} onPress={addEntry}>
+                <Icon name="add" size={24} color="#fff" />
+                <Text style={styles.addEntryText}>Add Activity</Text>
+              </TouchableOpacity>
+
+              {Platform.OS === "android" && show && (
+                <DateTimePicker
+                  value={date}
+                  mode="date" // "time" or "datetime"
+                  display="default"
+                  onChange={onChangeDate}
+                  maximumDate={new Date(2030, 11, 31)}
+                  minimumDate={new Date(2020, 0, 1)}
+                />
+              )}
+
+              {Platform.OS === "ios" && show && (
+                <Modal transparent={true} animationType="slide">
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: "flex-end",
+                      backgroundColor: "rgba(0,0,0,0.3)",
+                    }}
+                  >
+                    <View
+                      style={{
+                        backgroundColor: "#fff",
+                        padding: 20,
+                        borderTopLeftRadius: 20,
+                        borderTopRightRadius: 20,
+                      }}
+                    >
+                      <View style={{ alignItems: "flex-end" }}>
+                        <TouchableOpacity onPress={() => setShow(false)}>
+                          <Text
+                            style={{
+                              fontSize: 16,
+                              color: "blue",
+                              marginBottom: 10,
+                            }}
+                          >
+                            Done
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+
+                      <DateTimePicker
+                        value={date}
+                        mode="date"
+                        display="spinner"
+                        onChange={(event, selectedDate) => {
+                          if (selectedDate) {
+                            setDate(selectedDate);
+                          }
+                        }}
+                        style={{ width: "100%" }}
+                        maximumDate={new Date(2030, 11, 31)}
+                        minimumDate={new Date(2020, 0, 1)}
+                      />
+                    </View>
+                  </View>
+                </Modal>
+              )}
+
               <View
                 style={{
-                  flex: 1,
-                  justifyContent: "flex-end",
-                  backgroundColor: "rgba(0,0,0,0.3)",
+                  backgroundColor: "#f1f8e9",
+                  padding: 10,
+                  borderRadius: 10,
+                  borderWidth: 2,
+                  borderColor: "#2e7d32",
+                  borderStyle: "dotted",
+                  marginTop: 10,
                 }}
               >
-                <View
-                  style={{
-                    backgroundColor: "#fff",
-                    padding: 20,
-                    borderTopLeftRadius: 20,
-                    borderTopRightRadius: 20,
-                  }}
-                >
-                  <View style={{ alignItems: "flex-end" }}>
-                    <TouchableOpacity onPress={() => setShow(false)}>
-                      <Text
-                        style={{
-                          fontSize: 16,
-                          color: "blue",
-                          marginBottom: 10,
-                        }}
-                      >
-                        Done
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  <DateTimePicker
-                    value={date}
-                    mode="date"
-                    display="spinner"
-                    onChange={(event, selectedDate) => {
-                      if (selectedDate) {
-                        setDate(selectedDate);
-                      }
+                <View style={styles.row}>
+                  <Text
+                    style={{
+                      color: Colors.black,
+                      fontSize: 18,
+                      marginBottom: 10,
                     }}
-                    style={{ width: "100%" }}
-                    maximumDate={new Date(2030, 11, 31)}
-                    minimumDate={new Date(2020, 0, 1)}
-                  />
+                  >
+                    Basic Detail
+                  </Text>
                 </View>
-              </View>
-            </Modal>
-          )}
-
-          <View
-            style={{
-              backgroundColor: "#f1f8e9",
-              padding: 10,
-              borderRadius: 10,
-              borderWidth: 2,
-              borderColor: "#2e7d32",
-              borderStyle: "dotted",
-              marginTop: 10,
-            }}
-          >
-            <View style={styles.row}>
-              <Text
-                style={{
-                  color: Colors.black,
-                  fontSize: 18,
-                  marginBottom: 10,
-                }}
-              >
-                Basic Detail
-              </Text>
-            </View>
-            <View style={styles.row}>
-              {/* <View style={styles.inputContainer}>
+                <View style={styles.row}>
+                  {/* <View style={styles.inputContainer}>
                 <Text style={styles.label}>Plan Id</Text>
                 <TextInput
                   style={styles.input}
@@ -934,516 +1040,621 @@ export default function AddNewDpr({ route }) {
                   editable={false}
                 />
               </View> */}
-              <TouchableOpacity
-                onPress={() => setShow(true)}
-                style={styles.inputContainer}
-              >
-                <Text style={styles.label}>Report Date</Text>
-                <View style={styles.input}>
-                  <Text>{date.toLocaleDateString()}</Text>
-                </View>
-              </TouchableOpacity>
-              <DropDown
-                label="Plan"
-                data={[NONE_PLAN_OPTION, ...(landData?.plans || [])]}
-                value={selectedPlan?.planCode || ""}
-                selectItem={(item) => {
-                  if (item.id === null) {
-                    // NONE selected
-                    setSelectedPlan(null);
-                  } else {
-                    setSelectedPlan(item);
-                  }
-                }}
-              />
-            </View>
-          </View>
-
-          {entries.map((entry, ei) => (
-            <View key={entry.id} style={styles.entryCard}>
-              <View style={styles.entryHeader}>
-                <TouchableOpacity
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    flex: 1,
-                  }}
-                  onPress={() => toggleEntry(entry.id)}
-                >
-                  <Text style={styles.entryTitle}>Activity #{ei + 1}</Text>
-                </TouchableOpacity>
-
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  {/* ❌ DELETE ENTRY (hide for first entry if you want) */}
-                  {entries.length > 1 && (
-                    <TouchableOpacity
-                      onPress={() => deleteEntry(entry.id)}
-                      style={{ marginRight: 8 }}
-                    >
-                      <Icon name="delete" size={22} color="red" />
-                    </TouchableOpacity>
-                  )}
-
-                  <Icon
-                    name={entry.expanded ? "expand-less" : "expand-more"}
-                    size={28}
-                  />
+                  <TouchableOpacity
+                    onPress={() => setShow(true)}
+                    style={styles.inputContainer}
+                  >
+                    <Text style={styles.label}>Report Date</Text>
+                    <View style={styles.input}>
+                      <Text>{date.toLocaleDateString()}</Text>
+                    </View>
+                  </TouchableOpacity>
+                  {/* <DropDown
+                    label="Plan"
+                    data={[NONE_PLAN_OPTION, ...(landData?.plans || [])]}
+                    value={selectedPlan?.planCode || ""}
+                    selectItem={(item) => {
+                      if (item.id === null) {
+                        // NONE selected
+                        setSelectedPlan(null);
+                      } else {
+                        setSelectedPlan(item);
+                      }
+                    }}
+                  /> */}
+                  <TouchableOpacity disabled style={styles.inputContainer}>
+                    <Text style={styles.label}>Plan ID</Text>
+                    <View style={styles.input}>
+                      <Text>{landData?.planCode}</Text>
+                    </View>
+                  </TouchableOpacity>
                 </View>
               </View>
 
-              {entry.expanded &&
-                entry.activities.map((act, ai) => (
-                  <View key={act.id} style={styles.activityCard}>
-                    {/* ACTIVITY */}
-                    <DropDown
-                      label="Activity"
-                      data={operationList}
-                      value={act.activity?.operationName || ""}
-                      selectItem={(item) => {
-                        getContractorName(item.id);
-                        updateActivity(entry.id, act.id, (a) => ({
-                          ...a,
-                          activity: item,
-                          contractorType: {
-                            id: 1,
-                            name: "Activity Wise Contractor",
-                            agreementType: "ACTIVITY_WISE_CONTRACTOR",
-                          },
-                        }));
-                        setErrors((prev) => {
-                          const copy = { ...prev };
-                          delete copy[`activity_${ei}_${ai}`];
-                          return copy;
-                        });
+              {entries.map((entry, ei) => (
+                <View key={entry.id} style={styles.entryCard}>
+                  <View style={styles.entryHeader}>
+                    <TouchableOpacity
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        flex: 1,
                       }}
-                      containerStyle={[
-                        errors[`activity_${ei}_${ai}`] && {
-                          borderColor: "red",
-                          borderWidth: 1,
-                        },
-                      ]}
-                    />
-                    {errors[`activity_${ei}_${ai}`] && (
-                      <Text style={styles.dropdownErrorMessageText}>
-                        {errors[`activity_${ei}_${ai}`]}
-                      </Text>
-                    )}
+                      onPress={() => toggleEntry(entry.id)}
+                    >
+                      <Text style={styles.entryTitle}>Activity #{ei + 1}</Text>
+                    </TouchableOpacity>
 
-                    <DropDown
-                      label="Contractor Type"
-                      data={contractorTypeList}
-                      value={act.contractorType?.name || ""}
-                      selectItem={(item) => {
-                        console.log(item);
-                        updateActivity(entry.id, act.id, (a) => ({
-                          ...a,
-                          contractorType: item,
-                          contractorName: null,
-                        }));
-                        setErrors((prev) => {
-                          const copy = { ...prev };
-                          delete copy[`contractorType_${ei}_${ai}`];
-                          return copy;
-                        });
-                      }}
-                      containerStyle={[
-                        errors[`contractorType_${ei}_${ai}`] && {
-                          borderColor: "red",
-                          borderWidth: 1,
-                        },
-                      ]}
-                    />
-                    {errors[`contractorType_${ei}_${ai}`] && (
-                      <Text style={styles.dropdownErrorMessageText}>
-                        {errors[`contractorType_${ei}_${ai}`]}
-                      </Text>
-                    )}
-
-                    <DropDown
-                      label="Contractor Name"
-                      data={contractorNameList}
-                      value={act.contractorName?.name || ""}
-                      selectItem={(item) => {
-                        updateActivity(entry.id, act.id, (a) => ({
-                          ...a,
-                          contractorName: item,
-                        }));
-                        setErrors((prev) => {
-                          const copy = { ...prev };
-                          delete copy[`contractorName_${ei}_${ai}`];
-                          return copy;
-                        });
-                      }}
-                      containerStyle={[
-                        errors[`contractorName_${ei}_${ai}`] && {
-                          borderColor: "red",
-                          borderWidth: 1,
-                        },
-                      ]}
-                    />
-                    {errors[`contractorName_${ei}_${ai}`] && (
-                      <Text style={styles.dropdownErrorMessageText}>
-                        {errors[`contractorName_${ei}_${ai}`]}
-                      </Text>
-                    )}
-
-                    <View style={styles.inputContainer}>
-                      <Text style={styles.label}>No of Labour</Text>
-                      <TextInput
-                        style={[
-                          styles.input,
-                          errors[`labour_${ei}_${ai}`] && {
-                            borderColor: "red",
-                          },
-                        ]}
-                        placeholder="No of Labour"
-                        keyboardType="numeric"
-                        value={act.noOfLabour}
-                        onChangeText={(v) => {
-                          updateActivity(entry.id, act.id, (a) => ({
-                            ...a,
-                            noOfLabour: v,
-                          }));
-                          setErrors((prev) => {
-                            const copy = { ...prev };
-                            delete copy[`labour_${ei}_${ai}`];
-                            return copy;
-                          });
-                        }}
-                      />
-                      {errors[`labour_${ei}_${ai}`] && (
-                        <Text style={styles.textInputErrorText}>
-                          {errors[`labour_${ei}_${ai}`]}
-                        </Text>
+                    <View
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    >
+                      {/* ❌ DELETE ENTRY (hide for first entry if you want) */}
+                      {entries.length > 1 && (
+                        <TouchableOpacity
+                          onPress={() => deleteEntry(entry.id)}
+                          style={{ marginRight: 8 }}
+                        >
+                          <Icon name="delete" size={22} color="red" />
+                        </TouchableOpacity>
                       )}
+
+                      <Icon
+                        name={entry.expanded ? "expand-less" : "expand-more"}
+                        size={28}
+                      />
                     </View>
+                  </View>
 
-                    {/* AGRICULTURE */}
-                    <View style={styles.sectionHeader}>
-                      <Text style={styles.sectionTitle}>
-                        Agriculture Inputs
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() => addAgriculture(entry.id, act.id)}
-                        style={styles.addNewButton}
-                      >
-                        <Text style={styles.addText}>+ Add New</Text>
-                      </TouchableOpacity>
-                    </View>
-
-                    {act.agricultures.map((ag, index) => (
-                      <View key={ag.id} style={styles.rowBox}>
-                        <View
-                          style={{
-                            flexDirection: "row",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                          }}
-                        >
-                          <Text
-                            style={{
-                              fontSize: 14,
-                              fontWeight: "bold",
-                              color: "black",
-                            }}
-                          >
-                            S.N. {index + 1}
-                          </Text>
-                          <TouchableOpacity
-                            onPress={() =>
-                              removeAgriculture(entry.id, act.id, ag.id)
-                            }
-                          >
-                            <Icon name="delete" size={20} color="red" />
-                          </TouchableOpacity>
-                        </View>
-                        <View style={styles.divider} />
+                  {entry.expanded &&
+                    entry.activities.map((act, ai) => (
+                      <View key={act.id} style={styles.activityCard}>
+                        {/* ACTIVITY */}
                         <DropDown
-                          label="Material Type"
-                          data={materialTypeList}
-                          value={ag.materialType || ""}
-                          selectItem={(val) => {
-                            getMaterialItem(val);
-                            updateActivity(entry.id, act.id, (a) => ({
-                              ...a,
-                              agricultures: a.agricultures.map((x) =>
-                                x.id === ag.id
-                                  ? { ...x, materialType: val }
-                                  : x,
-                              ),
-                            }));
-                            setErrors((prev) => {
-                              const copy = { ...prev };
-                              delete copy[`materialType_${ei}_${ai}_${index}`];
-                              return copy;
-                            });
-                          }}
-                          containerStyle={[
-                            errors[`materialType_${ei}_${ai}_${index}`] && {
-                              borderColor: "red",
-                              borderWidth: 1,
-                            },
-                          ]}
-                        />
-                        {errors[`materialType_${ei}_${ai}_${index}`] && (
-                          <Text style={styles.dropdownErrorMessageText}>
-                            {errors[`materialType_${ei}_${ai}_${index}`]}
-                          </Text>
-                        )}
-
-                        <DropDown
-                          label="Item"
-                          data={materialList}
-                          value={ag.material?.itemName || ""}
+                          label="Activity"
+                          data={operationList}
+                          value={act.activity?.operationName || ""}
                           selectItem={(item) => {
-                            fetchMaterialList(item);
+                            getContractorName(item.id);
                             updateActivity(entry.id, act.id, (a) => ({
                               ...a,
-                              agricultures: a.agricultures.map((x) =>
-                                x.id === ag.id ? { ...x, material: item } : x,
-                              ),
+                              activity: item,
+                              contractorType: {
+                                id: 1,
+                                name: "Activity Wise Contractor",
+                                agreementType: "ACTIVITY_WISE_CONTRACTOR",
+                              },
                             }));
                             setErrors((prev) => {
                               const copy = { ...prev };
-                              delete copy[`material_${ei}_${ai}_${index}`];
+                              delete copy[`activity_${ei}_${ai}`];
                               return copy;
                             });
                           }}
                           containerStyle={[
-                            errors[`material_${ei}_${ai}_${index}`] && {
+                            errors[`activity_${ei}_${ai}`] && {
                               borderColor: "red",
                               borderWidth: 1,
                             },
                           ]}
                         />
-                        {errors[`material_${ei}_${ai}_${index}`] && (
+                        {errors[`activity_${ei}_${ai}`] && (
                           <Text style={styles.dropdownErrorMessageText}>
-                            {errors[`material_${ei}_${ai}_${index}`]}
+                            {errors[`activity_${ei}_${ai}`]}
                           </Text>
                         )}
-                        <TouchableOpacity
-                          style={styles.selectMaterialBtn}
-                          onPress={() => {
-                            setShowMaterialModal(true);
+
+                        <DropDown
+                          label="Contractor Type"
+                          data={contractorTypeList}
+                          value={act.contractorType?.name || ""}
+                          selectItem={(item) => {
+                            console.log(item);
+                            updateActivity(entry.id, act.id, (a) => ({
+                              ...a,
+                              contractorType: item,
+                              contractorName: null,
+                            }));
+                            setErrors((prev) => {
+                              const copy = { ...prev };
+                              delete copy[`contractorType_${ei}_${ai}`];
+                              return copy;
+                            });
                           }}
-                        >
-                          <Text style={styles.selectMaterialText}>
-                            Select / View Material(s)
+                          containerStyle={[
+                            errors[`contractorType_${ei}_${ai}`] && {
+                              borderColor: "red",
+                              borderWidth: 1,
+                            },
+                          ]}
+                        />
+                        {errors[`contractorType_${ei}_${ai}`] && (
+                          <Text style={styles.dropdownErrorMessageText}>
+                            {errors[`contractorType_${ei}_${ai}`]}
                           </Text>
-                        </TouchableOpacity>
-                      </View>
-                    ))}
+                        )}
 
-                    {/* EQUIPMENT */}
-                    <View style={styles.sectionHeader}>
-                      <View style={{ width: "70%" }}>
-                        <Text style={styles.sectionTitle}>
-                          Equipment & Mechanical Details
-                        </Text>
-                      </View>
-                      <View style={{ width: "25%" }}>
-                        <TouchableOpacity
-                          onPress={() => addEquipment(entry.id, act.id)}
-                          style={styles.addNewButton}
-                        >
-                          <Text style={styles.addText}>+ Add New</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
+                        <DropDown
+                          label="Contractor Name"
+                          data={contractorNameList}
+                          value={act.contractorName?.name || ""}
+                          selectItem={(item) => {
+                            updateActivity(entry.id, act.id, (a) => ({
+                              ...a,
+                              contractorName: item,
+                            }));
+                            setErrors((prev) => {
+                              const copy = { ...prev };
+                              delete copy[`contractorName_${ei}_${ai}`];
+                              return copy;
+                            });
+                          }}
+                          containerStyle={[
+                            errors[`contractorName_${ei}_${ai}`] && {
+                              borderColor: "red",
+                              borderWidth: 1,
+                            },
+                          ]}
+                        />
+                        {errors[`contractorName_${ei}_${ai}`] && (
+                          <Text style={styles.dropdownErrorMessageText}>
+                            {errors[`contractorName_${ei}_${ai}`]}
+                          </Text>
+                        )}
 
-                    {act.equipments.map((eq, eqi) => (
-                      <View>
-                        <View key={eq.id} style={styles.rowBox}>
-                          <View
-                            style={{
-                              flexDirection: "row",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                            }}
-                          >
-                            <Text
-                              style={{
-                                fontSize: 14,
-                                fontWeight: "bold",
-                                color: "black",
-                              }}
-                            >
-                              S.N. {eqi + 1}
-                            </Text>
-                            <TouchableOpacity
-                              onPress={() =>
-                                removeEquipment(entry.id, act.id, eq.id)
-                              }
-                            >
-                              <Icon name="delete" size={20} color="red" />
-                            </TouchableOpacity>
-                          </View>
-                          <View style={styles.divider} />
-                          <DropDown
-                            label="Equipment"
-                            data={equipmentList}
-                            value={eq.equipment}
-                            selectItem={(item) => {
-                              getSubGroup(item.id);
+                        <View style={styles.inputContainer}>
+                          <Text style={styles.label}>No of Labour</Text>
+                          <TextInput
+                            style={[
+                              styles.input,
+                              errors[`labour_${ei}_${ai}`] && {
+                                borderColor: "red",
+                              },
+                            ]}
+                            placeholder="No of Labour"
+                            keyboardType="numeric"
+                            value={act.noOfLabour}
+                            onChangeText={(v) => {
                               updateActivity(entry.id, act.id, (a) => ({
                                 ...a,
-                                equipments: a.equipments.map((x) =>
-                                  x.id === eq.id
-                                    ? { ...x, equipment: item }
-                                    : x,
-                                ),
+                                noOfLabour: v,
                               }));
                               setErrors((prev) => {
                                 const copy = { ...prev };
-                                delete copy[`equipment_${ei}_${ai}_${eqi}`];
+                                delete copy[`labour_${ei}_${ai}`];
                                 return copy;
                               });
                             }}
-                            containerStyle={[
-                              errors[`equipment_${ei}_${ai}_${eqi}`] && {
-                                borderColor: "red",
-                                borderWidth: 1,
-                              },
-                            ]}
                           />
-                          {errors[`equipment_${ei}_${ai}_${eqi}`] && (
-                            <Text style={styles.dropdownErrorMessageText}>
-                              {errors[`equipment_${ei}_${ai}_${eqi}`]}
+                          {errors[`labour_${ei}_${ai}`] && (
+                            <Text style={styles.textInputErrorText}>
+                              {errors[`labour_${ei}_${ai}`]}
                             </Text>
                           )}
+                        </View>
+                        <View style={{ flexDirection: "row", gap: 10 }}>
+                          {/* AREA */}
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.label}>Area</Text>
 
-                          <DropDown
-                            label="Sub Group"
-                            data={equipmentSubGroupList}
-                            value={eq.subGroup}
-                            selectItem={(item) => {
-                              getCategory(item);
-                              updateActivity(entry.id, act.id, (a) => ({
-                                ...a,
-                                equipments: a.equipments.map((x) =>
-                                  x.id === eq.id
-                                    ? {
-                                        ...x,
-                                        subGroup: item,
-                                        categoryId: null,
-                                        categoryName: "", // 🔥 RESET
-                                      }
-                                    : x,
-                                ),
-                              }));
-                              setErrors((prev) => {
-                                const copy = { ...prev };
-                                delete copy[`subGroup_${ei}_${ai}_${eqi}`];
-                                return copy;
-                              });
-                            }}
-                            containerStyle={[
-                              errors[`subGroup_${ei}_${ai}_${eqi}`] && {
-                                borderColor: "red",
-                                borderWidth: 1,
-                              },
-                            ]}
-                          />
-                          {errors[`subGroup_${ei}_${ai}_${eqi}`] && (
-                            <Text style={styles.dropdownErrorMessageText}>
-                              {errors[`subGroup_${ei}_${ai}_${eqi}`]}
-                            </Text>
-                          )}
-
-                          <DropDown
-                            label="Category"
-                            data={categoryList}
-                            value={eq.categoryName || ""}
-                            selectItem={(item) => {
-                              updateActivity(entry.id, act.id, (a) => ({
-                                ...a,
-                                equipments: a.equipments.map((x) =>
-                                  x.id === eq.id
-                                    ? {
-                                        ...x,
-                                        categoryId: item.id,
-                                        categoryName: item.assetCategoryName,
-                                      }
-                                    : x,
-                                ),
-                              }));
-                              setErrors((prev) => {
-                                const copy = { ...prev };
-                                delete copy[`category_${ei}_${ai}_${eqi}`];
-                                return copy;
-                              });
-                            }}
-                            containerStyle={[
-                              errors[`category_${ei}_${ai}_${eqi}`] && {
-                                borderColor: "red",
-                                borderWidth: 1,
-                              },
-                            ]}
-                          />
-                          {errors[`category_${ei}_${ai}_${eqi}`] && (
-                            <Text style={styles.dropdownErrorMessageText}>
-                              {errors[`category_${ei}_${ai}_${eqi}`]}
-                            </Text>
-                          )}
-
-                          <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Estimated Hours</Text>
                             <TextInput
-                              style={[
-                                styles.input,
-                                errors[`hours_${ei}_${ai}_${eqi}`] && {
-                                  borderColor: "red",
-                                },
-                              ]}
-                              placeholder="Estimated Hours"
-                              value={eq.estHours}
+                              style={styles.input}
+                              placeholder="Area"
+                              keyboardType="numeric"
+                              value={act.area}
                               onChangeText={(v) => {
-                                setErrors((prev) => {
-                                  const copy = { ...prev };
-                                  delete copy[`hours_${ei}_${ai}_${eqi}`];
-                                  return copy;
-                                });
+                                const total =
+                                  Number(v || 0) *
+                                  Number(act.noOfIteration || 0);
+
                                 updateActivity(entry.id, act.id, (a) => ({
                                   ...a,
-                                  equipments: a.equipments.map((x) =>
-                                    x.id === eq.id ? { ...x, estHours: v } : x,
-                                  ),
+                                  area: v,
+                                  total: total.toString(),
                                 }));
                               }}
                             />
-                            {errors[`hours_${ei}_${ai}_${eqi}`] && (
-                              <Text style={styles.textInputErrorText}>
-                                {errors[`hours_${ei}_${ai}_${eqi}`]}
-                              </Text>
-                            )}
                           </View>
 
-                          <View style={styles.switchRow}>
-                            <Text>Operator Required</Text>
-                            <Switch
-                              value={eq.operatorRequired}
-                              onValueChange={(v) =>
+                          {/* NO OF ITERATION */}
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.label}>No. of Iteration</Text>
+
+                            <TextInput
+                              style={styles.input}
+                              placeholder="Iteration"
+                              keyboardType="numeric"
+                              value={act.noOfIteration}
+                              onChangeText={(v) => {
+                                const total =
+                                  Number(act.area || 0) * Number(v || 0);
+
                                 updateActivity(entry.id, act.id, (a) => ({
                                   ...a,
-                                  equipments: a.equipments.map((x) =>
-                                    x.id === eq.id
-                                      ? { ...x, operatorRequired: v }
-                                      : x,
-                                  ),
-                                }))
-                              }
+                                  noOfIteration: v,
+                                  total: total.toString(),
+                                }));
+                              }}
                             />
                           </View>
                         </View>
+
+                        {/* TOTAL */}
+                        <View style={styles.inputContainer}>
+                          <Text style={styles.label}>Total</Text>
+
+                          <TextInput
+                            style={[
+                              styles.input,
+                              { backgroundColor: "#f3f3f3" },
+                            ]}
+                            value={act.total}
+                            editable={false}
+                            placeholder="Total"
+                          />
+                        </View>
+
+                        {/* AGRICULTURE */}
+                        <View style={styles.sectionHeader}>
+                          <Text style={styles.sectionTitle}>
+                            Agriculture Inputs
+                          </Text>
+                          <TouchableOpacity
+                            onPress={() => addAgriculture(entry.id, act.id)}
+                            style={styles.addNewButton}
+                          >
+                            <Text style={styles.addText}>+ Add New</Text>
+                          </TouchableOpacity>
+                        </View>
+
+                        {act.agricultures.map((ag, index) => (
+                          <View key={ag.id} style={styles.rowBox}>
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                              }}
+                            >
+                              <Text
+                                style={{
+                                  fontSize: 14,
+                                  fontWeight: "bold",
+                                  color: "black",
+                                }}
+                              >
+                                S.N. {index + 1}
+                              </Text>
+                              <TouchableOpacity
+                                onPress={() =>
+                                  removeAgriculture(entry.id, act.id, ag.id)
+                                }
+                              >
+                                <Icon name="delete" size={20} color="red" />
+                              </TouchableOpacity>
+                            </View>
+                            <View style={styles.divider} />
+                            <DropDown
+                              label="Material Type"
+                              data={materialTypeList}
+                              value={ag.materialType || ""}
+                              selectItem={(val) => {
+                                getMaterialItem(val);
+                                updateActivity(entry.id, act.id, (a) => ({
+                                  ...a,
+                                  agricultures: a.agricultures.map((x) =>
+                                    x.id === ag.id
+                                      ? { ...x, materialType: val }
+                                      : x,
+                                  ),
+                                }));
+                                setErrors((prev) => {
+                                  const copy = { ...prev };
+                                  delete copy[
+                                    `materialType_${ei}_${ai}_${index}`
+                                  ];
+                                  return copy;
+                                });
+                              }}
+                              containerStyle={[
+                                errors[`materialType_${ei}_${ai}_${index}`] && {
+                                  borderColor: "red",
+                                  borderWidth: 1,
+                                },
+                              ]}
+                            />
+                            {errors[`materialType_${ei}_${ai}_${index}`] && (
+                              <Text style={styles.dropdownErrorMessageText}>
+                                {errors[`materialType_${ei}_${ai}_${index}`]}
+                              </Text>
+                            )}
+
+                            <DropDown
+                              label="Item"
+                              data={materialList}
+                              value={ag.material?.itemName || ""}
+                              selectItem={(item) => {
+                                fetchMaterialList(item);
+                                updateActivity(entry.id, act.id, (a) => ({
+                                  ...a,
+                                  agricultures: a.agricultures.map((x) =>
+                                    x.id === ag.id
+                                      ? { ...x, material: item }
+                                      : x,
+                                  ),
+                                }));
+                                setErrors((prev) => {
+                                  const copy = { ...prev };
+                                  delete copy[`material_${ei}_${ai}_${index}`];
+                                  return copy;
+                                });
+                              }}
+                              containerStyle={[
+                                errors[`material_${ei}_${ai}_${index}`] && {
+                                  borderColor: "red",
+                                  borderWidth: 1,
+                                },
+                              ]}
+                            />
+                            {errors[`material_${ei}_${ai}_${index}`] && (
+                              <Text style={styles.dropdownErrorMessageText}>
+                                {errors[`material_${ei}_${ai}_${index}`]}
+                              </Text>
+                            )}
+                            <TouchableOpacity
+                              style={styles.selectMaterialBtn}
+                              onPress={() => {
+                                setShowMaterialModal(true);
+                              }}
+                            >
+                              <Text style={styles.selectMaterialText}>
+                                Select / View Material(s)
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
+                        ))}
+
+                        {/* EQUIPMENT */}
+                        <View style={styles.sectionHeader}>
+                          <View style={{ width: "70%" }}>
+                            <Text style={styles.sectionTitle}>
+                              Equipment & Mechanical Details
+                            </Text>
+                          </View>
+                          <View style={{ width: "25%" }}>
+                            <TouchableOpacity
+                              onPress={() => addEquipment(entry.id, act.id)}
+                              style={styles.addNewButton}
+                            >
+                              <Text style={styles.addText}>+ Add New</Text>
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+
+                        {act.equipments.map((eq, eqi) => (
+                          <View>
+                            <View key={eq.id} style={styles.rowBox}>
+                              <View
+                                style={{
+                                  flexDirection: "row",
+                                  justifyContent: "space-between",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <Text
+                                  style={{
+                                    fontSize: 14,
+                                    fontWeight: "bold",
+                                    color: "black",
+                                  }}
+                                >
+                                  S.N. {eqi + 1}
+                                </Text>
+                                <TouchableOpacity
+                                  onPress={() =>
+                                    removeEquipment(entry.id, act.id, eq.id)
+                                  }
+                                >
+                                  <Icon name="delete" size={20} color="red" />
+                                </TouchableOpacity>
+                              </View>
+                              <View style={styles.divider} />
+                              <DropDown
+                                label="Equipment"
+                                data={equipmentList}
+                                value={eq.equipment}
+                                selectItem={(item) => {
+                                  getSubGroup(item.id);
+                                  updateActivity(entry.id, act.id, (a) => ({
+                                    ...a,
+                                    equipments: a.equipments.map((x) =>
+                                      x.id === eq.id
+                                        ? { ...x, equipment: item }
+                                        : x,
+                                    ),
+                                  }));
+                                  setErrors((prev) => {
+                                    const copy = { ...prev };
+                                    delete copy[`equipment_${ei}_${ai}_${eqi}`];
+                                    return copy;
+                                  });
+                                }}
+                                containerStyle={[
+                                  errors[`equipment_${ei}_${ai}_${eqi}`] && {
+                                    borderColor: "red",
+                                    borderWidth: 1,
+                                  },
+                                ]}
+                              />
+                              {errors[`equipment_${ei}_${ai}_${eqi}`] && (
+                                <Text style={styles.dropdownErrorMessageText}>
+                                  {errors[`equipment_${ei}_${ai}_${eqi}`]}
+                                </Text>
+                              )}
+
+                              <DropDown
+                                label="Sub Group"
+                                data={equipmentSubGroupList}
+                                value={eq.subGroup}
+                                selectItem={(item) => {
+                                  getCategory(item);
+                                  updateActivity(entry.id, act.id, (a) => ({
+                                    ...a,
+                                    equipments: a.equipments.map((x) =>
+                                      x.id === eq.id
+                                        ? {
+                                            ...x,
+                                            subGroup: item,
+                                            categoryId: null,
+                                            categoryName: "", // 🔥 RESET
+                                          }
+                                        : x,
+                                    ),
+                                  }));
+                                  setErrors((prev) => {
+                                    const copy = { ...prev };
+                                    delete copy[`subGroup_${ei}_${ai}_${eqi}`];
+                                    return copy;
+                                  });
+                                }}
+                                containerStyle={[
+                                  errors[`subGroup_${ei}_${ai}_${eqi}`] && {
+                                    borderColor: "red",
+                                    borderWidth: 1,
+                                  },
+                                ]}
+                              />
+                              {errors[`subGroup_${ei}_${ai}_${eqi}`] && (
+                                <Text style={styles.dropdownErrorMessageText}>
+                                  {errors[`subGroup_${ei}_${ai}_${eqi}`]}
+                                </Text>
+                              )}
+
+                              <DropDown
+                                label="Category"
+                                data={categoryList}
+                                value={eq.categoryName || ""}
+                                selectItem={(item) => {
+                                  updateActivity(entry.id, act.id, (a) => ({
+                                    ...a,
+                                    equipments: a.equipments.map((x) =>
+                                      x.id === eq.id
+                                        ? {
+                                            ...x,
+                                            categoryId: item.id,
+                                            categoryName:
+                                              item.assetCategoryName,
+                                          }
+                                        : x,
+                                    ),
+                                  }));
+                                  setErrors((prev) => {
+                                    const copy = { ...prev };
+                                    delete copy[`category_${ei}_${ai}_${eqi}`];
+                                    return copy;
+                                  });
+                                }}
+                                containerStyle={[
+                                  errors[`category_${ei}_${ai}_${eqi}`] && {
+                                    borderColor: "red",
+                                    borderWidth: 1,
+                                  },
+                                ]}
+                              />
+                              {errors[`category_${ei}_${ai}_${eqi}`] && (
+                                <Text style={styles.dropdownErrorMessageText}>
+                                  {errors[`category_${ei}_${ai}_${eqi}`]}
+                                </Text>
+                              )}
+
+                              <View style={styles.inputContainer}>
+                                <Text style={styles.label}>
+                                  Estimated Hours
+                                </Text>
+                                <TextInput
+                                  style={[
+                                    styles.input,
+                                    errors[`hours_${ei}_${ai}_${eqi}`] && {
+                                      borderColor: "red",
+                                    },
+                                  ]}
+                                  placeholder="Estimated Hours"
+                                  value={eq.estHours}
+                                  onChangeText={(v) => {
+                                    setErrors((prev) => {
+                                      const copy = { ...prev };
+                                      delete copy[`hours_${ei}_${ai}_${eqi}`];
+                                      return copy;
+                                    });
+                                    updateActivity(entry.id, act.id, (a) => ({
+                                      ...a,
+                                      equipments: a.equipments.map((x) =>
+                                        x.id === eq.id
+                                          ? { ...x, estHours: v }
+                                          : x,
+                                      ),
+                                    }));
+                                  }}
+                                />
+                                {errors[`hours_${ei}_${ai}_${eqi}`] && (
+                                  <Text style={styles.textInputErrorText}>
+                                    {errors[`hours_${ei}_${ai}_${eqi}`]}
+                                  </Text>
+                                )}
+                              </View>
+
+                              <View style={styles.switchRow}>
+                                <Text>Operator Required</Text>
+                                <Switch
+                                  value={eq.operatorRequired}
+                                  onValueChange={(v) =>
+                                    updateActivity(entry.id, act.id, (a) => ({
+                                      ...a,
+                                      equipments: a.equipments.map((x) =>
+                                        x.id === eq.id
+                                          ? { ...x, operatorRequired: v }
+                                          : x,
+                                      ),
+                                    }))
+                                  }
+                                />
+                              </View>
+                            </View>
+                          </View>
+                        ))}
                       </View>
                     ))}
-                  </View>
-                ))}
+                </View>
+              ))}
+            </>
+          ) : (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Remark</Text>
+              <TextInput
+                style={[styles.input]}
+                placeholder="Remark"
+                value={remark}
+                onChangeText={(v) => {
+                  setremark(v);
+                }}
+              />
             </View>
-          ))}
+          )}
 
-          <TouchableOpacity style={styles.submitBtn} onPress={submitDPR}>
+          <TouchableOpacity
+            style={[styles.submitBtn, { marginBottom: 0 }]}
+            onPress={() => {
+              submitDPR("PENDING");
+            }}
+          >
             <Text style={styles.addEntryText}>Submit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.submitBtn]}
+            onPress={() => {
+              submitDPR("DRAFT");
+            }}
+          >
+            <Text style={styles.addEntryText}>Save As Draft</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>

@@ -366,7 +366,8 @@ export default function MechanicalIssueDetails({ route }) {
             ? macItem.cpNumber.cpNo
             : macItem.cpNumber,
 
-        remarks: null,
+        outTime: macItem.outTime || "",
+        remarks: macItem.remarks || "",
 
         estimatedHours: Number(macItem.estimatedHours || 0),
         actualHours: Number(macItem.actualHours || 0),
@@ -489,6 +490,56 @@ export default function MechanicalIssueDetails({ route }) {
                     );
                   }}
                 />
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Out Time</Text>
+
+                  <TextInput
+                    editable={macItem?.dprMechStatus == "PENDING"}
+                    value={macItem?.outTime || ""}
+                    style={
+                      macItem?.dprMechStatus == "PENDING"
+                        ? styles.input
+                        : styles.disabledInput
+                    }
+                    placeholder="Enter Out Time"
+                    onChangeText={(text) => {
+                      setActivityGroups((prev) =>
+                        prev.map((act) => ({
+                          ...act,
+                          mechanicals: act.mechanicals.map((m) =>
+                            m.id === macItem.id ? { ...m, outTime: text } : m,
+                          ),
+                        })),
+                      );
+                    }}
+                  />
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Remark</Text>
+
+                  <TextInput
+                    editable={macItem?.dprMechStatus == "PENDING"}
+                    value={macItem?.remarks || ""}
+                    style={
+                      macItem?.dprMechStatus == "PENDING"
+                        ? styles.input
+                        : styles.disabledInput
+                    }
+                    placeholder="Enter Remark"
+                    multiline
+                    onChangeText={(text) => {
+                      setActivityGroups((prev) =>
+                        prev.map((act) => ({
+                          ...act,
+                          mechanicals: act.mechanicals.map((m) =>
+                            m.id === macItem.id ? { ...m, remarks: text } : m,
+                          ),
+                        })),
+                      );
+                    }}
+                  />
+                </View>
 
                 {macItem?.operatorRequired && (
                   // <DropDown
@@ -768,7 +819,7 @@ export default function MechanicalIssueDetails({ route }) {
 
   return (
     <WrapperContainer isLoading={loading}>
-      <InnerHeader title="Crop DPR" />
+      <InnerHeader title="Mechanical Issue Details" />
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}

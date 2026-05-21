@@ -60,6 +60,7 @@ export default function DprProcessAllocation({ route }) {
   const [toDate, setToDate] = useState(new Date());
   const [activeDateField, setActiveDateField] = useState(null); // 'FROM' | 'TO'
   const [selectedPlan, setSelectedPlan] = useState(null);
+  const [dprType, setdprType] = useState("");
 
   const isFocused = useIsFocused();
   const landData = route?.params?.landData;
@@ -102,7 +103,7 @@ export default function DprProcessAllocation({ route }) {
       pageNumber: 0,
       dprType: "CROP",
       // farmPlanId: selectedPlan?.planId || null,
-      farmPlanId: null,
+      farmPlanId: landData?.planId,
       // fromDate: "2026-01-28",
       // toDate: "2026-01-28",
       fromDate: fromDate.toISOString().split("T")[0],
@@ -110,21 +111,8 @@ export default function DprProcessAllocation({ route }) {
     };
 
     try {
-      if (selectedPlan) {
-        payloadData = {
-          epoId: null,
-          chakId: uData?.chakId || null,
-          farmBlockId: uData?.farmBlockId || null,
-          pageSize: 100,
-          pageNumber: 0,
-          dprType: "CROP",
-          farmPlanId: selectedPlan?.planId || null,
-          fromDate: fromDate.toISOString().split("T")[0],
-          toDate: toDate.toISOString().split("T")[0],
-        };
-      }
-
       console.log("payloadData", payloadData);
+      console.log("payloadData", landData);
 
       const encryptedPayload = encryptWholeObject(payloadData);
 
@@ -300,7 +288,7 @@ export default function DprProcessAllocation({ route }) {
   return (
     <WrapperContainer isLoading={loading}>
       <InnerHeader
-        title={"Process Allocation"}
+        title={`Crop (Square: ${landData?.squareName})`}
         // rightIcon={
         //   showAddNewButton && (
         //     <TouchableOpacity
@@ -389,7 +377,7 @@ export default function DprProcessAllocation({ route }) {
           </View>
         </TouchableOpacity>
       </View>
-      <View style={{ marginHorizontal: 15, marginBottom: 10 }}>
+      {/* <View style={{ marginHorizontal: 15, marginBottom: 10 }}>
         <DropDown
           label="Plan"
           data={[NONE_PLAN_OPTION, ...(landData?.plans || [])]}
@@ -401,6 +389,19 @@ export default function DprProcessAllocation({ route }) {
             } else {
               setSelectedPlan(item);
             }
+          }}
+        />
+      </View> */}
+      <View style={{ marginHorizontal: 15, marginBottom: 10 }}>
+        <DropDown
+          label="Select Type"
+          data={[
+            { id: 1, name: "Indent Request" },
+            { id: 2, name: "DPR" },
+          ]}
+          value={dprType?.name || ""}
+          selectItem={(item) => {
+            setdprType(item);
           }}
         />
       </View>

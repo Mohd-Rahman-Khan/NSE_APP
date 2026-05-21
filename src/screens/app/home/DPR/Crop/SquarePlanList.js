@@ -5,6 +5,7 @@ import {
   View,
   FlatList,
   Animated,
+  TextInput,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { getUserData } from "../../../../../utils/Storage";
@@ -34,53 +35,9 @@ import PropTypes from "prop-types";
 import en from "../../../../../constants/en";
 import WrapperContainer from "../../../../../utils/WrapperContainer";
 import InnerHeader from "../../../../../components/InnerHeader";
+import DropDown from "../../../../../components/DropDown";
 
-const squareList = [
-  {
-    squareId: 15,
-    squareName: "LKU SQUARE",
-    farmBlockId: 8,
-    farmBlockName: "LKU Block",
-    farmId: 14,
-    farmName: null,
-    plans: [
-      {
-        planId: 22,
-        planCode: "2029-2030 | Rabi | Lady Fingar | Arka Anamika | FS | I",
-        finYearId: 22,
-        status: "ACTIVE",
-        contractorList:
-          '[{"contractorId": 51, "agreementType": "SHARING_BASIS", "contractorName": "gunjan Contractor"}]',
-      },
-      {
-        planId: 25,
-        planCode: "2025-2026 | Zaid | Wheat | W75 | FS | I",
-        finYearId: 17,
-        status: "ACTIVE",
-        contractorList:
-          '[{"contractorId": 51, "agreementType": "SHARING_BASIS", "contractorName": "gunjan Contractor"}]',
-      },
-    ],
-  },
-  {
-    squareId: 17,
-    squareName: "sqaure 1",
-    farmBlockId: 8,
-    farmBlockName: "LKU Block",
-    farmId: 14,
-    farmName: null,
-    plans: [],
-  },
-];
-
-const AnimatedCard = ({
-  item,
-  index,
-  handleCardPress,
-  getStatusColor,
-  formatDate,
-  onPress,
-}) => {
+const AnimatedCard = ({ item, index, getStatusColor, formatDate, onPress }) => {
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const slideAnim = React.useRef(new Animated.Value(20)).current;
 
@@ -103,87 +60,20 @@ const AnimatedCard = ({
   }, []);
 
   return (
-    <View
-      onPress={() => {
-        //handleCardPress(item)
-      }}
-      style={styles.card}
-    >
-      {/* Header Row with Date and Status */}
-
-      {/* <View style={styles.cardHeader}>
-        <Text style={styles.dateText}>{item.farmName}</Text>
-        <View
-          style={[
-            styles.statusBadge,
-            { backgroundColor: getStatusColor(item.currentDprStatus) },
-          ]}
-        >
-          <Text style={styles.statusText}>{item.currentDprStatus}</Text>
-        </View>
-      </View> */}
-
-      {/* Main Content */}
+    <View style={styles.card}>
       <View>
-        {/* Square and Operation Row */}
-        {/* <View style={styles.row}>
-          <View style={styles.column}>
-            <Text style={styles.label}>Plan Id</Text>
-            <Text style={styles.value}>{item.planId || "N/A"}</Text>
-          </View>
-        </View> */}
         <View style={styles.row}>
           <View style={styles.column}>
             <Text style={styles.label}>Square Name</Text>
             <Text style={styles.value}>{item?.squareName || "N/A"}</Text>
           </View>
+        </View>
+        <View style={styles.row}>
           <View style={styles.column}>
-            <Text style={styles.label}>No. of Plan</Text>
-            <Text style={styles.value}>{item?.plans?.length}</Text>
+            <Text style={styles.label}>Plan</Text>
+            <Text style={styles.value}>{item?.planCode}</Text>
           </View>
         </View>
-
-        {/* Financial Year and Crop Row */}
-        {item?.contractors?.length > 0 ? (
-          <View style={styles.row}>
-            <View style={styles.column}>
-              <Text style={styles.label}>Contractor Type</Text>
-              <Text style={styles.value}>
-                {item?.contractors[0]?.contractorType || "N/A"}
-              </Text>
-            </View>
-            <View style={styles.column}>
-              <Text style={styles.label}>Contractor Name</Text>
-              <Text style={styles.value}>
-                {item?.contractors[0]?.contractorName || "N/A"}
-              </Text>
-            </View>
-          </View>
-        ) : null}
-
-        {/* Season and Class Row */}
-        {/* <View style={styles.row}>
-          <View style={styles.column}>
-            <Text style={styles.label}>Total Area(in ha)</Text>
-            <Text style={styles.value}>{item.squareArea || "N/A"}</Text>
-          </View>
-          <View style={styles.column}>
-            <Text style={styles.label}>Cultivation Area(in ha)</Text>
-            <Text style={styles.value}>{item.cultivatedArea || "N/A"}</Text>
-          </View>
-        </View> */}
-
-        {/* Required Output and Equipment Row */}
-        {/* <View style={styles.row}>
-          <View style={styles.column}>
-            <Text style={styles.label}>Required Output (ha)</Text>
-            <Text style={styles.value}>{item.requiredOutputArea || "N/A"}</Text>
-          </View>
-          <View style={styles.column}>
-            <Text style={styles.label}>Equipment</Text>
-            <Text style={styles.value}>{item.equipment ? "Yes" : "No"}</Text>
-          </View>
-        </View> */}
 
         <CustomButton
           onPress={onPress}
@@ -215,7 +105,6 @@ AnimatedCard.propTypes = {
     equipment: PropTypes.bool,
   }).isRequired,
   index: PropTypes.number.isRequired,
-  handleCardPress: PropTypes.func.isRequired,
   getStatusColor: PropTypes.func.isRequired,
   formatDate: PropTypes.func.isRequired,
 };
@@ -226,12 +115,18 @@ const SquarePlanList = () => {
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState();
   const [dpReportList, setDpReportList] = useState([]);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
+  const [showFilter, setshowFilter] = useState(false);
+  const [financialYear, setfinancialYear] = useState([]);
+  const [selectedFinancialYear, setselectedFinancialYear] = useState([]);
+  const [operationList, setoperationList] = useState([]);
+  const [selectedActivity, setselectedActivity] = useState("");
+  const [selectedStatus, setselectedStatus] = useState("");
 
   useEffect(() => {
     fetchUserData();
-  }, [isFocused]);
+    getFinacialYears();
+    getActivityList();
+  }, []);
 
   const fetchUserData = async () => {
     setLoading(true);
@@ -240,18 +135,72 @@ const SquarePlanList = () => {
     await fetchDPRList(userData);
   };
 
+  const getFinacialYears = async () => {
+    try {
+      const payloadData = {};
+      const encryptedPayload = encryptWholeObject(payloadData);
+      const response = await apiRequest(
+        API_ROUTES.FINANCIAL_YEAR,
+        "post",
+        encryptedPayload,
+      );
+      const decrypted = decryptAES(response);
+      const parsedDecrypted = JSON.parse(decrypted);
+      console.log("getFinacialYears", parsedDecrypted);
+
+      if (
+        parsedDecrypted &&
+        (parsedDecrypted?.statusCode === "200" ||
+          parsedDecrypted?.statusCode === "201")
+      ) {
+        setfinancialYear(parsedDecrypted?.data);
+        setselectedFinancialYear(parsedDecrypted?.data[0]);
+      } else {
+        showErrorMessage(parsedDecrypted?.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.log(error, "line error");
+      showErrorMessage("something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getActivityList = async () => {
+    setLoading(true);
+    try {
+      const operationPayloadData = {};
+      const encryptedOperationPayload =
+        encryptWholeObject(operationPayloadData);
+      const operationListResponse = await apiRequest(
+        API_ROUTES.OPERATION_MASTER_DD,
+        "POST",
+        encryptedOperationPayload,
+      );
+      const decryptedOperationListData = decryptAES(operationListResponse);
+      const parsedDecryptedOperationListData = JSON.parse(
+        decryptedOperationListData,
+      );
+      if (
+        parsedDecryptedOperationListData?.status === "SUCCESS" &&
+        parsedDecryptedOperationListData?.statusCode === "200"
+      ) {
+        setoperationList(parsedDecryptedOperationListData?.data || []);
+      } else {
+        showErrorMessage("Unable to get the Operation List Data");
+      }
+    } catch (error) {
+      console.log(error, "line error");
+      showErrorMessage("Error fetching dropdown data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchDPRList = async (userData) => {
+    console.log("userData___", userData);
     setLoading(false);
     try {
-      // const payloadData = {
-      //   blockId: userData?.unitType === "BLOCK" ? userData?.blockId : null,
-      //   chakId: userData?.unitType === "CHAK" ? userData?.chakId : null,
-      //   // equipment: userData?.subUnitType === "WORKSHOP" ? true : false,
-      //   equipment: userData?.subUnitType === "WORKSHOP",
-      //   page: 0,
-      //   pageSize: 25,
-      // };
-
       const payloadData = {
         blockId: userData?.unitType === "BLOCK" ? userData?.blockId : null,
         chakId: userData?.unitType === "CHAK" ? userData?.chakId : null,
@@ -261,11 +210,6 @@ const SquarePlanList = () => {
 
       console.log("parsedDecrypted", payloadData);
       const encryptedPayload = encryptWholeObject(payloadData);
-      // const response = await apiRequest(
-      //   API_ROUTES.PLAN_FOR_SQURE_LIST,
-      //   "post",
-      //   encryptedPayload,
-      // );
 
       const response = await apiRequest(
         API_ROUTES.SQUARE_LIST,
@@ -280,120 +224,12 @@ const SquarePlanList = () => {
         parsedDecrypted?.status === "SUCCESS" &&
         parsedDecrypted?.statusCode === "200"
       ) {
-        setDpReportList(parsedDecrypted?.data || squareList);
+        setDpReportList(parsedDecrypted?.data);
       } else {
-        setDpReportList(squareList);
         showErrorMessage(parsedDecrypted?.message || "Not getting Data");
       }
     } catch (error) {
-      setDpReportList(squareList);
       console.log("parsedDecrypted", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCardPress = (item) => {
-    setSelectedItem(item);
-    setBottomSheetVisible(true);
-  };
-
-  const handleBottomSheetAction = (action) => {
-    setBottomSheetVisible(false);
-    setTimeout(() => {
-      switch (action) {
-        case "Details":
-          navigation.navigate("DPRDetails", { data: selectedItem });
-          break;
-        case "Edit":
-          navigation.navigate("DPREdit", { data: selectedItem });
-          break;
-        case "Submit":
-          navigation.navigate("DPRSubmit", { data: selectedItem });
-          break;
-        case "Activity Log":
-          navigation.navigate("DPRRevision", { data: selectedItem });
-          break;
-        case "Approve":
-          handleApproveMethod();
-          break;
-        case "Reject":
-          handleRejectMethod();
-          break;
-        default:
-          break;
-      }
-    }, 1000); // 1000ms = 1 second delay
-  };
-
-  const handleApproveMethod = async () => {
-    try {
-      setLoading(true);
-      const payloadData = {
-        dprStatus:
-          selectedItem?.equipment === true
-            ? "PENDING_WITH_MECHANICAL_INCHARGE"
-            : "PENDING_WITH_CHAK_INCHARGE",
-        id: selectedItem?.id,
-        subUnitId: userData?.subUnitId,
-        subUnitName: userData?.subUnitName,
-        unitId: userData?.blockId,
-        unitType: userData?.unitType,
-      };
-      const encryptedPayload = encryptWholeObject(payloadData);
-      const response = await apiRequest(
-        API_ROUTES.DP_REPORT_UPDATE,
-        "POST",
-        encryptedPayload,
-      );
-      const decrypted = decryptAES(response);
-      const parsedDecrypted = JSON.parse(decrypted);
-      if (
-        parsedDecrypted?.status === "SUCCESS" &&
-        parsedDecrypted?.statusCode === "200"
-      ) {
-        showSuccessMessage(parsedDecrypted?.message || "success");
-        await fetchDPRList(userData);
-      } else {
-        showErrorMessage(`${parsedDecrypted?.message}` || "Error");
-      }
-    } catch (error) {
-      console.log(error, "Line error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRejectMethod = async () => {
-    try {
-      setLoading(true);
-      const payloadData = {
-        dprStatus: "REJECTED",
-        id: selectedItem?.id,
-        subUnitId: userData?.subUnitId,
-        subUnitName: userData?.subUnitName,
-        unitId: userData?.blockId,
-        unitType: userData?.unitType,
-      };
-      const encryptedPayload = encryptWholeObject(payloadData);
-      const response = await apiRequest(
-        API_ROUTES.DP_REPORT_UPDATE,
-        "POST",
-        encryptedPayload,
-      );
-      const decrypted = decryptAES(response);
-      const parsedDecrypted = JSON.parse(decrypted);
-      if (
-        parsedDecrypted?.status === "SUCCESS" &&
-        parsedDecrypted?.statusCode === "200"
-      ) {
-        showSuccessMessage(parsedDecrypted?.message || "success");
-        await fetchDPRList(userData);
-      } else {
-        showErrorMessage(`${parsedDecrypted?.message}` || "Error");
-      }
-    } catch (error) {
-      console.log(error, "Line error");
     } finally {
       setLoading(false);
     }
@@ -406,20 +242,6 @@ const SquarePlanList = () => {
   };
 
   const getStatusColor = (status) => {
-    // switch (status) {
-    //   case "SUBMITTED":
-    //     return Colors.greenColor;
-    //   case "PENDING_WITH_CHAK_INCHARGE":
-    //     return Colors.orange;
-    //   case "PENDING_WITH_BLOCK_INCHARGE":
-    //     return Colors.blue;
-    //   case "PENDING_WITH_MECHANICAL_INCHARGE":
-    //     return Colors.purple;
-    //   case "REJECTED":
-    //     return Colors.redThemeColor;
-    //   default:
-    //     return Colors.gray;
-    // }
     switch (status) {
       case "SUBMITTED":
         return Colors.greenColor;
@@ -439,13 +261,12 @@ const SquarePlanList = () => {
   return (
     <WrapperContainer isLoading={loading}>
       <InnerHeader
-        // title={en.DAILY_PROGRESS_REPORT.TITLE}
         title={"Crop Process Allocation"}
         rightIcon={
           <TouchableOpacity
             activeOpacity={0.5}
             style={styles.notificationHolder}
-            //onPress={() => setShowFilter(!showFilter)}
+            onPress={() => setshowFilter(!showFilter)}
           >
             <Ionicons
               name="filter"
@@ -455,26 +276,52 @@ const SquarePlanList = () => {
           </TouchableOpacity>
         }
       />
-      {/* Create Row */}
-      {/* {dpReportList.length > 0 && ( */}
-      {/* <View style={styles.exportRow}>
-        <Text style={styles.headerText}>{en.DAILY_PROGRESS_REPORT.HEADER}</Text>
-        {userData?.unitType != "BLOCK" && (
-          <CustomButton
-            text={en.DAILY_PROGRESS_REPORT.CREATE_NEW}
-            handleAction={() => navigation.navigate("CreateNewDPR")}
-            buttonStyle={styles.exportBtn}
+      {showFilter && (
+        <View style={styles.filterCard}>
+          <DropDown
+            label="Financial Year"
+            data={financialYear}
+            value={selectedFinancialYear?.finYearShortName}
+            selectItem={(item) => setselectedFinancialYear(item)}
           />
-        )}
-      </View> */}
-      {/* )} */}
+          <DropDown
+            label="Activity"
+            data={operationList}
+            value={selectedActivity?.operationName || ""}
+            selectItem={(item) => {
+              setselectedActivity(item);
+            }}
+          />
+          <DropDown
+            label="Status"
+            data={[
+              { id: 4, name: "All" },
+              { id: 1, name: "Pending" },
+              { id: 2, name: "Approved" },
+              { id: 3, name: "Rejected" },
+              { id: 5, name: "Done" },
+            ]}
+            value={selectedStatus?.name || ""}
+            selectItem={(item) => {
+              setselectedStatus(item);
+            }}
+          />
+          <View style={styles.filterBtns}>
+            <TouchableOpacity style={styles.primaryBtn} onPress={() => {}}>
+              <Text style={styles.primaryBtnText}>Search</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.secondaryBtn} onPress={() => {}}>
+              <Text style={styles.secondaryBtnText}>Reset</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
       <FlatList
         data={dpReportList}
         renderItem={({ item, index }) => (
           <AnimatedCard
             item={item}
             index={index}
-            handleCardPress={handleCardPress}
             getStatusColor={getStatusColor}
             formatDate={formatDate}
             onPress={() => {
@@ -495,97 +342,6 @@ const SquarePlanList = () => {
           </View>
         }
       />
-      <CustomBottomSheet
-        visible={bottomSheetVisible}
-        onRequestClose={() => setBottomSheetVisible(false)}
-      >
-        <View style={styles.bottomSheetContent}>
-          <Text style={styles.headerText}>
-            {en.DAILY_PROGRESS_REPORT.SELECT_ACTION}
-          </Text>
-          <CustomButton
-            text={en.DAILY_PROGRESS_REPORT.VIEW_DETAILS}
-            buttonStyle={[
-              styles.bottomSheetButton,
-              { backgroundColor: Colors.lightGray },
-            ]}
-            textStyle={styles.bottomSheetButtonText}
-            handleAction={() => handleBottomSheetAction("Details")}
-          />
-          <CustomButton
-            text={en.DAILY_PROGRESS_REPORT.ACTIVITY_LOG}
-            buttonStyle={[
-              styles.bottomSheetButton,
-              { backgroundColor: Colors.gray },
-            ]}
-            textStyle={styles.bottomSheetButtonText}
-            handleAction={() => handleBottomSheetAction("Activity Log")}
-          />
-
-          {(selectedItem?.dprStatus === "PENDING_WITH_BLOCK_INCHARGE" ||
-            selectedItem?.dprStatus ===
-              "PENDING_WITH_CHAK_INCHARGE_FOR_CORRECTION") &&
-            userData?.unitType === "CHAK" && (
-              <CustomButton
-                text={"Edit"}
-                buttonStyle={[
-                  styles.bottomSheetButton,
-                  { backgroundColor: Colors.primary },
-                ]}
-                textStyle={styles.bottomSheetButtonText}
-                handleAction={() => handleBottomSheetAction("Edit")}
-              />
-            )}
-
-          {userData?.subUnitType === "WORKSHOP" &&
-            selectedItem?.dprStatus === "PENDING_WITH_MECHANICAL_INCHARGE" && (
-              <CustomButton
-                text={"Submit"}
-                buttonStyle={[
-                  styles.bottomSheetButton,
-                  { backgroundColor: Colors.purple },
-                ]}
-                textStyle={styles.bottomSheetButtonText}
-                handleAction={() => handleBottomSheetAction("Submit")}
-              />
-            )}
-
-          {selectedItem?.dprStatus === "PENDING_WITH_BLOCK_INCHARGE" ||
-            (selectedItem?.dprStatus === "PENDING_WITH_CHAK_INCHARGE" &&
-              userData?.unitType === "CHAK" && (
-                <CustomButton
-                  text={"Submit"}
-                  buttonStyle={styles.bottomSheetButton}
-                  textStyle={styles.bottomSheetButtonText}
-                  handleAction={() => handleBottomSheetAction("Submit")}
-                />
-              ))}
-
-          {userData?.unitType === "BLOCK" &&
-            selectedItem?.dprStatus === "PENDING_WITH_BLOCK_INCHARGE" &&
-            userData?.subUnitType != "WORKSHOP" && (
-              <CustomButton
-                text={"Approve"}
-                buttonStyle={styles.bottomSheetButton}
-                textStyle={styles.bottomSheetButtonText}
-                handleAction={() => handleBottomSheetAction("Approve")}
-              />
-            )}
-          {userData?.unitType === "BLOCK" &&
-            selectedItem?.dprStatus === "PENDING_WITH_BLOCK_INCHARGE" &&
-            userData?.subUnitType != "WORKSHOP" && (
-              <CustomButton
-                text={"Reject"}
-                buttonStyle={[
-                  styles.bottomSheetButton,
-                  { backgroundColor: Colors.red },
-                ]}
-                textStyle={styles.bottomSheetButtonText}
-                handleAction={() => handleBottomSheetAction("Reject")}
-              />
-            )}
-        </View>
-      </CustomBottomSheet>
     </WrapperContainer>
   );
 };
@@ -746,5 +502,52 @@ const styles = StyleSheet.create({
     borderColor: Colors.greenColor,
     alignItems: "center",
     justifyContent: "center",
+  },
+  filterCard: {
+    backgroundColor: Colors.white,
+    marginHorizontal: moderateScale(15),
+    margin: moderateScaleVertical(10),
+    borderRadius: moderateScale(5),
+    padding: moderateScale(10),
+    elevation: moderateScale(5),
+    shadowColor: Colors.greenColor,
+    shadowOpacity: scale(0.08),
+    shadowRadius: moderateScale(5),
+    shadowOffset: { width: 0, height: 2 },
+  },
+
+  filterBtns: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: moderateScale(10),
+    marginTop: moderateScale(8),
+  },
+  primaryBtn: {
+    backgroundColor: Colors.greenColor,
+    height: moderateScale(40),
+    width: moderateScale(75),
+    borderRadius: moderateScale(6),
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  primaryBtnText: {
+    color: Colors.white,
+    fontFamily: FontFamily.PoppinsMedium,
+    fontSize: textScale(12),
+  },
+  secondaryBtn: {
+    backgroundColor: Colors.white,
+    height: moderateScale(40),
+    width: moderateScale(75),
+    borderRadius: moderateScale(6),
+    borderWidth: moderateScale(1.3),
+    borderColor: Colors.greenColor,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  secondaryBtnText: {
+    color: Colors.greenColor,
+    fontFamily: FontFamily.PoppinsMedium,
+    fontSize: textScale(12),
   },
 });

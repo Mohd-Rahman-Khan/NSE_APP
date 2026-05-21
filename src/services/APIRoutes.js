@@ -51,7 +51,7 @@ export const API_ROUTES = {
   EQUIPMENT_LIST: "master/asset-group-master/dd",
   GET_EQUIPMENT_SUB_GROUP: "master/asset-sub-group-master/dd",
   DPR_FIND_BY_ID: "prod_farm/dpr/find-by-id",
-  MATERIAL_LIST_DPR: "inventory/running-inventory/dd/find-by-filter",
+  MATERIAL_LIST_DPR: "inventory/running-inventory/dd",
   DEALER_INDENTS_LIST: "marketing/dealer-indent/find-by-filter",
   DEALER_INDENTS_FIND_BY_ID: "marketing/dealer-indent/find-by-id",
   SEASON: "master/season-master/dd",
