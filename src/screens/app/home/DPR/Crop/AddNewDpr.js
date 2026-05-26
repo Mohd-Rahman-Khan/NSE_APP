@@ -475,52 +475,192 @@ export default function AddNewDpr({ route }) {
     return date.toISOString().split("T")[0]; // YYYY-MM-DD
   };
 
+  // const buildDprPayload = (status) => {
+  //   const planDate = formatDate(date);
+
+  //   return [
+  //     {
+  //       planDate,
+  //       actualDate: planDate,
+
+  //       chakId: String(userData?.chakId),
+  //       chakName: userData?.chakName,
+
+  //       farmId: String(landData?.farmId),
+  //       farmName: landData?.farmName,
+
+  //       farmBlockId: String(landData?.farmBlockId),
+  //       farmBlockName: landData?.farmBlockName,
+  //       allowMultiple: false,
+
+  //       squareId: landData?.squareId,
+  //       squareName: landData?.squareName,
+
+  //       farmPlanId: landData?.planId || null,
+  //       farmPlanCode: selectedPlan?.planCode || null,
+
+  //       dprType: "CROP",
+  //       dprStatus: status,
+  //       currentDprStatus: status,
+  //       dprMechanicalSubmit: false,
+
+  //       /* ================= ACTIVITIES ================= */
+  //       // activities: entries.flatMap((entry) =>
+  //       //   entry.activities
+  //       //     .filter((act) => act.activity)
+  //       //     .map((act) => ({
+  //       //       activityId: act.activity.id,
+  //       //       activityName: act.activity.operationName,
+  //       //       noOfLabour: Number(act.noOfLabour || 0),
+  //       //       area: Number(act.area || 0),
+  //       //       noOfIteration: Number(act.noOfIteration || 0),
+  //       //       total: Number(act.total || 0),
+  //       //       actualNoOfLabour: "",
+  //       //       contractorType: act.contractorType?.agreementType,
+  //       //       contractorId: act.contractorName?.contractorId,
+  //       //       contractorName: act.contractorName?.name,
+  //       //     })),
+  //       // ),
+  //       activities: entries.flatMap((entry) =>
+  //         entry.activities
+  //           .filter((act) => act.activity)
+  //           .map((act) => ({
+  //             activityId: act.activity.id,
+
+  //             activityName: act.activity.operationName,
+
+  //             noOfLabour: String(act.noOfLabour || ""),
+
+  //             actualNoOfLabour: "",
+
+  //             area: String(act.area || ""),
+
+  //             noOfIteration: String(act.noOfIteration || ""),
+
+  //             totalOutput: Number(act.total || 0).toFixed(2),
+
+  //             contractorType: act.contractorType?.agreementType,
+
+  //             contractorId: String(act.contractorName?.contractorId || ""),
+
+  //             contractorName: act.contractorName?.name,
+  //           })),
+  //       ),
+
+  //       // dprAgricultures: entries.flatMap((entry) =>
+  //       //   entry.activities.flatMap((act) =>
+  //       //     act.agricultures
+  //       //       .filter((ag) => ag.material && ag.materialType)
+  //       //       .map((ag) => ({
+  //       //         activityId: act.activity.id,
+  //       //         activityName: act.activity.operationName,
+  //       //         itemCode: ag.material.itemCode,
+  //       //         cashMemoDto: {
+  //       //           materialType: ag.materialType.name,
+  //       //           activityId: act.activity.id,
+  //       //           activityName: act.activity.operationName,
+  //       //           cashMemoItems: [],
+  //       //         },
+  //       //       })),
+  //       //   ),
+  //       // ),
+  //       dprAgricultures: entries.flatMap((entry) =>
+  //         entry.activities.flatMap((act) =>
+  //           act.agricultures
+  //             .filter((ag) => ag.material && ag.materialType)
+  //             .map((ag) => ({
+  //               activityId: act.activity.id,
+
+  //               activityName: act.activity.operationName,
+
+  //               itemCode: ag.material.itemCode,
+
+  //               itemName: ag.material.itemName || "",
+
+  //               itemId: ag.material.id,
+
+  //               materialType: ag.materialType.name,
+  //             })),
+  //         ),
+  //       ),
+
+  //       /* ================= MECHANICAL ================= */
+  //       dprMechanicals: entries.flatMap((entry) =>
+  //         entry.activities.flatMap((act) =>
+  //           act.equipments
+  //             .filter((eq) => eq.equipment && eq.subGroup && eq.categoryId)
+  //             .map((eq) => ({
+  //               equipmentId: eq.equipment.id,
+  //               equipmentName: eq.equipment.assetGroupName,
+  //               categoryId: eq.categoryId,
+  //               categoryName: eq.categoryName,
+  //               subGroupId: eq.subGroup.id,
+  //               subGroupName: eq.subGroup.assetSubGroupName,
+  //               estimatedHours: eq.estHours,
+  //               actualHours: "",
+  //               operatorRequired: eq.operatorRequired,
+  //               operatorName: "",
+  //               cpNumber: "",
+  //               mechIdleHours: "",
+  //               mechWalkingTime: "",
+  //               outTime: "",
+  //               inTime: "",
+  //               activityId: act.activity.id,
+  //               activityName: act.activity.operationName,
+  //             })),
+  //         ),
+  //       ),
+
+  //       dprLabour: [],
+  //       epoId: null,
+  //       epoName: null,
+  //     },
+  //   ];
+  // };
+
   const buildDprPayload = (status) => {
     const planDate = formatDate(date);
 
     return [
       {
+        /* ================= BASIC ================= */
+
         planDate,
         actualDate: planDate,
 
-        chakId: String(userData?.chakId),
-        chakName: userData?.chakName,
+        chakId: String(userData?.chakId || ""),
+        chakName: userData?.chakName || "",
 
-        farmId: String(landData?.farmId),
-        farmName: landData?.farmName,
+        farmId: String(landData?.farmId || ""),
+        farmName: landData?.farmName || "",
 
-        farmBlockId: String(landData?.farmBlockId),
-        farmBlockName: landData?.farmBlockName,
-        allowMultiple: false,
+        farmBlockId: String(landData?.farmBlockId || ""),
+        farmBlockName: landData?.farmBlockName || "",
 
-        squareId: landData?.squareId,
-        squareName: landData?.squareName,
+        engineeringId: String(landData?.farmBlockId || ""),
+        engineeringName: landData?.farmBlockName || "",
+
+        epoId: null,
+        epoName: null,
+
+        squareId: landData?.squareId || null,
+        squareName: landData?.squareName || "",
 
         farmPlanId: landData?.planId || null,
         farmPlanCode: selectedPlan?.planCode || null,
 
+        //allowMultiple: false,
+
         dprType: "CROP",
+        allowMultiple: true,
+
         dprStatus: status,
         currentDprStatus: status,
+
         dprMechanicalSubmit: false,
 
         /* ================= ACTIVITIES ================= */
-        // activities: entries.flatMap((entry) =>
-        //   entry.activities
-        //     .filter((act) => act.activity)
-        //     .map((act) => ({
-        //       activityId: act.activity.id,
-        //       activityName: act.activity.operationName,
-        //       noOfLabour: Number(act.noOfLabour || 0),
-        //       area: Number(act.area || 0),
-        //       noOfIteration: Number(act.noOfIteration || 0),
-        //       total: Number(act.total || 0),
-        //       actualNoOfLabour: "",
-        //       contractorType: act.contractorType?.agreementType,
-        //       contractorId: act.contractorName?.contractorId,
-        //       contractorName: act.contractorName?.name,
-        //     })),
-        // ),
+
         activities: entries.flatMap((entry) =>
           entry.activities
             .filter((act) => act.activity)
@@ -537,33 +677,18 @@ export default function AddNewDpr({ route }) {
 
               noOfIteration: String(act.noOfIteration || ""),
 
-              totalOutput: Number(act.total || 0).toFixed(2),
+              totalOutput: Number(act.total || 0).toFixed(3),
 
-              contractorType: act.contractorType?.agreementType,
+              contractorType: act.contractorType?.agreementType || "",
 
-              contractorId: String(act.contractorName?.contractorId || ""),
+              contractorId: act.contractorName?.contractorId || null,
 
-              contractorName: act.contractorName?.name,
+              contractorName: act.contractorName?.name || "",
             })),
         ),
 
-        // dprAgricultures: entries.flatMap((entry) =>
-        //   entry.activities.flatMap((act) =>
-        //     act.agricultures
-        //       .filter((ag) => ag.material && ag.materialType)
-        //       .map((ag) => ({
-        //         activityId: act.activity.id,
-        //         activityName: act.activity.operationName,
-        //         itemCode: ag.material.itemCode,
-        //         cashMemoDto: {
-        //           materialType: ag.materialType.name,
-        //           activityId: act.activity.id,
-        //           activityName: act.activity.operationName,
-        //           cashMemoItems: [],
-        //         },
-        //       })),
-        //   ),
-        // ),
+        /* ================= AGRICULTURE ================= */
+
         dprAgricultures: entries.flatMap((entry) =>
           entry.activities.flatMap((act) =>
             act.agricultures
@@ -585,35 +710,52 @@ export default function AddNewDpr({ route }) {
         ),
 
         /* ================= MECHANICAL ================= */
+
         dprMechanicals: entries.flatMap((entry) =>
           entry.activities.flatMap((act) =>
             act.equipments
               .filter((eq) => eq.equipment && eq.subGroup && eq.categoryId)
               .map((eq) => ({
                 equipmentId: eq.equipment.id,
+
                 equipmentName: eq.equipment.assetGroupName,
+
                 categoryId: eq.categoryId,
+
                 categoryName: eq.categoryName,
+
                 subGroupId: eq.subGroup.id,
+
                 subGroupName: eq.subGroup.assetSubGroupName,
+
                 estimatedHours: eq.estHours,
+
                 actualHours: "",
+
                 operatorRequired: eq.operatorRequired,
+
                 operatorName: "",
+
                 cpNumber: "",
+
                 mechIdleHours: "",
+
                 mechWalkingTime: "",
+
                 outTime: "",
+
                 inTime: "",
+
                 activityId: act.activity.id,
+
                 activityName: act.activity.operationName,
               })),
           ),
         ),
 
+        /* ================= LABOUR ================= */
+
         dprLabour: [],
-        epoId: null,
-        epoName: null,
       },
     ];
   };
@@ -717,7 +859,7 @@ export default function AddNewDpr({ route }) {
 
   const fetchMaterialList = async (item) => {
     setLoading(true);
-    console.log("parsedDecryptedMaterialList", userData);
+    //console.log("parsedDecryptedMaterialList", userData);
     try {
       // const payloadData = {
       //   inventoryType: "RUNNING",
@@ -743,7 +885,7 @@ export default function AddNewDpr({ route }) {
         subUnitName: "",
         subUnitType: "FARM_BLOCK",
       };
-      console.log("parsedDecryptedMaterialList", payloadData);
+      //console.log("parsedDecryptedMaterialList", payloadData);
       //return;
       const encryptPayloadData = encryptWholeObject(payloadData);
       const getMaterialItem = await apiRequest(

@@ -172,7 +172,11 @@ export default function DprProcessAllocation({ route }) {
   const handleCardPress = (item) => {
     setSelectedItem(item);
     //setBottomSheetVisible(true);
-    navigation.navigate("ViewDprDetail", { item: item, userData: userData });
+    navigation.navigate("ViewDprDetail", {
+      item: item,
+      userData: userData,
+      landData,
+    });
   };
 
   // ------------------- BOTTOM SHEET ACTION -------------------
@@ -229,7 +233,8 @@ export default function DprProcessAllocation({ route }) {
       style={styles.itemCard}
     >
       <View style={styles.cardHeader}>
-        <Text style={styles.dateText}>{formatDate(item?.actualDate)}</Text>
+        {console.log("item?.actualDate", item)}
+        <Text style={styles.dateText}>{formatDate(item?.planDate)}</Text>
         <View
           style={[
             styles.statusBadge,

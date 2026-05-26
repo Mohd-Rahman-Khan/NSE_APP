@@ -704,7 +704,7 @@ export default function Home({ navigation }) {
     if (hasMKT) tabs.push("Marketing");
     if (hasINV) tabs.push("Inventory");
     if (hasQC) tabs.push("QC");
-    if (hasFARM) tabs.push("Farm");
+    //if (hasFARM) tabs.push("Farm");
 
     return tabs;
   };

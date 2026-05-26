@@ -11550,6 +11550,231 @@ export default function ViewDprDetail({ route }) {
     return isValid;
   };
 
+  const submitUpdateDpr__ = async () => {
+    try {
+      setLoading(true);
+
+      const payload = [
+        {
+          id: dprData?.id,
+
+          planDate: dprData?.planDate || "",
+
+          actualDate: dprData?.actualDate || "",
+
+          /* ================= ACTIVITIES ================= */
+
+          activities: activityGroups.map((act) => ({
+            id: act?.basic?.id,
+
+            activityId: act?.activityId,
+
+            activityName: act?.activityName,
+
+            noOfLabour: Number(act?.basic?.noOfLabour || 0),
+
+            actualNoOfLabour: act?.basic?.actualNoOfLabour || null,
+
+            area: Number(act?.basic?.area || 0),
+
+            noOfIteration: Number(act?.basic?.noOfIteration || 0),
+
+            totalOutput: Number(act?.basic?.totalOutput || 0),
+
+            contractorType: act?.basic?.contractorType || "",
+
+            contractorId: act?.basic?.contractorId || null,
+
+            contractorName: act?.basic?.contractorName || "",
+          })),
+
+          chakId: dprData?.chakId || null,
+
+          farmBlockId: dprData?.farmBlockId || "",
+
+          chakName: dprData?.chakName || null,
+
+          farmBlockName: dprData?.farmBlockName || "",
+
+          engineeringId: dprData?.engineeringId || "",
+
+          engineeringName: dprData?.engineeringName || "",
+
+          farmPlanId: dprData?.farmPlanId || null,
+
+          dprType: dprData?.dprType || "CROP",
+
+          dprMechanicalSubmit: false,
+
+          farmId: dprData?.farmId || "",
+
+          farmName: dprData?.farmName || null,
+
+          epoId: dprData?.epoId || null,
+
+          epoName: dprData?.epoName || null,
+
+          squareId: dprData?.squareId || null,
+
+          squareName: dprData?.squareName || "",
+
+          allowMultiple: dprData?.allowMultiple || false,
+
+          dprStatus: "APPROVED",
+
+          currentDprStatus: "APPROVED",
+
+          /* ================= AGRICULTURE ================= */
+
+          dprAgricultures: activityGroups.flatMap((act) =>
+            act.agricultures.map((ag) => ({
+              id: ag?.id || null,
+
+              activityId: act?.activityId,
+
+              activityName: act?.activityName,
+
+              itemCode: ag?.material?.itemCode || ag?.itemCode || "",
+
+              itemName: ag?.material?.itemName || ag?.itemName || "",
+
+              itemId: Number(ag?.material?.id || ag?.itemId || 0),
+
+              materialType: ag?.materialType || "",
+
+              uom: ag?.selectedMaterial?.uom || "Kg",
+
+              qty: Number(ag?.selectedMaterial?.issueQty || 0),
+
+              noOfItems: Number(ag?.selectedMaterial?.noOfBags || 0),
+
+              requiredBags: String(ag?.selectedMaterial?.requiredBags || ""),
+
+              runningInventoryDto: {
+                lotBatchNo: ag?.selectedMaterial?.lotNo || "",
+
+                materialType: ag?.materialType || "",
+
+                uom: ag?.selectedMaterial?.uom || "Kg",
+
+                availableQty: Number(ag?.selectedMaterial?.availableQty || 0),
+
+                requestedQty: Number(ag?.selectedMaterial?.issueQty || 0),
+
+                noOfBags: Number(ag?.selectedMaterial?.noOfBags || 0),
+
+                requiredBags: String(ag?.selectedMaterial?.requiredBags || ""),
+
+                itemName: ag?.material?.itemName || "",
+
+                transactionMethod: "DPR_AGRICULTURE",
+              },
+            })),
+          ),
+
+          /* ================= MECHANICAL ================= */
+
+          dprMechanicals: activityGroups.flatMap((act) =>
+            act.mechanicals.map((eq) => ({
+              id: eq?.id,
+
+              equipmentId: eq?.equipmentId,
+
+              equipmentName: eq?.equipmentName || "",
+
+              categoryId: eq?.categoryId,
+
+              categoryName: eq?.categoryName || "",
+
+              subGroupId: eq?.subGroupId,
+
+              subGroupName: eq?.subGroupName || "",
+
+              estimatedHours: Number(eq?.estimatedHours || 0),
+
+              actualHours: eq?.actualHours || "",
+
+              operatorRequired: eq?.operatorRequired || false,
+
+              operatorName: eq?.operatorName || "",
+
+              cpNumber: eq?.cpNumber || "",
+
+              mechIdleHours: eq?.mechIdleHours || "",
+
+              mechWalkingTime: eq?.mechWalkingTime || "",
+
+              outTime: eq?.outTime || "",
+
+              inTime: eq?.inTime || "",
+
+              remarks: eq?.remarks || "",
+
+              activityId: act?.activityId,
+
+              activityName: act?.activityName || "",
+            })),
+          ),
+
+          /* ================= LABOUR ================= */
+
+          dprLabour: activityGroups.flatMap((act) =>
+            act.labours.map((lab) => ({
+              id: lab?.id || null,
+
+              labourName: lab?.labourName || "",
+
+              actualHours: Number(lab?.actualHours || 0),
+
+              agreementType: lab?.agreementType || "",
+
+              workerId: lab?.workerId || null,
+
+              workerName: lab?.workerName || "",
+
+              activityId: act?.activityId,
+
+              activityName: act?.activityName || "",
+            })),
+          ),
+
+          epoId: null,
+
+          epoName: null,
+        },
+      ];
+
+      console.log("UPDATE DPR PAYLOAD", payload);
+      //return;
+
+      const encryptedPayload = encryptWholeObject(payload);
+
+      const response = await apiRequest(
+        API_ROUTES.DPR_UPDATE,
+        "POST",
+        encryptedPayload,
+      );
+
+      const parsed = JSON.parse(decryptAES(response));
+
+      console.log("UPDATE DPR RESPONSE", parsed);
+
+      if (parsed?.status === "SUCCESS") {
+        alert("DPR updated successfully ✅");
+
+        navigation.goBack();
+      } else {
+        showErrorMessage(parsed?.message || "Update failed");
+      }
+    } catch (error) {
+      console.log("submitUpdateDpr ERROR", error);
+
+      showErrorMessage("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const submitUpdateDpr = async () => {
     if (!validateMaterialSelection()) {
       return;
@@ -11691,9 +11916,9 @@ export default function ViewDprDetail({ route }) {
 
           farmBlockName: dprData?.farmBlockName || "",
 
-          engineeringId: dprData?.farmBlockId || "",
+          engineeringId: dprData?.engineeringId || "",
 
-          engineeringName: dprData?.farmBlockName || "",
+          engineeringName: dprData?.engineeringName || "",
 
           farmPlanId: dprData?.farmPlanId || null,
 
@@ -11743,13 +11968,10 @@ export default function ViewDprDetail({ route }) {
 
               noOfItems: Number(ag?.selectedMaterial?.noOfBags || 0),
 
-              requiredBags: String(ag?.selectedMaterial?.noOfBagsInput || ""),
+              requiredBags: String(ag?.selectedMaterial?.requiredBags || ""),
 
               runningInventoryDto: {
-                lotBatchNo:
-                  ag?.selectedMaterial?.lotBatchNo ||
-                  ag?.selectedMaterial?.lotNo ||
-                  "",
+                lotBatchNo: ag?.selectedMaterial?.lotNo || "",
 
                 materialType: ag?.materialType || "",
 
@@ -11761,7 +11983,7 @@ export default function ViewDprDetail({ route }) {
 
                 noOfBags: Number(ag?.selectedMaterial?.noOfBags || 0),
 
-                requiredBags: String(ag?.selectedMaterial?.noOfBagsInput || ""),
+                requiredBags: String(ag?.selectedMaterial?.requiredBags || ""),
 
                 itemName: ag?.material?.itemName || "",
 
@@ -11816,7 +12038,25 @@ export default function ViewDprDetail({ route }) {
 
           /* ================= LABOUR ================= */
 
-          dprLabour: [],
+          dprLabour: activityGroups.flatMap((act) =>
+            act.labours.map((lab) => ({
+              id: lab?.id || null,
+
+              labourName: lab?.labourName || "",
+
+              actualHours: Number(lab?.actualHours || 0),
+
+              agreementType: lab?.agreementType || "",
+
+              workerId: lab?.workerId || null,
+
+              workerName: lab?.workerName || "",
+
+              activityId: act?.activityId,
+
+              activityName: act?.activityName || "",
+            })),
+          ),
 
           epoId: null,
 
@@ -11955,9 +12195,7 @@ export default function ViewDprDetail({ route }) {
                     {/* DETAILS */}
                     <View style={styles.cardRow}>
                       <Text style={styles.label}>Lot No:</Text>
-                      <Text style={styles.value}>
-                        {item.lotBatchNo || item.lotNo || "-"}
-                      </Text>
+                      <Text style={styles.value}>{item.lotNo}</Text>
                     </View>
 
                     <View style={styles.cardRow}>
