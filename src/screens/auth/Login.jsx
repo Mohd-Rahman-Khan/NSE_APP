@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Platform,
+  Modal,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import Colors from "../../utils/Colors";
@@ -45,6 +46,10 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
+  const [showUnitModal, setShowUnitModal] = useState(false);
+  const [unitsList, setUnitsList] = useState([]);
+  const [sessionId, setSessionId] = useState("");
+  const [selectedUnit, setSelectedUnit] = useState(null);
 
   useEffect(() => {
     getAnnouncement();
@@ -99,18 +104,112 @@ const Login = () => {
         payloadData,
       );
       console.log("loginResp", response);
+      if (response?.statusCode == "200") {
+        const decrypted = decryptAES(response?.data);
+        const parsedDecrypted = JSON.parse(decrypted);
+
+        console.log("loginResp", parsedDecrypted);
+
+        const allUnits = Object.values(parsedDecrypted?.units || {}).flat();
+
+        setSessionId(parsedDecrypted?.sessionId);
+
+        // SINGLE UNIT
+        if (allUnits.length === 1) {
+          console.log("allUnits[0]", allUnits[0]);
+          handleSelectedUnitLogin(allUnits[0], parsedDecrypted?.sessionId);
+        }
+
+        // MULTIPLE UNITS
+        else {
+          setUnitsList(allUnits);
+          setShowUnitModal(true);
+        }
+      } else {
+        showErrorMessage(response?.message || "Server Error");
+      }
+
+      // if (
+      //   response &&
+      //   response?.status === "Success" &&
+      //   response?.statusCode === "200"
+      // ) {
+      //   saveUserToken(response?.authToken);
+      //   try {
+      //     const response2 = await apiRequest(
+      //       API_ROUTES.GET_PROFILE,
+      //       "POST",
+      //       null,
+      //       response?.authToken,
+      //     );
+      //     const decrypted = decryptAES(response2);
+      //     console.log("decrypted UserData ", decrypted);
+      //     const parsedDecrypted = JSON.parse(decrypted);
+      //     if (
+      //       parsedDecrypted &&
+      //       parsedDecrypted?.status === "Success" &&
+      //       parsedDecrypted?.statusCode === "200"
+      //     ) {
+      //       const decryptedData = deepDecryptObject(parsedDecrypted.data);
+      //       console.log("decrypted UserData ", decryptedData);
+      //       dispatch(setUserData(decryptedData));
+      //       saveUserData(decryptedData);
+      //     } else {
+      //       showErrorMessage("Unable to Fetch User Data");
+      //     }
+      //   } catch (error) {
+      //     console.log(error, "Error in Catch Block");
+      //   }
+      //   showSuccessMessage("Login Success");
+      // } else {
+      //   showErrorMessage(response?.errorMsg);
+      // }
+    } catch (error) {
+      showErrorMessage(error?.message);
+      console.log(error, "Error In Login API");
+    } finally {
+      setLoading(false);
+      // setEmail("");
+      // setPassword("");
+    }
+  };
+
+  const handleSelectedUnitLogin = async (unit, sessionIdSelected = null) => {
+    try {
+      setLoading(true);
+
+      const payload = {
+        userId: email,
+        sessionId: sessionIdSelected ? sessionIdSelected : sessionId,
+        unitType: unit.unitType,
+        defaultUnit: unit.defaultUnit,
+        unitName: unit.unitName,
+        unitCode: unit.unitCode,
+        unitId: unit.unitId,
+      };
+
+      console.log("SELECTED UNIT PAYLOAD", payload);
+
+      const response = await apiRequest(
+        API_ROUTES.SELECTED_UNIT_LOGIN,
+        "POST",
+        payload,
+      );
+
+      console.log("selectedUnitLoginResp", response);
+
       if (
         response &&
         response?.status === "Success" &&
         response?.statusCode === "200"
       ) {
-        saveUserToken(response?.authToken);
+        saveUserToken(response?.data);
         try {
           const response2 = await apiRequest(
             API_ROUTES.GET_PROFILE,
             "POST",
             null,
-            response?.authToken,
+            response?.data,
           );
           const decrypted = decryptAES(response2);
           console.log("decrypted UserData ", decrypted);
@@ -135,12 +234,10 @@ const Login = () => {
         showErrorMessage(response?.errorMsg);
       }
     } catch (error) {
-      showErrorMessage(error?.message);
-      console.log(error, "Error In Login API");
+      console.log(error);
+      showErrorMessage("Something went wrong");
     } finally {
       setLoading(false);
-      setEmail("");
-      setPassword("");
     }
   };
 
@@ -273,6 +370,99 @@ const Login = () => {
           </TouchableOpacity> */}
         </View>
       </ScrollView>
+      <Modal visible={showUnitModal} transparent animationType="fade">
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "center",
+            padding: 20,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: 12,
+              padding: 20,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "700",
+                marginBottom: 20,
+              }}
+            >
+              Select Unit
+            </Text>
+
+            {unitsList.map((item, index) => {
+              const isSelected = selectedUnit?.unitId === item.unitId;
+
+              return (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => setSelectedUnit(item)}
+                  style={{
+                    borderWidth: 1,
+                    borderColor: isSelected ? Colors.greenColor : "#ddd",
+                    padding: 15,
+                    borderRadius: 8,
+                    marginBottom: 10,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "600",
+                    }}
+                  >
+                    {item.unitName}
+                  </Text>
+
+                  <Text>{item.unitType}</Text>
+                </TouchableOpacity>
+              );
+            })}
+
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "flex-end",
+                marginTop: 20,
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => {
+                  setShowUnitModal(false);
+                  setSelectedUnit(null);
+                }}
+                style={{
+                  marginRight: 15,
+                }}
+              >
+                <Text>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                disabled={!selectedUnit}
+                onPress={() => {
+                  setShowUnitModal(false);
+                  handleSelectedUnitLogin(selectedUnit);
+                }}
+                style={{
+                  backgroundColor: selectedUnit ? Colors.greenColor : "#ccc",
+                  paddingHorizontal: 20,
+                  paddingVertical: 10,
+                  borderRadius: 6,
+                }}
+              >
+                <Text style={{ color: "#fff" }}>Proceed</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 };

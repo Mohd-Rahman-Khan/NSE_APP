@@ -4,7 +4,7 @@ export const API_ROUTES = {
 
   //BASE_URL: "http://192.168.100.102:7630/api/", //qa url
 
-  AUTHORIZE_LOGIN: "userauth/authenticate/login",
+  AUTHORIZE_LOGIN: "userauth/authenticate/login-new",
   GET_PROFILE: "userauth/all/get-profile",
   PROFILE_DETAILS: "master/employee-master/find-by-id",
   PROGRAMME_LIST: "prod_plan/prd-schedule/find-by-filter",
@@ -63,7 +63,7 @@ export const API_ROUTES = {
   GET_EQUIPMENT_SUBGROUP_CATEGORY: "master/asset-category-master/dd",
   DPR_UPDATE: "prod_farm/dpr/update",
   DPR_MECHANICAL_UPDATE: "prod_farm/dpr/update-mechanical-item",
-  CP_NUMBER_LIST: "inventory/item-inventory/dd",
+  CP_NUMBER_LIST: "inventory/fixed-asset-inventory/allottedAsset/dd",
   FIND_PLOT_BY_EPOID: "prod_farm/dpr/find-plots-by-epoId",
   SEND_CHAT: "api/context/v1/show-suggestion",
   DASHBOARD_SUMMARY: "prod_plan/production_dashboard/get-summary",
@@ -78,4 +78,7 @@ export const API_ROUTES = {
   TOTAL_SALES_BY_MONTH: "inventory/dashboard/sales-total-qty-by-month",
   QC_DASHBOARD_DATA: "quality/dashboard/qc-dashboard",
   QC_COMPLAINT_DASHBOARD: "master/dashboard/complaint-dashboard",
+  SELECTED_UNIT_LOGIN: "userauth/authenticate/selected-unit-login",
+  CONTRACTOR_LIST: "master/contractor-agreement/dd",
+  EMPLOYEE_LIST: "master/employee-master/dd",
 };

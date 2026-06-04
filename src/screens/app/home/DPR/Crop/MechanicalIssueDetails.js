@@ -715,12 +715,12 @@ export default function MechanicalIssueDetails({ route }) {
       }
 
       const payload = {
-        assetGroupId: macItem.equipmentId, // 👈 MOST IMPORTANT
+        assetGroupId: macItem.equipmentId,
         assetSubGroupId: macItem.subGroupId,
-        equipmentAllotmentStatus: "ALLOTTED",
-        allottedUnitType: "FARM_BLOCK",
-        allottedUnitId: dprData.farmBlockId,
-        assetCategoryId: macItem.categoryId || 116, // 👈 fallback
+        //equipmentAllotmentStatus: "ALLOTTED",
+        unitType: "FARM_BLOCK",
+        unitId: dprData.farmBlockId,
+        assetCategoryId: macItem.categoryId,
       };
 
       console.log("🚀 CP API PAYLOAD", payload);
