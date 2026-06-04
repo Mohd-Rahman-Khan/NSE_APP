@@ -131,8 +131,6 @@ export default function DprProcessAllocation({ route }) {
         const newData = parsed?.data || [];
 
         setActivityList(newData);
-      } else {
-        showErrorMessage(parsed?.message || "DPR List is empty.");
       }
     } catch (err) {
       console.log("Fetch error", err);
@@ -233,7 +231,6 @@ export default function DprProcessAllocation({ route }) {
       style={styles.itemCard}
     >
       <View style={styles.cardHeader}>
-        {console.log("item?.actualDate", item)}
         <Text style={styles.dateText}>{formatDate(item?.planDate)}</Text>
         <View
           style={[
@@ -411,13 +408,21 @@ export default function DprProcessAllocation({ route }) {
         />
       </View>
 
-      <FlatList
-        data={activityList}
-        renderItem={({ item }) => <RenderCard item={item} />}
-        keyExtractor={(item) => item.id?.toString()}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
-      />
+      {activityList?.length > 0 ? (
+        <FlatList
+          data={activityList}
+          renderItem={({ item }) => <RenderCard item={item} />}
+          keyExtractor={(item) => item.id?.toString()}
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+        />
+      ) : (
+        <View style={{ flex: 1, alignItems: "center" }}>
+          <Text style={{ color: "black", fontWeight: "700", fontSize: 16 }}>
+            List is empty.
+          </Text>
+        </View>
+      )}
 
       {/* Bottom Sheet */}
       <CustomBottomSheet

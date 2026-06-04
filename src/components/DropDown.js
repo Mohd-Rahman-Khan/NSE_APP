@@ -196,13 +196,13 @@ const getLabel = (val) => {
     val.itemName ||
     val.operationName ||
     val.macName ||
-    val.assetGroupName ||
+    val.assetCategoryName ||
     val.assetSubGroupName ||
+    val.assetGroupName ||
     val.planCode ||
     val.seasonType ||
     val.payeeName ||
     val.dealerIndentNo ||
-    val.assetCategoryName ||
     val.comName ||
     val.finYearShortName ||
     val.seedCropName ||

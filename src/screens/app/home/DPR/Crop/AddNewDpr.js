@@ -38,10 +38,8 @@ import { getUserData } from "../../../../../utils/Storage";
 export default function AddNewDpr({ route }) {
   const navigation = useNavigation();
   const landData = route?.params?.landData;
-  console.log("landData---", landData);
 
   const [loading, setLoading] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState(null);
   const [operationList, setoperationList] = useState([]);
   const [contractorNameList, setcontractorNameList] = useState([]);
   const [equipmentList, setequipmentList] = useState([]);
@@ -84,13 +82,6 @@ export default function AddNewDpr({ route }) {
     { id: 6, name: "FIXED" },
     { id: 7, name: "CONSUMABLE_PARTS" },
   ];
-
-  const NONE_PLAN_OPTION = {
-    id: null,
-    planCode: "None",
-    planName: "None",
-  };
-
   useEffect(() => {
     getActivityList();
     getEquipmentList();
@@ -772,9 +763,9 @@ export default function AddNewDpr({ route }) {
           newErrors[`contractorType_${ei}_${ai}`] = "Contractor Type required";
         }
 
-        if (!act.contractorName) {
-          newErrors[`contractorName_${ei}_${ai}`] = "Contractor Name required";
-        }
+        // if (!act.contractorName) {
+        //   newErrors[`contractorName_${ei}_${ai}`] = "Contractor Name required";
+        // }
 
         if (!act.noOfLabour) {
           newErrors[`labour_${ei}_${ai}`] = "No of labour required";
@@ -964,7 +955,11 @@ export default function AddNewDpr({ route }) {
             <View style={styles.modalContainer}>
               {/* HEADER */}
               <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Select Materials</Text>
+                <Text style={styles.modalTitle}>
+                  {materialTableData?.length > 0
+                    ? "Select Materials"
+                    : "No materials available"}
+                </Text>
                 <TouchableOpacity onPress={() => setShowMaterialModal(false)}>
                   <Icon name="close" size={24} />
                 </TouchableOpacity>
@@ -1033,7 +1028,7 @@ export default function AddNewDpr({ route }) {
               </ScrollView>
 
               {/* FOOTER */}
-              <View style={styles.modalFooter}>
+              {/* <View style={styles.modalFooter}>
                 <TouchableOpacity
                   style={styles.cancelBtn}
                   onPress={() => setShowMaterialModal(false)}
@@ -1050,7 +1045,7 @@ export default function AddNewDpr({ route }) {
                 >
                   <Text style={{ color: "#fff" }}>Save</Text>
                 </TouchableOpacity>
-              </View>
+              </View> */}
             </View>
           </View>
         </Modal>
@@ -1444,7 +1439,7 @@ export default function AddNewDpr({ route }) {
                             onPress={() => addAgriculture(entry.id, act.id)}
                             style={styles.addNewButton}
                           >
-                            <Text style={styles.addText}>+ Add New</Text>
+                            <Text style={styles.addText}>+ Add</Text>
                           </TouchableOpacity>
                         </View>
 
@@ -1567,7 +1562,7 @@ export default function AddNewDpr({ route }) {
                               onPress={() => addEquipment(entry.id, act.id)}
                               style={styles.addNewButton}
                             >
-                              <Text style={styles.addText}>+ Add New</Text>
+                              <Text style={styles.addText}>+ Add</Text>
                             </TouchableOpacity>
                           </View>
                         </View>

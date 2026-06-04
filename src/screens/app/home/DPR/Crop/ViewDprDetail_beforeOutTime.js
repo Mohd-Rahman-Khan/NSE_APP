@@ -73,11 +73,6 @@ export default function ViewDprDetail({ route }) {
   const [selectedAgricultureId, setSelectedAgricultureId] = useState(null);
   const [contractortList, setcontractortList] = useState([]);
   const [employeeList, setEmployeeList] = useState([]);
-  const [showOutTimePicker, setShowOutTimePicker] = useState(false);
-  const [selectedOutTime, setSelectedOutTime] = useState({
-    activityId: null,
-    mechId: null,
-  });
 
   const landData = route?.params?.landData;
 
@@ -186,32 +181,6 @@ export default function ViewDprDetail({ route }) {
       showErrorMessage("Something went wrong");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const openOutTimePicker = (activityId, mechId) => {
-    if (Platform.OS === "android") {
-      DateTimePickerAndroid.open({
-        value: new Date(),
-        mode: "time",
-        is24Hour: true,
-        onChange: (event, selectedTime) => {
-          if (!selectedTime) return;
-
-          const hours = String(selectedTime.getHours()).padStart(2, "0");
-          const minutes = String(selectedTime.getMinutes()).padStart(2, "0");
-
-          updateMechanicalField(
-            activityId,
-            mechId,
-            "outTime",
-            `${hours}:${minutes}`,
-          );
-        },
-      });
-    } else {
-      setSelectedOutTime({ activityId, mechId });
-      setShowOutTimePicker(true);
     }
   };
 
@@ -939,21 +908,12 @@ export default function ViewDprDetail({ route }) {
                     </View>
                     <View style={styles.inputContainer}>
                       <Text style={styles.label}>Out Time</Text>
-
-                      <TouchableOpacity
-                        style={styles.timeContainer}
-                        onPress={() =>
-                          openOutTimePicker(item.activityId, eq.id)
-                        }
-                      >
-                        <Text>{eq.outTime || "Select Out Time"}</Text>
-
-                        <Icon
-                          name="access-time"
-                          size={22}
-                          color={Colors.greenColor}
-                        />
-                      </TouchableOpacity>
+                      <TextInput
+                        editable={false}
+                        style={styles.disabledInput}
+                        value={String(eq.outTime || "")}
+                        placeholder="Out Time"
+                      />
                     </View>
 
                     <View style={styles.switchRow}>
@@ -1458,9 +1418,9 @@ export default function ViewDprDetail({ route }) {
   };
 
   const submitUpdateDpr = async () => {
-    // if (!validateMaterialSelection()) {
-    //   return;
-    // }
+    if (!validateMaterialSelection()) {
+      return;
+    }
     try {
       setLoading(true);
       let payload;
@@ -1827,59 +1787,6 @@ export default function ViewDprDetail({ route }) {
   return (
     <WrapperContainer isLoading={loading}>
       <InnerHeader title="Crop DPR" />
-
-      {Platform.OS === "ios" && showOutTimePicker && (
-        <Modal transparent animationType="slide">
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "flex-end",
-              backgroundColor: "rgba(0,0,0,0.4)",
-            }}
-          >
-            <View
-              style={{
-                backgroundColor: "#fff",
-                padding: 20,
-                borderTopLeftRadius: 20,
-                borderTopRightRadius: 20,
-              }}
-            >
-              <TouchableOpacity
-                style={{ alignSelf: "flex-end", marginBottom: 10 }}
-                onPress={() => setShowOutTimePicker(false)}
-              >
-                <Text style={{ color: Colors.greenColor }}>Done</Text>
-              </TouchableOpacity>
-
-              <DateTimePicker
-                value={new Date()}
-                mode="time"
-                display="spinner"
-                onChange={(event, selectedTime) => {
-                  if (!selectedTime) return;
-
-                  const hours = String(selectedTime.getHours()).padStart(
-                    2,
-                    "0",
-                  );
-                  const minutes = String(selectedTime.getMinutes()).padStart(
-                    2,
-                    "0",
-                  );
-
-                  updateMechanicalField(
-                    selectedOutTime.activityId,
-                    selectedOutTime.mechId,
-                    "outTime",
-                    `${hours}:${minutes}`,
-                  );
-                }}
-              />
-            </View>
-          </View>
-        </Modal>
-      )}
 
       {Platform.OS === "android" && show && (
         <DateTimePicker
@@ -2355,17 +2262,5 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 8,
     marginBottom: 5,
-  },
-  timeContainer: {
-    borderWidth: 1,
-    borderColor: Colors.disableFieldColor,
-    borderRadius: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 6,
-    backgroundColor: "#fff",
   },
 });
