@@ -44,6 +44,7 @@ import en from "../../constants/en";
 import AnimatedNumbers from "react-native-animated-numbers";
 import ProductionFilterComp from "./ProductionFilterComp";
 import { PieChart } from "react-native-gifted-charts";
+import { getCurrentFinancialYearObj } from "../../utils/getCurrentFinancialYearObj";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -84,9 +85,12 @@ export default function Home({ navigation }) {
     if (userData) {
       switch (selectedTab) {
         case "Production":
-          getProductionDashboardSummary();
-          getProductionGraphData();
-          getProductionPlanDetail();
+          if (financialYear?.length > 0) {
+            getProductionDashboardSummary();
+            getProductionGraphData();
+            getProductionPlanDetail();
+          }
+
           break;
 
         case "Marketing":
@@ -107,7 +111,7 @@ export default function Home({ navigation }) {
           break;
       }
     }
-  }, [selectedTab, userData]);
+  }, [selectedTab, userData, financialYear]);
   useEffect(() => {
     getFinacialYears();
     getSeasonList();
@@ -452,8 +456,11 @@ export default function Home({ navigation }) {
   const getProductionDashboardSummary = async (filter = {}) => {
     setLoading(true);
     try {
+      const currentFY = getCurrentFinancialYearObj(financialYear);
+      console.log("currentFY", currentFY);
       const payloadData = {
         roId: userData?.roId,
+        finYearId: currentFY?.id,
         ...filter,
       };
       const encryptedPayload = encryptWholeObject(payloadData);
@@ -464,8 +471,9 @@ export default function Home({ navigation }) {
       );
       const decrypted = decryptAES(response);
       const parsedDecrypted = JSON.parse(decrypted);
-      // console.log("getProductionDashboardSummary___", payloadData);
-      // console.log("getProductionDashboardSummary___", parsedDecrypted);
+      //console.log("getProductionDashboardSummary___", userData);
+      console.log("getProductionDashboardSummary___", payloadData);
+      //console.log("getProductionDashboardSummary___", parsedDecrypted);
 
       if (
         parsedDecrypted &&
@@ -483,13 +491,13 @@ export default function Home({ navigation }) {
   const getProductionGraphData = async (filter = {}) => {
     setLoading(true);
     try {
+      const currentFY = getCurrentFinancialYearObj(financialYear);
       const payloadData = {
-        finYearId: financialYear[0]?.id,
-        roId: userData?.roId,
-        aoId: userData?.aoId,
-        pcId: userData?.pcId,
+        finYearId: currentFY?.id,
+        unitId: userData?.unitId,
+        unitType: userData?.unitType,
         page: 0,
-        pageSize: 25,
+        pageSize: 100,
         ...filter,
       };
       const encryptedPayload = encryptWholeObject(payloadData);
@@ -520,13 +528,14 @@ export default function Home({ navigation }) {
   const getProductionPlanDetail = async (filter = {}) => {
     setLoading(true);
     try {
+      const currentFY = getCurrentFinancialYearObj(financialYear);
       const payloadData = {
-        finYearId: financialYear[0]?.id,
+        finYearId: currentFY?.id,
         roId: userData?.roId,
         aoId: userData?.aoId,
         pcId: userData?.pcId,
         page: 0,
-        pageSize: 25,
+        pageSize: 100,
         ...filter,
       };
       const encryptedPayload = encryptWholeObject(payloadData);
@@ -673,6 +682,8 @@ export default function Home({ navigation }) {
   const role = (() => {
     const rawRole = userData?.roleName;
 
+    console.log("rawRole", rawRole);
+
     if (!rawRole) return [];
 
     if (Array.isArray(rawRole)) return rawRole;
@@ -706,6 +717,8 @@ export default function Home({ navigation }) {
     if (hasQC) tabs.push("QC");
     //if (hasFARM) tabs.push("Farm");
 
+    console.log("getTabsByRole", tabs);
+
     return tabs;
   };
 
@@ -716,12 +729,14 @@ export default function Home({ navigation }) {
       <CustomHeader
         data={userData}
         clickOnFilter={() => {
-          if (selectedTab == "Production" || selectedTab == "Marketing") {
-            setshowFilterSheet(true);
+          if (roleTabs.length > 0) {
+            if (selectedTab == "Production" || selectedTab == "Marketing") {
+              setshowFilterSheet(true);
+            }
           }
         }}
         bgColor="#eef3e8"
-        showFilter={true}
+        showFilter={roleTabs.length > 0 ? true : false}
         //showNotf={true}
       />
       {showFromPicker && (
@@ -1474,19 +1489,28 @@ const Tabs = ({ selected, setSelected, tabs }) => {
 
 const ProductionOverview = ({ graphData }) => {
   const getAreaChartData = () => {
-    return graphData?.roGroupData?.flatMap((item) => [
+    let data =
+      graphData?.roGroupData ||
+      graphData?.aoGroupData ||
+      graphData?.pcGroupData ||
+      [];
+    return data?.flatMap((item) => [
       {
         value: item.area || 0,
         frontColor: "#2b6cb0",
         spacing: 4,
         onPress: () => {
-          alert(`RO: ${item.roName}\nArea: ${item.area}`);
+          alert(
+            `RO: ${item.roName || item?.aoName || item?.pcName}\nArea: ${
+              item.area
+            }`,
+          );
         },
       },
       {
         value: item.assignedArea || 0,
         frontColor: "#f59e0b",
-        label: item.roName?.trim(),
+        label: item.roName || item?.aoName || item?.pcName?.trim(),
         labelTextStyle: {
           textAlign: "center",
           width: 90,
@@ -1495,26 +1519,39 @@ const ProductionOverview = ({ graphData }) => {
         },
         spacing: 28, // 👈 🔥 BIG GAP between groups
         onPress: () => {
-          alert(`RO: ${item.roName}\nAssigned Area: ${item.assignedArea}`);
+          alert(
+            `RO: ${
+              item.roName || item?.aoName || item?.pcName
+            }\nAssigned Area: ${item.assignedArea}`,
+          );
         },
       },
     ]);
   };
 
   const getSeedChartData = () => {
-    return graphData?.roGroupData?.flatMap((item) => [
+    let data =
+      graphData?.roGroupData ||
+      graphData?.aoGroupData ||
+      graphData?.pcGroupData ||
+      [];
+    return data?.flatMap((item) => [
       {
-        value: item.rawSeed || 10,
+        value: item.rawSeed,
         frontColor: "#2f855a",
         spacing: 4,
         onPress: () => {
-          alert(`RO: ${item.roName}\nRaw Seed: ${item.rawSeed}`);
+          alert(
+            `RO: ${item.roName || item?.aoName || item?.pcName}\nRaw Seed: ${
+              item.rawSeed
+            }`,
+          );
         },
       },
       {
-        value: item.receivedRawSeed || 10,
+        value: Number(item.receivedRawSeed || 0),
         frontColor: "#e53e3e",
-        label: item.roName?.trim(),
+        label: item.roName || item?.aoName || item?.pcName?.trim(),
         labelTextStyle: {
           textAlign: "center",
           width: 90,
@@ -1523,7 +1560,11 @@ const ProductionOverview = ({ graphData }) => {
         },
         spacing: 28,
         onPress: () => {
-          alert(`RO: ${item.roName}\nReceived Seed: ${item.receivedRawSeed}`);
+          alert(
+            `RO: ${
+              item.roName || item?.aoName || item?.pcName
+            }\nReceived Seed: ${item.receivedRawSeed}`,
+          );
         },
       },
     ]);
@@ -1575,8 +1616,8 @@ const ProductionOverview = ({ graphData }) => {
         data={getAreaChartData()}
         height={220}
         width={width - 100}
-        barWidth={18} // 👈 thinner bars
-        spacing={12} // 👈 overall spacing
+        barWidth={18}
+        spacing={12}
         initialSpacing={25}
         endSpacing={25}
         roundedTop
@@ -1589,7 +1630,6 @@ const ProductionOverview = ({ graphData }) => {
           textAlign: "center",
           width: 90,
         }}
-        isAnimated
       />
 
       {/* 🔹 Raw Seed vs Received */}
@@ -1634,11 +1674,11 @@ const ProductionOverview = ({ graphData }) => {
 
       <BarChart
         data={getSeedChartData()}
-        height={220}
+        height={250}
         width={width - 100}
         barWidth={22}
         roundedTop
-        noOfSections={5}
+        noOfSections={8}
         spacing={20}
         initialSpacing={20}
         endSpacing={20}
@@ -1648,7 +1688,7 @@ const ProductionOverview = ({ graphData }) => {
           textAlign: "center",
           width: 70,
         }}
-        isAnimated
+        maxValue={20000}
       />
     </View>
   );

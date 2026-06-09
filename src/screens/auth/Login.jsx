@@ -122,6 +122,7 @@ const Login = () => {
 
         // MULTIPLE UNITS
         else {
+          setLoading(false);
           setUnitsList(allUnits);
           setShowUnitModal(true);
         }
@@ -168,7 +169,7 @@ const Login = () => {
       showErrorMessage(error?.message);
       console.log(error, "Error In Login API");
     } finally {
-      setLoading(false);
+      //setLoading(false);
       // setEmail("");
       // setPassword("");
     }

@@ -19,6 +19,7 @@ import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { apiRequest } from "../../../../../services/APIRequest";
 import { API_ROUTES } from "../../../../../services/APIRoutes";
 import { getUserData } from "../../../../../utils/Storage";
+import Feather from "react-native-vector-icons/Feather";
 import {
   decryptAES,
   encryptWholeObject,
@@ -27,6 +28,8 @@ import {
   showErrorMessage,
   showSuccessMessage,
 } from "../../../../../utils/HelperFunction";
+import MachanicalFilterComp from "../../../MachanicalFilterComp";
+import CustomBottomSheet from "../../../../../components/CustomBottomSheet";
 
 export default function MechanicalAllocationProcessList({ route }) {
   const navigation = useNavigation();
@@ -35,6 +38,9 @@ export default function MechanicalAllocationProcessList({ route }) {
   const [loading, setLoading] = useState(false);
   const [activityList, setActivityList] = useState([]);
   const [userData, setUserData] = useState([]);
+  const [showFilterSheet, setshowFilterSheet] = useState(false);
+  const [chukList, setchukList] = useState([]);
+  const [operationActivityList, setoperationActivityList] = useState([]);
 
   const isFocused = useIsFocused();
 
@@ -45,24 +51,103 @@ export default function MechanicalAllocationProcessList({ route }) {
     }
   }, [isFocused]);
 
+  useEffect(() => {
+    if (userData) {
+      getChukList();
+      getOperationsActivityList();
+    }
+  }, [userData]);
+
   const fetchUserData = async () => {
     const data = await getUserData();
     setUserData(data);
     fetchDprAllocationList(data);
   };
 
-  // ------------------- API: FETCH fetchDprAllocationList LIST -------------------
-  const fetchDprAllocationList = async (uData) => {
+  const getChukList = async () => {
     setLoading(true);
 
     try {
       const payloadData = {
-        epoId: null,
-        farmBlockId: "2",
-        dprType: null,
-        pageSize: 20,
-        pageNumber: 0,
+        farmBlockId: userData?.farmBlockId,
       };
+
+      const encryptedPayload = encryptWholeObject(payloadData);
+
+      const response = await apiRequest(
+        API_ROUTES.CHUK_LIST,
+        "post",
+        encryptedPayload,
+      );
+
+      const decrypted = decryptAES(response);
+      const parsed = JSON.parse(decrypted);
+
+      console.log("parsed", parsed);
+
+      if (parsed?.status === "SUCCESS" && parsed?.statusCode === "200") {
+        const newData = parsed?.data;
+
+        setchukList(newData);
+      } else {
+        showErrorMessage(parsed?.message || "Invalid response");
+      }
+    } catch (err) {
+      console.log("Fetch error", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const getOperationsActivityList = async () => {
+    setLoading(true);
+
+    try {
+      const payloadData = {};
+
+      const encryptedPayload = encryptWholeObject(payloadData);
+
+      const response = await apiRequest(
+        API_ROUTES.OPERATION_MASTER_DD,
+        "post",
+        encryptedPayload,
+      );
+
+      const decrypted = decryptAES(response);
+      const parsed = JSON.parse(decrypted);
+
+      console.log("parsed", parsed);
+
+      if (parsed?.status === "SUCCESS" && parsed?.statusCode === "200") {
+        const newData = parsed?.data;
+
+        setoperationActivityList(newData);
+      } else {
+        setoperationActivityList([]);
+        showErrorMessage(parsed?.message || "Something went wrong");
+      }
+    } catch (err) {
+      console.log("Fetch error", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ------------------- API: FETCH fetchDprAllocationList LIST -------------------
+  const fetchDprAllocationList = async (uData, filter = null) => {
+    setLoading(true);
+
+    try {
+      const payloadData = {
+        dprStatus: "APPROVED",
+        dprType: "CROP",
+        engineeringId: uData?.farmBlockId,
+        isMechanical: true,
+        page: 0,
+        pageNumber: 0,
+        pageSize: 100,
+        ...filter,
+      };
+      //console.log("payloadData", payloadData);
 
       const encryptedPayload = encryptWholeObject(payloadData);
 
@@ -82,7 +167,10 @@ export default function MechanicalAllocationProcessList({ route }) {
 
         setActivityList(newData);
       } else {
-        showErrorMessage(parsed?.message || "Invalid response");
+        setActivityList([]);
+        showErrorMessage(
+          parsed?.message || parsed?.status || "Something went wrong.",
+        );
       }
     } catch (err) {
       console.log("Fetch error", err);
@@ -109,6 +197,12 @@ export default function MechanicalAllocationProcessList({ route }) {
         return Colors.gray;
     }
   };
+  const formatDate = (isoString) => {
+    const date = new Date(isoString);
+    return `${String(date.getDate()).padStart(2, "0")}-${String(
+      date.getMonth() + 1,
+    ).padStart(2, "0")}-${date.getFullYear()}`;
+  };
 
   // ------------------- CARD RENDER -------------------
   const RenderCard = ({ item }) => (
@@ -119,7 +213,7 @@ export default function MechanicalAllocationProcessList({ route }) {
       style={styles.itemCard}
     >
       <View style={styles.cardHeader}>
-        <Text style={styles.dateText}>{item?.planDate}</Text>
+        <Text style={styles.dateText}>{formatDate(item?.planDate)}</Text>
         <View
           style={[
             styles.statusBadge,
@@ -157,8 +251,8 @@ export default function MechanicalAllocationProcessList({ route }) {
           </View>
 
           <View style={styles.itemColumn}>
-            <Text style={styles.itemLabel}>Operation Name</Text>
-            <Text style={styles.itemValue}>{item?.operationName || "N/A"}</Text>
+            <Text style={styles.itemLabel}>DPR Code</Text>
+            <Text style={styles.itemValue}>{item?.dprCode || "N/A"}</Text>
           </View>
         </View>
       </View>
@@ -168,15 +262,76 @@ export default function MechanicalAllocationProcessList({ route }) {
   // ------------------- UI -------------------
   return (
     <WrapperContainer isLoading={loading}>
-      <InnerHeader title={"Mechanical DPR Allocation"} />
+      {showFilterSheet && (
+        <CustomBottomSheet
+          visible={showFilterSheet}
+          onRequestClose={() => setshowFilterSheet(false)}
+        >
+          <View style={styles.sheetContainer}>
+            <MachanicalFilterComp
+              chukList={chukList}
+              operationActivityList={operationActivityList}
+              onCLose={() => {
+                setshowFilterSheet(false);
+              }}
+              userData={userData}
+              applyFilter={(data) => {
+                let payloadData = {
+                  engineeringId: userData?.farmBlockId,
+                  dprType: "CROP",
+                  dprStatus: data?.selectedStatus?.value,
+                  isMechanical: true,
+                  chakId: data?.selectedChak?.id,
+                  squareId: data?.selectedSquare?.id,
+                  planId: data?.selectedPlan?.id,
+                  planDate: data?.planDate,
+                  actualDate: data?.actualDate,
+                  activityId: data?.selectedActivity?.id,
+                };
+                fetchDprAllocationList(userData, payloadData);
+                setshowFilterSheet(false);
+                // console.log(data, "filterData");
+                // console.log(userData, "filterData");
+              }}
+            />
+          </View>
+        </CustomBottomSheet>
+      )}
 
-      <FlatList
-        data={activityList}
-        renderItem={({ item }) => <RenderCard item={item} />}
-        keyExtractor={(item) => item.id?.toString()}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
+      <InnerHeader
+        title={"Mechanical DPR Allocation"}
+        rightIcon={
+          <TouchableOpacity
+            activeOpacity={0.5}
+            style={styles.notificationHolder}
+            onPress={() => {
+              setshowFilterSheet(true);
+            }}
+          >
+            <Feather
+              name="filter"
+              size={moderateScale(25)}
+              color={Colors.black}
+            />
+          </TouchableOpacity>
+        }
       />
+
+      {activityList?.length > 0 ? (
+        <FlatList
+          data={activityList}
+          renderItem={({ item }) => <RenderCard item={item} />}
+          keyExtractor={(item) => item.id?.toString()}
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+        />
+      ) : (
+        <View style={{ alignItems: "center", flex: 1, marginTop: 20 }}>
+          <Text style={{ color: "black", fontSize: 15, fontWeight: "700" }}>
+            List is empty.
+          </Text>
+        </View>
+      )}
     </WrapperContainer>
   );
 }
@@ -249,12 +404,15 @@ const styles = StyleSheet.create({
   },
   notificationHolder: {
     borderWidth: 2,
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: Colors.greenColor,
-    borderColor: Colors.greenColor,
+    width: moderateScale(50),
+    height: moderateScale(50),
+    borderRadius: moderateScale(25),
+    backgroundColor: Colors.bg3,
+    borderColor: Colors.bg3,
     alignItems: "center",
     justifyContent: "center",
+  },
+  sheetContainer: {
+    padding: 15,
   },
 });

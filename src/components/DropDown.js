@@ -209,6 +209,8 @@ const getLabel = (val) => {
     val.seedVarietyName ||
     val.workerName ||
     val.agreementType ||
+    val.blockName ||
+    val?.chakName ||
     ""
   );
 };
@@ -222,9 +224,9 @@ export default function DropDown({
   disabled = false,
   label,
   containerStyle = {},
+  fieldName,
 }) {
   const [visible, setVisible] = useState(false);
-
   return (
     <View style={styles.inputContainer}>
       {!!label && <Text style={styles.label}>{label}</Text>}
@@ -276,7 +278,10 @@ export default function DropDown({
                     setVisible(false);
                   }}
                 >
-                  <Text style={styles.dropdownItemText}>{getLabel(item)}</Text>
+                  {/* <Text style={styles.dropdownItemText}>{getLabel(item)}</Text> */}
+                  <Text style={styles.dropdownItemText}>
+                    {fieldName ? item?.[fieldName] : getLabel(item)}
+                  </Text>
                 </TouchableOpacity>
               )}
               ListEmptyComponent={() => (

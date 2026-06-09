@@ -44,15 +44,11 @@ export default function DprProcessAllocation({ route }) {
   // ------------------- STATES -------------------
   const [loading, setLoading] = useState(false);
   const [activityList, setActivityList] = useState([]);
+  const [allActivityList, setAllActivityList] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
   const [userData, setUserData] = useState([]);
   const [showAddNewButton, setShowAddNewButton] = useState(true);
-
-  // Pagination States
-  const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
 
   const [show, setShow] = useState(false);
 
@@ -60,7 +56,10 @@ export default function DprProcessAllocation({ route }) {
   const [toDate, setToDate] = useState(new Date());
   const [activeDateField, setActiveDateField] = useState(null); // 'FROM' | 'TO'
   const [selectedPlan, setSelectedPlan] = useState(null);
-  const [dprType, setdprType] = useState("");
+  const [dprType, setdprType] = useState({
+    id: 1,
+    name: "Indent Request",
+  });
 
   const isFocused = useIsFocused();
   const landData = route?.params?.landData;
@@ -74,27 +73,19 @@ export default function DprProcessAllocation({ route }) {
   // ------------------- INITIAL FETCH -------------------
   useEffect(() => {
     if (isFocused) {
-      resetPaginationAndFetch();
+      fetchUserData();
     }
   }, [isFocused, fromDate, toDate, selectedPlan]);
 
-  const resetPaginationAndFetch = async () => {
-    setPage(0);
-    setHasMore(true);
-    setActivityList([]);
-    await fetchUserData(0, false);
-  };
-
-  const fetchUserData = async (currentPage = 0, isLoadMore = false) => {
+  const fetchUserData = async () => {
     const data = await getUserData();
     setUserData(data);
-    fetchActivityList(data, currentPage, isLoadMore);
+    fetchActivityList(data);
   };
 
   // ------------------- API: FETCH ACTIVITY LIST -------------------
-  const fetchActivityList = async (uData, currentPage, isLoadMore) => {
-    if (isLoadMore) setIsFetchingMore(true);
-    else setLoading(true);
+  const fetchActivityList = async (uData) => {
+    setLoading(true);
     let payloadData = {
       epoId: null,
       chakId: uData?.chakId || null,
@@ -129,14 +120,23 @@ export default function DprProcessAllocation({ route }) {
 
       if (parsed?.status === "SUCCESS" && parsed?.statusCode === "200") {
         const newData = parsed?.data || [];
+        setAllActivityList(newData);
 
-        setActivityList(newData);
+        const indentData = newData.filter(
+          (item) =>
+            !item?.dprMechanicals?.some(
+              (m) => m?.actualHours > 0 && m?.actualHours > 0?.trim() !== "",
+            ),
+        );
+
+        setActivityList(indentData);
+      } else {
+        setActivityList([]);
       }
     } catch (err) {
       console.log("Fetch error", err);
     } finally {
       setLoading(false);
-      setIsFetchingMore(false);
     }
   };
 
@@ -168,13 +168,25 @@ export default function DprProcessAllocation({ route }) {
 
   // ------------------- CARD PRESS -------------------
   const handleCardPress = (item) => {
-    setSelectedItem(item);
-    //setBottomSheetVisible(true);
-    navigation.navigate("ViewDprDetail", {
-      item: item,
-      userData: userData,
-      landData,
-    });
+    if (
+      (item?.currentDprStatus == "DRAFT" ||
+        item?.currentDprStatus == "PENDING") &&
+      userData?.unitType == "CHAK"
+    ) {
+      navigation.navigate("AddNewDpr", {
+        draftData: item,
+        userData: userData,
+        landData,
+      });
+    } else {
+      setSelectedItem(item);
+      //setBottomSheetVisible(true);
+      navigation.navigate("ViewDprDetail", {
+        item: item,
+        userData: userData,
+        landData,
+      });
+    }
   };
 
   // ------------------- BOTTOM SHEET ACTION -------------------
@@ -213,7 +225,7 @@ export default function DprProcessAllocation({ route }) {
       if (parsed?.status === "SUCCESS" && parsed?.statusCode === "200") {
         showSuccessMessage(parsed?.message || "Success");
         setBottomSheetVisible(false);
-        resetPaginationAndFetch();
+        fetchUserData();
       } else {
         showErrorMessage(parsed?.message || "Error");
       }
@@ -361,7 +373,8 @@ export default function DprProcessAllocation({ route }) {
         >
           <Text style={styles.label}>From Date</Text>
           <View style={styles.input}>
-            <Text>{fromDate.toLocaleDateString()}</Text>
+            {/* <Text>{fromDate.toLocaleDateString()}</Text> */}
+            <Text>{formatDate(fromDate)}</Text>
           </View>
         </TouchableOpacity>
 
@@ -375,7 +388,7 @@ export default function DprProcessAllocation({ route }) {
         >
           <Text style={styles.label}>To Date</Text>
           <View style={styles.input}>
-            <Text>{toDate.toLocaleDateString()}</Text>
+            <Text>{formatDate(toDate)}</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -402,8 +415,44 @@ export default function DprProcessAllocation({ route }) {
             { id: 2, name: "DPR" },
           ]}
           value={dprType?.name || ""}
+          // selectItem={(item) => {
+          //   setdprType(item);
+          // }}
+
           selectItem={(item) => {
             setdprType(item);
+
+            //     const indentData = newData.filter(
+            //   (item) =>
+            //     !item?.dprMechanicals?.some(
+            //       (m) => m?.actualHours > 0 && m?.actualHours > 0?.trim() !== "",
+            //     ),
+            // );
+
+            if (item.name === "Indent Request") {
+              const indentData = allActivityList.filter(
+                (row) =>
+                  !row?.dprMechanicals?.some(
+                    (m) =>
+                      m?.actualHours ||
+                      (0 > 0 && m?.actualHours) ||
+                      0 > 0?.trim() !== "",
+                  ),
+              );
+
+              setActivityList(indentData);
+            } else {
+              const dprData = allActivityList.filter((row) =>
+                row?.dprMechanicals?.some(
+                  (m) =>
+                    m?.actualHours ||
+                    (0 > 0 && m?.actualHours) ||
+                    0 > 0?.trim() !== "",
+                ),
+              );
+
+              setActivityList(dprData);
+            }
           }}
         />
       </View>

@@ -84,6 +84,7 @@ const App = () => {
             position={"top"}
             animated={true}
             titleStyle={{ textTransform: "capitalize" }}
+            duration={5000}
           />
         </PersistGate>
       </Provider>

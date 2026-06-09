@@ -38,6 +38,10 @@ import { getUserData } from "../../../../../utils/Storage";
 export default function AddNewDpr({ route }) {
   const navigation = useNavigation();
   const landData = route?.params?.landData;
+  const draftData = route?.params?.draftData || null;
+
+  const isDraftEdit =
+    draftData?.currentDprStatus === "DRAFT" || draftData?.dprStatus === "DRAFT";
 
   const [loading, setLoading] = useState(false);
   const [operationList, setoperationList] = useState([]);
@@ -53,7 +57,7 @@ export default function AddNewDpr({ route }) {
   const [userData, setUserData] = useState("");
   const [categoryList, setCategoryList] = useState();
   const [errors, setErrors] = useState({});
-  const [dprType, setdprType] = useState("");
+  const [dprType, setdprType] = useState({ id: 1, name: "Indent Request" });
   const [noActivity, setnoActivity] = useState(false);
   const [remark, setremark] = useState("");
 
@@ -75,18 +79,114 @@ export default function AddNewDpr({ route }) {
 
   const materialTypeList = [
     { id: 1, name: "SEED" },
-    { id: 2, name: "VALUE_ADDED" },
-    { id: 3, name: "PACKAGING_MATERIAL" },
+    { id: 2, name: "VALUE_ADDED_PRODUCTS" },
+    { id: 3, name: "CERTIFICATION_AND_PACKAGING_MATERIAL" },
     { id: 4, name: "AGRO_CHEMICAL" },
-    { id: 5, name: "SAPLING" },
+    { id: 5, name: "SAPLING_ETC" },
     { id: 6, name: "FIXED" },
     { id: 7, name: "CONSUMABLE_PARTS" },
+    { id: 8, name: "MISCELLANEOUS" },
+    { id: 9, name: "MINIKIT" },
+    { id: 10, name: "COMBO" },
   ];
+
+  useEffect(() => {
+    if (draftData) {
+      prefillDraftData(draftData);
+    }
+  }, [draftData]);
   useEffect(() => {
     getActivityList();
     getEquipmentList();
     fetchUserData();
   }, []);
+
+  const prefillDraftData = (data) => {
+    try {
+      if (data?.planDate) {
+        setDate(new Date(data.planDate));
+      }
+
+      const mappedEntries = [
+        {
+          id: data?.id,
+          expanded: true,
+          activities: data.activities.map((activity) => {
+            const agricultures =
+              data.dprAgricultures
+                ?.filter((x) => x.activityId === activity.activityId)
+                ?.map((ag) => ({
+                  id: ag.id,
+                  materialType: {
+                    id: Date.now(),
+                    name: ag.materialType,
+                  },
+                  material: {
+                    id: ag.itemId,
+                    itemCode: ag.itemCode,
+                    itemName: ag.itemName,
+                  },
+                })) || [];
+
+            const equipments =
+              data.dprMechanicals
+                ?.filter((x) => x.activityId === activity.activityId)
+                ?.map((eq) => ({
+                  id: eq.id,
+                  equipment: {
+                    id: eq.equipmentId,
+                    assetGroupName: eq.equipmentName,
+                  },
+                  subGroup: {
+                    id: eq.subGroupId,
+                    assetSubGroupName: eq.subGroupName,
+                  },
+                  categoryId: eq.categoryId,
+                  categoryName: eq.categoryName,
+                  estHours: String(eq.estimatedHours || ""),
+                  operatorRequired: eq.operatorRequired,
+                })) || [];
+
+            return {
+              id: activity.id || Date.now(),
+
+              activity: {
+                id: activity.activityId,
+                operationName: activity.activityName,
+              },
+
+              contractorType: {
+                agreementType: activity.contractorType,
+                name: activity.contractorType,
+              },
+
+              contractorName: {
+                contractorId: activity.contractorId,
+                name: activity.contractorName,
+              },
+
+              noOfLabour: String(activity.noOfLabour || ""),
+              area: String(activity.area || ""),
+              noOfIteration: String(activity.noOfIteration || ""),
+              total: String(activity.totalOutput || ""),
+
+              agricultures,
+              equipments,
+            };
+          }),
+        },
+      ];
+
+      if (mappedEntries?.activities?.length == 0) {
+        console.log("mappedEntries", mappedEntries);
+        setnoActivity(true);
+      }
+
+      setEntries(mappedEntries);
+    } catch (error) {
+      console.log("Prefill Error", error);
+    }
+  };
 
   const fetchUserData = async () => {
     setSelectedPlan(null);
@@ -282,6 +382,161 @@ export default function AddNewDpr({ route }) {
     }
   };
 
+  const buildUpdateDprPayload = (status) => {
+    const planDate = formatDate(date);
+
+    return [
+      {
+        id: draftData?.id,
+
+        planDate: draftData?.planDate || planDate,
+        actualDate: planDate,
+
+        chakId: draftData?.chakId,
+        chakName: draftData?.chakName,
+
+        farmBlockId: draftData?.farmBlockId,
+        farmBlockName: draftData?.farmBlockName,
+
+        engineeringId: draftData?.engineeringId,
+        engineeringName: draftData?.engineeringName,
+
+        farmPlanId: draftData?.farmPlanId,
+
+        dprType: draftData?.dprType || "CROP",
+        dprMechanicalSubmit: false,
+
+        farmId: draftData?.farmId,
+        farmName: draftData?.farmName,
+
+        epoId: draftData?.epoId,
+        epoName: draftData?.epoName,
+
+        squareId: draftData?.squareId,
+        squareName: draftData?.squareName,
+
+        allowMultiple: draftData?.allowMultiple,
+
+        dprStatus: status,
+        currentDprStatus: status,
+
+        activities: entries.flatMap((entry) =>
+          entry.activities
+            .filter((act) => act.activity)
+            .map((act) => ({
+              id: act.id, // existing activity id
+
+              activityId: act.activity.id,
+              activityName: act.activity.operationName,
+
+              noOfLabour: Number(act.noOfLabour || 0),
+              actualNoOfLabour: null,
+
+              area: Number(act.area || 0),
+              noOfIteration: Number(act.noOfIteration || 0),
+
+              totalOutput: Number(act.total || 0),
+
+              contractorType: act.contractorType?.agreementType || "",
+
+              contractorId: act.contractorName?.contractorId || null,
+
+              contractorName: act.contractorName?.name || "",
+            })),
+        ),
+
+        dprAgricultures: entries.flatMap((entry) =>
+          entry.activities.flatMap((act) =>
+            act.agricultures
+              .filter((ag) => ag.material && ag.materialType)
+              .map((ag) => ({
+                id: ag.id, // existing agriculture id
+
+                activityId: act.activity.id,
+                activityName: act.activity.operationName,
+
+                itemCode: ag.material.itemCode,
+                itemName: ag.material.itemName,
+                itemId: ag.material.id,
+
+                materialType: ag.materialType.name,
+              })),
+          ),
+        ),
+
+        dprMechanicals: entries.flatMap((entry) =>
+          entry.activities.flatMap((act) =>
+            act.equipments
+              .filter((eq) => eq.equipment && eq.subGroup)
+              .map((eq) => ({
+                id: eq.id, // existing mechanical id
+
+                equipmentId: eq.equipment.id,
+                equipmentName: eq.equipment.assetGroupName,
+
+                categoryId: eq.categoryId,
+                categoryName: eq.categoryName,
+
+                subGroupId: eq.subGroup.id,
+                subGroupName: eq.subGroup.assetSubGroupName,
+
+                estimatedHours: Number(eq.estHours || 0),
+
+                actualHours: "",
+                operatorRequired: eq.operatorRequired,
+
+                operatorName: "",
+                cpNumber: "",
+                mechIdleHours: "",
+                mechWalkingTime: "",
+                outTime: "",
+                inTime: "",
+
+                activityId: act.activity.id,
+                activityName: act.activity.operationName,
+              })),
+          ),
+        ),
+
+        dprLabour: [],
+      },
+    ];
+  };
+
+  const updateDpr = async (status) => {
+    try {
+      setLoading(true);
+
+      const payload = buildUpdateDprPayload(status);
+
+      console.log("🚀 UPDATE DPR PAYLOAD", payload);
+
+      const encryptedPayload = encryptWholeObject(payload);
+
+      const response = await apiRequest(
+        API_ROUTES.DPR_UPDATE,
+        "POST",
+        encryptedPayload,
+      );
+
+      const decrypted = decryptAES(response);
+      const parsed = JSON.parse(decrypted);
+      console.log(parsed);
+
+      if (parsed?.status === "SUCCESS") {
+        showSuccessMessage("DPR updated successfully");
+        navigation.goBack();
+      } else {
+        showErrorMessage(parsed?.message || "Update failed");
+      }
+    } catch (error) {
+      console.log("Update DPR Error", error);
+      showErrorMessage("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   /* ================= ACTIVITY ================= */
   // const addActivity = (entryId) => {
   //   setEntries((prev) =>
@@ -452,7 +707,8 @@ export default function AddNewDpr({ route }) {
       ) {
         setmaterialList(parsedDecryptedMaterialItemList?.data || []);
       } else {
-        showErrorMessage("Unable to get the Subgroup List Data");
+        //showErrorMessage("Unable to get the Subgroup List Data");
+        setmaterialList([]);
       }
     } catch (error) {
       console.log(error, "line error");
@@ -808,12 +1064,15 @@ export default function AddNewDpr({ route }) {
   };
 
   const submitDPR = async (status) => {
-    const valid = validateForm();
+    if (!noActivity) {
+      const valid = validateForm();
 
-    if (!valid) {
-      showErrorMessage("Please fill all required fields");
-      return;
+      if (!valid) {
+        showErrorMessage("Please fill all required fields");
+        return;
+      }
     }
+
     try {
       setLoading(true);
 
@@ -909,6 +1168,12 @@ export default function AddNewDpr({ route }) {
     } finally {
       setLoading(false);
     }
+  };
+  const formatDateInMDY = (isoString) => {
+    const date = new Date(isoString);
+    return `${String(date.getDate()).padStart(2, "0")}-${String(
+      date.getMonth() + 1,
+    ).padStart(2, "0")}-${date.getFullYear()}`;
   };
 
   const getCategory = async (item) => {
@@ -1057,6 +1322,7 @@ export default function AddNewDpr({ route }) {
       >
         <ScrollView style={{ padding: 10 }}>
           <DropDown
+            disabled
             label="Select Type"
             data={[
               { id: 1, name: "Indent Request" },
@@ -1080,6 +1346,7 @@ export default function AddNewDpr({ route }) {
           {!noActivity ? (
             <>
               {/* ADD ENTRY */}
+
               <TouchableOpacity style={styles.addEntryBtn} onPress={addEntry}>
                 <Icon name="add" size={24} color="#fff" />
                 <Text style={styles.addEntryText}>Add Activity</Text>
@@ -1177,15 +1444,7 @@ export default function AddNewDpr({ route }) {
                   editable={false}
                 />
               </View> */}
-                  <TouchableOpacity
-                    onPress={() => setShow(true)}
-                    style={styles.inputContainer}
-                  >
-                    <Text style={styles.label}>Report Date</Text>
-                    <View style={styles.input}>
-                      <Text>{date.toLocaleDateString()}</Text>
-                    </View>
-                  </TouchableOpacity>
+
                   {/* <DropDown
                     label="Plan"
                     data={[NONE_PLAN_OPTION, ...(landData?.plans || [])]}
@@ -1203,6 +1462,16 @@ export default function AddNewDpr({ route }) {
                     <Text style={styles.label}>Plan ID</Text>
                     <View style={styles.input}>
                       <Text>{landData?.planCode}</Text>
+                    </View>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => setShow(true)}
+                    style={styles.inputContainer}
+                  >
+                    <Text style={styles.label}>Report Date</Text>
+                    <View style={styles.input}>
+                      {/* <Text>{date.toLocaleDateString()}</Text> */}
+                      <Text>{formatDateInMDY(date)}</Text>
                     </View>
                   </TouchableOpacity>
                 </View>
@@ -1348,12 +1617,14 @@ export default function AddNewDpr({ route }) {
                               },
                             ]}
                             placeholder="No of Labour"
-                            keyboardType="numeric"
+                            keyboardType="number-pad"
                             value={act.noOfLabour}
+                            maxLength={4}
                             onChangeText={(v) => {
+                              const numericValue = v.replace(/[^0-9]/g, "");
                               updateActivity(entry.id, act.id, (a) => ({
                                 ...a,
-                                noOfLabour: v,
+                                noOfLabour: numericValue,
                               }));
                               setErrors((prev) => {
                                 const copy = { ...prev };
@@ -1379,15 +1650,17 @@ export default function AddNewDpr({ route }) {
                               keyboardType="numeric"
                               value={act.area}
                               onChangeText={(v) => {
-                                const total =
-                                  Number(v || 0) *
-                                  Number(act.noOfIteration || 0);
+                                if (/^\d*\.?\d{0,2}$/.test(v)) {
+                                  const total =
+                                    Number(v || 0) *
+                                    Number(act.noOfIteration || 0);
 
-                                updateActivity(entry.id, act.id, (a) => ({
-                                  ...a,
-                                  area: v,
-                                  total: total.toString(),
-                                }));
+                                  updateActivity(entry.id, act.id, (a) => ({
+                                    ...a,
+                                    area: v,
+                                    total: total.toString(),
+                                  }));
+                                }
                               }}
                             />
                           </View>
@@ -1397,17 +1670,20 @@ export default function AddNewDpr({ route }) {
                             <Text style={styles.label}>No. of Iteration</Text>
 
                             <TextInput
+                              maxLength={3}
                               style={styles.input}
                               placeholder="Iteration"
-                              keyboardType="numeric"
+                              keyboardType="number-pad"
                               value={act.noOfIteration}
                               onChangeText={(v) => {
+                                const numericValue = v.replace(/[^0-9]/g, "");
                                 const total =
-                                  Number(act.area || 0) * Number(v || 0);
+                                  Number(act.area || 0) *
+                                  Number(numericValue || 0);
 
                                 updateActivity(entry.id, act.id, (a) => ({
                                   ...a,
-                                  noOfIteration: v,
+                                  noOfIteration: numericValue,
                                   total: total.toString(),
                                 }));
                               }}
@@ -1716,20 +1992,39 @@ export default function AddNewDpr({ route }) {
                                   ]}
                                   placeholder="Estimated Hours"
                                   value={eq.estHours}
+                                  keyboardType="decimal-pad"
+                                  // onChangeText={(v) => {
+                                  //   setErrors((prev) => {
+                                  //     const copy = { ...prev };
+                                  //     delete copy[`hours_${ei}_${ai}_${eqi}`];
+                                  //     return copy;
+                                  //   });
+                                  //   updateActivity(entry.id, act.id, (a) => ({
+                                  //     ...a,
+                                  //     equipments: a.equipments.map((x) =>
+                                  //       x.id === eq.id
+                                  //         ? { ...x, estHours: v }
+                                  //         : x,
+                                  //     ),
+                                  //   }));
+                                  // }}
                                   onChangeText={(v) => {
-                                    setErrors((prev) => {
-                                      const copy = { ...prev };
-                                      delete copy[`hours_${ei}_${ai}_${eqi}`];
-                                      return copy;
-                                    });
-                                    updateActivity(entry.id, act.id, (a) => ({
-                                      ...a,
-                                      equipments: a.equipments.map((x) =>
-                                        x.id === eq.id
-                                          ? { ...x, estHours: v }
-                                          : x,
-                                      ),
-                                    }));
+                                    if (/^\d*\.?\d{0,2}$/.test(v)) {
+                                      setErrors((prev) => {
+                                        const copy = { ...prev };
+                                        delete copy[`hours_${ei}_${ai}_${eqi}`];
+                                        return copy;
+                                      });
+
+                                      updateActivity(entry.id, act.id, (a) => ({
+                                        ...a,
+                                        equipments: a.equipments.map((x) =>
+                                          x.id === eq.id
+                                            ? { ...x, estHours: v }
+                                            : x,
+                                        ),
+                                      }));
+                                    }
                                   }}
                                 />
                                 {errors[`hours_${ei}_${ai}_${eqi}`] && (
@@ -1764,35 +2059,119 @@ export default function AddNewDpr({ route }) {
               ))}
             </>
           ) : (
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Remark</Text>
-              <TextInput
-                style={[styles.input]}
-                placeholder="Remark"
-                value={remark}
-                onChangeText={(v) => {
-                  setremark(v);
+            <>
+              <View
+                style={{
+                  backgroundColor: "#f1f8e9",
+                  padding: 10,
+                  borderRadius: 10,
+                  borderWidth: 2,
+                  borderColor: "#2e7d32",
+                  borderStyle: "dotted",
+                  marginTop: 10,
                 }}
-              />
-            </View>
+              >
+                <View style={styles.row}>
+                  <Text
+                    style={{
+                      color: Colors.black,
+                      fontSize: 18,
+                      marginBottom: 10,
+                    }}
+                  >
+                    Basic Detail
+                  </Text>
+                </View>
+                <View style={styles.row}>
+                  <TouchableOpacity
+                    onPress={() => setShow(true)}
+                    style={styles.inputContainer}
+                  >
+                    <Text style={styles.label}>Report Date</Text>
+                    <View style={styles.input}>
+                      {/* <Text>{date.toLocaleDateString()}</Text> */}
+                      <Text>{formatDateInMDY(date)}</Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity disabled style={styles.inputContainer}>
+                    <Text style={styles.label}>Plan ID</Text>
+                    <View style={styles.input}>
+                      <Text>{landData?.planCode}</Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              {!draftData && (
+                <View style={[styles.inputContainer, { marginTop: 20 }]}>
+                  <Text style={styles.label}>Remark</Text>
+                  <TextInput
+                    style={[styles.input]}
+                    placeholder="Remark"
+                    value={remark}
+                    onChangeText={(v) => {
+                      setremark(v);
+                    }}
+                  />
+                </View>
+              )}
+            </>
           )}
 
-          <TouchableOpacity
-            style={[styles.submitBtn, { marginBottom: 0 }]}
-            onPress={() => {
-              submitDPR("PENDING");
-            }}
-          >
-            <Text style={styles.addEntryText}>Submit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.submitBtn]}
-            onPress={() => {
-              submitDPR("DRAFT");
-            }}
-          >
-            <Text style={styles.addEntryText}>Save As Draft</Text>
-          </TouchableOpacity>
+          {!draftData && (
+            <>
+              <TouchableOpacity
+                style={[styles.submitBtn, { marginBottom: 0 }]}
+                onPress={() => {
+                  submitDPR("PENDING");
+                }}
+              >
+                <Text style={styles.addEntryText}>Submit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.submitBtn]}
+                onPress={() => {
+                  submitDPR("DRAFT");
+                }}
+              >
+                <Text style={styles.addEntryText}>Save As Draft</Text>
+              </TouchableOpacity>
+            </>
+          )}
+
+          {draftData &&
+            userData?.unitType == "CHAK" &&
+            draftData?.dprStatus == "PENDING" && (
+              <TouchableOpacity
+                style={[styles.submitBtn, { marginBottom: 30 }]}
+                onPress={() => {
+                  updateDpr("PENDING");
+                }}
+              >
+                <Text style={styles.addEntryText}>Update</Text>
+              </TouchableOpacity>
+            )}
+
+          {draftData && draftData?.dprStatus == "DRAFT" && (
+            <>
+              <TouchableOpacity
+                style={[styles.submitBtn, { marginBottom: 0 }]}
+                onPress={() => {
+                  updateDpr("PENDING");
+                }}
+              >
+                <Text style={styles.addEntryText}>Submit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.submitBtn]}
+                onPress={() => {
+                  updateDpr("DRAFT");
+                }}
+              >
+                <Text style={styles.addEntryText}>Save As Draft</Text>
+              </TouchableOpacity>
+            </>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
     </WrapperContainer>

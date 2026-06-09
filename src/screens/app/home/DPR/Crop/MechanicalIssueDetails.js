@@ -9,6 +9,7 @@ import {
   Platform,
   TextInput,
   Switch,
+  Modal,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import Colors from "../../../../../utils/Colors";
@@ -31,6 +32,7 @@ import { showErrorMessage } from "../../../../../utils/HelperFunction";
 import DropDown from "../../../../../components/DropDown";
 import FontFamily from "../../../../../utils/FontFamily";
 import { getUserData } from "../../../../../utils/Storage";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 /* ================= MATERIAL TYPE ================= */
 
@@ -55,6 +57,13 @@ export default function MechanicalIssueDetails({ route }) {
   const [dprData, setDprData] = useState(null);
   const [activityGroups, setActivityGroups] = useState([]);
   const [expandedActivityId, setExpandedActivityId] = useState(null);
+  const [selectedEqupment, setselectedEqupment] = useState("");
+  const [farmBlokList, setFarmBlokList] = useState([]);
+  const [showForwardModal, setShowForwardModal] = useState(false);
+  const [selectedForwardBlock, setSelectedForwardBlock] = useState(null);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [selectedMachineId, setSelectedMachineId] = useState(null);
+  const [selectedTimeField, setSelectedTimeField] = useState("outTime");
 
   useEffect(() => {
     if (isFocused && dprId) {
@@ -293,7 +302,7 @@ export default function MechanicalIssueDetails({ route }) {
   //   );
   // };
 
-  const approveMechanical = async (macItem) => {
+  const approveMechanical = async (macItem, status) => {
     try {
       // 🔒 VALIDATIONS
       if (!macItem.cpNumber) {
@@ -366,7 +375,8 @@ export default function MechanicalIssueDetails({ route }) {
             ? macItem.cpNumber.cpNo
             : macItem.cpNumber,
 
-        outTime: macItem.outTime || "",
+        outTime: macItem?.outTime || "",
+        inTime: macItem.inTime || "",
         remarks: macItem.remarks || "",
 
         estimatedHours: Number(macItem.estimatedHours || 0),
@@ -384,14 +394,14 @@ export default function MechanicalIssueDetails({ route }) {
         activityId: macItem.activityId,
         activityName: macItem.activityName,
 
-        dprMechStatus: "ISSUE",
+        dprMechStatus: status,
         dprId: dprData.id,
 
         engineerId: userData?.userId,
         engineerName: userData?.username,
       };
 
-      console.log("✅ APPROVE PAYLOAD", payload);
+      console.log("APPROVE PAYLOAD", payload);
 
       const encryptedPayload = encryptWholeObject(payload);
 
@@ -413,6 +423,89 @@ export default function MechanicalIssueDetails({ route }) {
     } catch (err) {
       console.log("❌ Approve error", err);
       showErrorMessage("Something went wrong while approving");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const forwardEquipment = async () => {
+    try {
+      setLoading(true);
+
+      const userData = await getUserData();
+
+      const payload = {
+        dprId: dprData?.id,
+        id: selectedEqupment.id,
+        dprMechStatus: "FORWARD",
+        engineerId: selectedForwardBlock?.id,
+        engineerName: selectedForwardBlock?.blockName,
+        forwardedFarmEngineeringBlockId: selectedForwardBlock?.id,
+        forwardedFarmEngineeringBlockName: selectedForwardBlock?.blockName,
+      };
+
+      console.log("forwardEquipment", payload);
+
+      const encryptedPayload = encryptWholeObject(payload);
+
+      const res = await apiRequest(
+        API_ROUTES.DPR_MECHANICAL_UPDATE,
+        "POST",
+        encryptedPayload,
+      );
+
+      const parsed = JSON.parse(decryptAES(res));
+      console.log("✅ APPROVE RESPONSE", parsed);
+
+      if (parsed?.status === "SUCCESS") {
+        alert("Mechanical Approved Successfully ✅");
+        fetchDprDetail(); // 🔁 reload updated status
+      } else {
+        showErrorMessage(parsed?.message || "Approve failed");
+      }
+    } catch (err) {
+      console.log("❌ Approve error", err);
+      showErrorMessage("Something went wrong while approving");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getFarmBlokList = async (macItem) => {
+    try {
+      setLoading(true);
+
+      const userData = await getUserData();
+
+      const payload = {
+        farmId: userData?.farmId,
+      };
+
+      const encryptedPayload = encryptWholeObject(payload);
+
+      const res = await apiRequest(
+        API_ROUTES.FARM_BLOK_LIST,
+        "POST",
+        encryptedPayload,
+      );
+
+      const parsed = JSON.parse(decryptAES(res));
+
+      if (parsed?.status === "SUCCESS") {
+        const blocks =
+          parsed?.data?.filter((item) => item?.id != userData?.farmBlockId) ||
+          [];
+
+        setFarmBlokList(blocks);
+        setselectedEqupment(macItem);
+
+        // Modal Open
+        setShowForwardModal(true);
+      } else {
+        showErrorMessage(parsed?.message || "Request failed");
+      }
+    } catch (err) {
+      showErrorMessage("Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -493,39 +586,68 @@ export default function MechanicalIssueDetails({ route }) {
                 <View style={styles.inputContainer}>
                   <Text style={styles.label}>Out Time</Text>
 
-                  <TextInput
-                    editable={macItem?.dprMechStatus == "PENDING"}
-                    value={macItem?.outTime || ""}
+                  <TouchableOpacity
+                    disabled={macItem?.dprMechStatus !== "PENDING"}
                     style={
-                      macItem?.dprMechStatus == "PENDING"
-                        ? styles.input
+                      macItem?.dprMechStatus === "PENDING"
+                        ? styles.timeInput
                         : styles.disabledInput
                     }
-                    placeholder="Enter Out Time"
-                    onChangeText={(text) => {
-                      setActivityGroups((prev) =>
-                        prev.map((act) => ({
-                          ...act,
-                          mechanicals: act.mechanicals.map((m) =>
-                            m.id === macItem.id ? { ...m, outTime: text } : m,
-                          ),
-                        })),
-                      );
+                    onPress={() => {
+                      setSelectedMachineId(macItem.id);
+                      setSelectedTimeField("outTime");
+                      setShowTimePicker(true);
                     }}
-                  />
+                  >
+                    <Text>{macItem?.outTime || "Select Out Time"}</Text>
+
+                    {!macItem?.outTime && (
+                      <Icon
+                        name="access-time"
+                        size={20}
+                        color={Colors.greenColor}
+                      />
+                    )}
+                  </TouchableOpacity>
                 </View>
+                {dprData?.dprStatus == "SUBMITTED" && (
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.label}>In Time</Text>
+
+                    <TouchableOpacity
+                      disabled={macItem?.inTime ? true : false}
+                      style={
+                        macItem?.dprMechStatus === "PENDING"
+                          ? styles.timeInput
+                          : styles.disabledInput
+                      }
+                      //style={styles.timeInput}
+                      onPress={() => {
+                        setSelectedMachineId(macItem.id);
+                        setSelectedTimeField("inTime");
+                        setShowTimePicker(true);
+                      }}
+                    >
+                      <Text>{macItem?.inTime || "Select In Time"}</Text>
+
+                      {!macItem?.inTime && (
+                        <Icon
+                          name="access-time"
+                          size={20}
+                          color={Colors.greenColor}
+                        />
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                )}
 
                 <View style={styles.inputContainer}>
                   <Text style={styles.label}>Remark</Text>
 
                   <TextInput
-                    editable={macItem?.dprMechStatus == "PENDING"}
+                    //editable={macItem?.dprMechStatus == "PENDING"}
                     value={macItem?.remarks || ""}
-                    style={
-                      macItem?.dprMechStatus == "PENDING"
-                        ? styles.input
-                        : styles.disabledInput
-                    }
+                    style={styles.input}
                     placeholder="Enter Remark"
                     multiline
                     onChangeText={(text) => {
@@ -592,19 +714,49 @@ export default function MechanicalIssueDetails({ route }) {
                             : styles.input
                         }
                         placeholder="Idle Hours"
-                        keyboardType="numeric"
+                        keyboardType="decimal-pad"
                         value={String(macItem?.mechIdleTime || "")}
                         onChangeText={(val) => {
-                          setActivityGroups((prev) =>
-                            prev.map((act) => ({
-                              ...act,
-                              mechanicals: act.mechanicals.map((m) =>
-                                m.id === macItem.id
-                                  ? { ...m, mechIdleTime: val }
-                                  : m,
-                              ),
-                            })),
-                          );
+                          if (/^\d*\.?\d{0,2}$/.test(val)) {
+                            setActivityGroups((prev) =>
+                              prev.map((act) => ({
+                                ...act,
+                                mechanicals: act.mechanicals.map((m) =>
+                                  m.id === macItem.id
+                                    ? { ...m, mechIdleTime: val }
+                                    : m,
+                                ),
+                              })),
+                            );
+                          }
+                        }}
+                      />
+                    </View>
+                    <View style={styles.inputContainer}>
+                      <Text style={styles.label}>Fuel Consumption (Lit)</Text>
+                      <TextInput
+                        //editable={macItem.fuelConsumptionInLit ? false : true}
+                        style={
+                          macItem.isIdleLocked
+                            ? styles.disabledInput
+                            : styles.input
+                        }
+                        placeholder="Fuel Consumption (Lit)"
+                        keyboardType="decimal-pad"
+                        value={String(macItem?.fuelConsumptionInLit || "")}
+                        onChangeText={(val) => {
+                          if (/^\d*\.?\d{0,2}$/.test(val)) {
+                            setActivityGroups((prev) =>
+                              prev.map((act) => ({
+                                ...act,
+                                mechanicals: act.mechanicals.map((m) =>
+                                  m.id === macItem.id
+                                    ? { ...m, fuelConsumptionInLit: val }
+                                    : m,
+                                ),
+                              })),
+                            );
+                          }
                         }}
                       />
                     </View>
@@ -618,15 +770,16 @@ export default function MechanicalIssueDetails({ route }) {
                             : styles.disabledInput
                         }
                         placeholder="Working Hours"
-                        keyboardType="numeric"
+                        keyboardType="number-pad"
                         value={String(macItem?.mechRunningTime || "")}
                         onChangeText={(val) => {
+                          const numericValue = val.replace(/[^0-9]/g, "");
                           setActivityGroups((prev) =>
                             prev.map((act) => ({
                               ...act,
                               mechanicals: act.mechanicals.map((m) =>
                                 m.id === macItem.id
-                                  ? { ...m, mechRunningTime: val }
+                                  ? { ...m, mechRunningTime: numericValue }
                                   : m,
                               ),
                             })),
@@ -657,7 +810,7 @@ export default function MechanicalIssueDetails({ route }) {
                 : macItem?.dprMechStatus == "PENDING" && (
                     <View style={styles.actionRow}>
                       <TouchableOpacity
-                        onPress={() => approveMechanical(macItem)}
+                        onPress={() => approveMechanical(macItem, "ISSUE")}
                         style={styles.approveBtn}
                       >
                         <Icon name="check-circle" size={18} color="#fff" />
@@ -665,11 +818,23 @@ export default function MechanicalIssueDetails({ route }) {
                       </TouchableOpacity>
 
                       <TouchableOpacity
-                        onPress={() => rejectMechanical(macItem)}
+                        onPress={() => approveMechanical(macItem, "REJECTED")}
                         style={styles.rejectBtn}
                       >
                         <Icon name="cancel" size={18} color="#fff" />
                         <Text style={styles.actionText}>Reject</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => {
+                          setselectedEqupment(macItem);
+                          getFarmBlokList(macItem);
+                        }}
+                        style={styles.forwardBtn}
+                      >
+                        <Icon name="sms" size={18} color="#856404" />
+                        <Text style={[styles.actionText, { color: "#856404" }]}>
+                          Forward
+                        </Text>
                       </TouchableOpacity>
                     </View>
                   )}
@@ -680,11 +845,16 @@ export default function MechanicalIssueDetails({ route }) {
                   <View style={styles.actionRow}>
                     <TouchableOpacity
                       onPress={() => {
-                        if (!macItem.mechIdleTime || !macItem.mechRunningTime) {
-                          showErrorMessage("Please fill Idle & Working Hours");
+                        if (
+                          !macItem.mechIdleTime ||
+                          !macItem.mechRunningTime ||
+                          !macItem?.fuelConsumptionInLit ||
+                          !macItem?.inTime
+                        ) {
+                          showErrorMessage("Please fill all fields.");
                           return;
                         }
-                        approveMechanical(macItem);
+                        approveMechanical(macItem, "ISSUE");
                       }}
                       style={styles.approveBtn}
                     >
@@ -692,13 +862,13 @@ export default function MechanicalIssueDetails({ route }) {
                       <Text style={styles.actionText}>Approve</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity
+                    {/* <TouchableOpacity
                       onPress={() => rejectMechanical(macItem)}
                       style={styles.rejectBtn}
                     >
                       <Icon name="cancel" size={18} color="#fff" />
                       <Text style={styles.actionText}>Reject</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                   </View>
                 )}
             </View>
@@ -820,6 +990,126 @@ export default function MechanicalIssueDetails({ route }) {
   return (
     <WrapperContainer isLoading={loading}>
       <InnerHeader title="Mechanical Issue Details" />
+      {showTimePicker && (
+        <DateTimePicker
+          value={new Date()}
+          mode="time"
+          is24Hour={true}
+          display={Platform.OS === "ios" ? "spinner" : "default"}
+          onChange={(event, selectedDate) => {
+            setShowTimePicker(false);
+
+            if (!selectedDate) return;
+
+            const hours = String(selectedDate.getHours()).padStart(2, "0");
+            const minutes = String(selectedDate.getMinutes()).padStart(2, "0");
+
+            const formattedTime = `${hours}:${minutes}`;
+            console.log(formattedTime);
+
+            setActivityGroups((prev) =>
+              prev.map((act) => ({
+                ...act,
+                mechanicals: act.mechanicals.map((m) =>
+                  m.id === selectedMachineId
+                    ? {
+                        ...m,
+                        [selectedTimeField]: formattedTime,
+                      }
+                    : m,
+                ),
+              })),
+            );
+          }}
+        />
+      )}
+      <Modal visible={showForwardModal} transparent animationType="slide">
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.4)",
+            justifyContent: "center",
+            padding: 20,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: 12,
+              padding: 16,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: "700",
+                marginBottom: 15,
+              }}
+            >
+              Forward Equipment
+            </Text>
+
+            <DropDown
+              label="Farm Block"
+              placeholder="Select Farm Block"
+              data={farmBlokList}
+              value={selectedForwardBlock?.name || ""}
+              selectItem={(item) => {
+                setSelectedForwardBlock(item);
+              }}
+            />
+
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginTop: 20,
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => {
+                  setShowForwardModal(false);
+                  setSelectedForwardBlock(null);
+                }}
+                style={{
+                  padding: 12,
+                  backgroundColor: "#ddd",
+                  borderRadius: 8,
+                  width: "45%",
+                  alignItems: "center",
+                }}
+              >
+                <Text>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  if (!selectedForwardBlock) {
+                    showErrorMessage("Please select Farm Block");
+                    return;
+                  }
+
+                  console.log("Selected Block", selectedForwardBlock);
+
+                  // Forward API Call Here
+                  forwardEquipment();
+
+                  setShowForwardModal(false);
+                }}
+                style={{
+                  padding: 12,
+                  backgroundColor: Colors.greenColor,
+                  borderRadius: 8,
+                  width: "45%",
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ color: "#fff" }}>Submit</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -832,9 +1122,15 @@ export default function MechanicalIssueDetails({ route }) {
           {dprData && (
             <View style={styles.basicCard}>
               <Text style={styles.basicTitle}>Basic Details</Text>
+              <Text>Process Date: {dprData.planDate}</Text>
+              <Text>Block Name: {dprData.farmBlockName}</Text>
+              <Text>
+                Contractor Name: {dprData.contractorName}(
+                {dprData.contractorType})
+              </Text>
+              <Text>Chak Name {dprData.chakName}</Text>
               <Text>Square: {dprData.squareName}</Text>
-              <Text>Status: {dprData.currentDprStatus}</Text>
-              <Text>DPR Type: {dprData.dprType}</Text>
+              <Text>Plan Id: {dprData.planId}</Text>
             </View>
           )}
 
@@ -1058,7 +1354,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#2e7d32",
     padding: 10,
     borderRadius: 8,
-    width: "48%",
+    width: "32%",
     justifyContent: "center",
   },
 
@@ -1068,7 +1364,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#c62828",
     padding: 10,
     borderRadius: 8,
-    width: "48%",
+    width: "32%",
+    justifyContent: "center",
+  },
+  forwardBtn: {
+    backgroundColor: "#fff3cd",
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    borderRadius: 8,
+    width: "32%",
     justifyContent: "center",
   },
 
@@ -1118,5 +1423,16 @@ const styles = StyleSheet.create({
     color: Colors.grey,
     marginBottom: 2,
     fontWeight: "700",
+  },
+  timeInput: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 6,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#fff",
   },
 });

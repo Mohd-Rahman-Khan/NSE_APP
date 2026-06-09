@@ -178,6 +178,9 @@ export default function ViewDprDetail({ route }) {
             );
           });
         }, 0);
+        if (parsed?.data?.actualDate) {
+          setDate(new Date(parsed.data.actualDate));
+        }
       } else {
         showErrorMessage(parsed?.message || "Failed to load DPR");
       }
@@ -279,6 +282,7 @@ export default function ViewDprDetail({ route }) {
     data.activities.forEach((a) => {
       const existingLabour =
         data.dprLabour?.filter((l) => l.activityId === a.activityId) || [];
+      console.log("existingLabour", existingLabour);
 
       const labours =
         existingLabour.length > 0
@@ -290,7 +294,7 @@ export default function ViewDprDetail({ route }) {
               agreementType: l.agreementType || "",
               worker: l.worker || null,
               workerList: [],
-              category: "",
+              category: l.category,
             }))
           : Array.from({ length: a.noOfLabour || 0 }).map((_, i) => ({
               id: `${a.id}-${i}`, // 🔥 use a.id
@@ -698,9 +702,13 @@ export default function ViewDprDetail({ route }) {
                 <TextInput
                   maxLength={2}
                   keyboardType="number-pad"
-                  editable={dprData?.currentDprStatus === "APPROVED"}
+                  editable={
+                    dprData?.currentDprStatus === "APPROVED" &&
+                    userData?.unitType == "CHAK"
+                  }
                   style={
-                    dprData?.currentDprStatus === "APPROVED"
+                    dprData?.currentDprStatus === "APPROVED" &&
+                    userData?.unitType == "CHAK"
                       ? styles.input
                       : styles.disabledInput
                   }
@@ -719,6 +727,30 @@ export default function ViewDprDetail({ route }) {
                 />
               </View>
             )}
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Area</Text>
+              <TextInput
+                editable={false}
+                style={styles.disabledInput}
+                value={String(item.basic?.area || "")}
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>No Of Iteration</Text>
+              <TextInput
+                editable={false}
+                style={styles.disabledInput}
+                value={String(item.basic?.noOfIteration || "")}
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Total Output</Text>
+              <TextInput
+                editable={false}
+                style={styles.disabledInput}
+                value={String(item.basic?.totalOutput || "")}
+              />
+            </View>
 
             {/* AGRICULTURE */}
             {item.agricultures.length > 0 && (
@@ -828,23 +860,23 @@ export default function ViewDprDetail({ route }) {
                       // }}
 
                       onPress={async () => {
-                        if (userData?.unitType == "CHAK") {
-                        } else {
-                          if (!ag?.material?.itemCode) {
-                            alert("Please select item first");
-                            return;
-                          }
-
-                          // await fetchMaterialListByItemCode(
-                          //   ag.material.materialType,
-                          // );
-
-                          setSelectedActivityId(item.activityId);
-
-                          setSelectedAgricultureId(ag.id);
-
-                          setShowMaterialModal(true);
+                        // if (userData?.unitType == "CHAK") {
+                        // } else {
+                        if (!ag?.material?.itemCode) {
+                          alert("Please select item first");
+                          return;
                         }
+
+                        // await fetchMaterialListByItemCode(
+                        //   ag.material.materialType,
+                        // );
+
+                        setSelectedActivityId(item.activityId);
+
+                        setSelectedAgricultureId(ag.id);
+
+                        setShowMaterialModal(true);
+                        // }
                       }}
                     >
                       <Text style={styles.selectMaterialText}>
@@ -869,11 +901,7 @@ export default function ViewDprDetail({ route }) {
                   <View key={eq.id} style={styles.rowBox}>
                     <Text style={styles.serial}>S.N. {i + 1}</Text>
                     <View style={styles.divider} />
-                    <DropDown
-                      disabled
-                      label="Equipment"
-                      value={eq.equipmentName}
-                    />
+                    <DropDown disabled label="Group" value={eq.equipmentName} />
                     <DropDown
                       disabled
                       label="Sub Group"
@@ -894,67 +922,127 @@ export default function ViewDprDetail({ route }) {
                       />
                     </View>
 
-                    <View style={styles.inputContainer}>
-                      <Text style={styles.label}>Actual Hours</Text>
-                      <TextInput
-                        maxLength={2}
-                        keyboardType="numeric"
-                        value={String(eq.actualHours || "")}
-                        placeholder="Actual Hours"
-                        editable={dprData?.currentDprStatus == "APPROVED"}
-                        style={
-                          dprData?.currentDprStatus == "APPROVED"
-                            ? styles.input
-                            : styles.disabledInput
-                        }
-                        onChangeText={(val) =>
-                          updateMechanicalField(
-                            item.activityId,
-                            eq.id,
-                            "actualHours",
-                            val,
-                          )
-                        }
-                      />
-                    </View>
-
-                    <View style={styles.inputContainer}>
-                      <Text style={styles.label}>Operator Name</Text>
-                      <TextInput
-                        editable={false}
-                        style={styles.disabledInput}
-                        value={String(eq.operatorName || "")}
-                        placeholder="Operator Name"
-                      />
-                    </View>
-
-                    <View style={styles.inputContainer}>
-                      <Text style={styles.label}>CP Number</Text>
-                      <TextInput
-                        editable={false}
-                        style={styles.disabledInput}
-                        value={String(eq.cpNumber || "")}
-                        placeholder="CP Number"
-                      />
-                    </View>
-                    <View style={styles.inputContainer}>
-                      <Text style={styles.label}>Out Time</Text>
-
-                      <TouchableOpacity
-                        style={styles.timeContainer}
-                        onPress={() =>
-                          openOutTimePicker(item.activityId, eq.id)
-                        }
-                      >
-                        <Text>{eq.outTime || "Select Out Time"}</Text>
-
-                        <Icon
-                          name="access-time"
-                          size={22}
-                          color={Colors.greenColor}
+                    {dprData?.dprStatus == "PENDING" &&
+                    userData?.unitType == "FARM_BLOCK" ? null : (
+                      <View style={styles.inputContainer}>
+                        <Text style={styles.label}>Actual Hours</Text>
+                        <TextInput
+                          maxLength={2}
+                          keyboardType="numeric"
+                          value={String(eq.actualHours || "")}
+                          placeholder="Actual Hours"
+                          editable={
+                            dprData?.currentDprStatus == "APPROVED" &&
+                            userData?.unitType == "CHAK"
+                          }
+                          style={
+                            dprData?.currentDprStatus == "APPROVED" &&
+                            userData?.unitType == "CHAK"
+                              ? styles.input
+                              : styles.disabledInput
+                          }
+                          onChangeText={(val) =>
+                            updateMechanicalField(
+                              item.activityId,
+                              eq.id,
+                              "actualHours",
+                              val,
+                            )
+                          }
                         />
-                      </TouchableOpacity>
-                    </View>
+                      </View>
+                    )}
+
+                    {(dprData?.dprStatus == "APPROVED" ||
+                      dprData?.dprStatus == "SUBMITTED" ||
+                      dprData?.dprStatus == "DONE") &&
+                      eq.operatorName && (
+                        <View style={styles.inputContainer}>
+                          <Text style={styles.label}>Operator Name</Text>
+                          <TextInput
+                            editable={false}
+                            style={styles.disabledInput}
+                            value={String(eq.operatorName || "")}
+                            placeholder="Operator Name"
+                          />
+                        </View>
+                      )}
+
+                    {(dprData?.dprStatus == "APPROVED" ||
+                      dprData?.dprStatus == "SUBMITTED" ||
+                      dprData?.dprStatus == "DONE") && (
+                      <View style={styles.inputContainer}>
+                        <Text style={styles.label}>CP Number</Text>
+                        <TextInput
+                          editable={false}
+                          style={styles.disabledInput}
+                          value={String(eq.cpNumber || "")}
+                          placeholder="CP Number"
+                        />
+                      </View>
+                    )}
+
+                    {(dprData?.dprStatus == "APPROVED" ||
+                      dprData?.dprStatus == "SUBMITTED" ||
+                      dprData?.dprStatus == "DONE") && (
+                      <View style={styles.inputContainer}>
+                        <Text style={styles.label}>Out Time</Text>
+
+                        <TouchableOpacity
+                          disabled
+                          // style={
+                          //   eq.outTime
+                          //     ? styles.disabledInput
+                          //     : styles.timeContainer
+                          // }
+                          style={styles.disabledInput}
+                          onPress={() => {
+                            if (!eq.outTime) {
+                              openOutTimePicker(item.activityId, eq.id);
+                            }
+                          }}
+                        >
+                          <Text>{eq.outTime || "- - : - -"}</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+
+                    {console.log("eq____", eq)}
+
+                    {(dprData?.dprStatus == "APPROVED" ||
+                      dprData?.dprStatus == "SUBMITTED" ||
+                      dprData?.dprStatus == "DONE") && (
+                      <View style={styles.inputContainer}>
+                        <Text style={styles.label}>In Time</Text>
+
+                        <TouchableOpacity disabled style={styles.disabledInput}>
+                          <Text>{eq.inTime || "- - : - -"}</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+
+                    {(dprData?.dprStatus == "APPROVED" ||
+                      dprData?.dprStatus == "SUBMITTED" ||
+                      dprData?.dprStatus == "DONE") && (
+                      <View style={styles.inputContainer}>
+                        <Text style={styles.label}>Idle Hours</Text>
+
+                        <TouchableOpacity disabled style={styles.disabledInput}>
+                          <Text>{eq.mechIdleTime || ""}</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                    {(dprData?.dprStatus == "APPROVED" ||
+                      dprData?.dprStatus == "SUBMITTED" ||
+                      dprData?.dprStatus == "DONE") && (
+                      <View style={styles.inputContainer}>
+                        <Text style={styles.label}>Working Time</Text>
+
+                        <TouchableOpacity disabled style={styles.disabledInput}>
+                          <Text>{eq.mechRunningTime || ""}</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
 
                     <View style={styles.switchRow}>
                       <Text>Operator Required</Text>
@@ -979,7 +1067,8 @@ export default function ViewDprDetail({ route }) {
             {/* LABOUR */}
             {item.labours.length > 0 &&
               (dprData?.currentDprStatus == "APPROVED" ||
-                dprData?.currentDprStatus == "SUBMITTED") && (
+                dprData?.currentDprStatus == "SUBMITTED") &&
+              userData?.unitType == "CHAK" && (
                 <>
                   <View style={styles.sectionHeader}>
                     <Text style={styles.sectionTitle}>Labour Details</Text>
@@ -989,6 +1078,7 @@ export default function ViewDprDetail({ route }) {
                     <View key={lab.id} style={styles.rowBox}>
                       <Text style={styles.serial}>S.N. {i + 1}</Text>
                       <View style={styles.divider} />
+
                       <DropDown
                         label="Category"
                         data={categoryList}
@@ -1083,15 +1173,20 @@ export default function ViewDprDetail({ route }) {
 
                       <DropDown
                         label="Labour/Employee"
+                        fieldName={
+                          lab.category === "RW" ? "firstName" : "workerName"
+                        }
                         data={lab.workerList || []}
                         value={lab.labourName || ""}
                         disabled={dprData?.currentDprStatus != "APPROVED"}
                         selectItem={(selectedWorker) => {
+                          //console.log("selectedWorker", selectedWorker);
                           updateLabourField(
                             item.activityId,
                             lab.id,
                             "labourName",
-                            selectedWorker?.firstName,
+                            selectedWorker?.firstName ||
+                              selectedWorker?.workerName,
                           );
                           updateLabourField(
                             item.activityId,
@@ -1194,6 +1289,53 @@ export default function ViewDprDetail({ route }) {
 
   const handleUpdateDpr = async () => {
     try {
+      // ✅ Validation Start
+      for (const act of activityGroups) {
+        // Actual No Of Labour
+        console.log(act);
+        if (
+          act?.basic?.actualNoOfLabour === "" ||
+          act?.basic?.actualNoOfLabour === null ||
+          act?.basic?.actualNoOfLabour === undefined ||
+          Number(act?.basic?.actualNoOfLabour) <= 0
+        ) {
+          showErrorMessage(`Please enter Actual No Of Labour`);
+          return;
+        }
+
+        for (const mac of act.mechanicals || []) {
+          if (mac?.actualHours == 0) {
+            showErrorMessage(`Please enter actoual number of hours.`);
+            return;
+          }
+        }
+
+        // Labour Details
+        for (const lab of act.labours || []) {
+          if (!lab?.category) {
+            showErrorMessage(`Please select Category in Labour detail`);
+            return;
+          }
+
+          if (!lab?.labourName?.trim()) {
+            showErrorMessage(
+              `Please select Labour/Employee in Please select Category in Labour detail`,
+            );
+            return;
+          }
+
+          if (
+            lab?.actualHours === "" ||
+            lab?.actualHours === null ||
+            lab?.actualHours === undefined ||
+            Number(lab?.actualHours) <= 0
+          ) {
+            showErrorMessage(`Please enter Working Hours for Labour`);
+            return;
+          }
+        }
+      }
+
       setLoading(true);
 
       // const payload = [
@@ -1425,6 +1567,12 @@ export default function ViewDprDetail({ route }) {
       setLoading(false);
     }
   };
+  const formatDate = (isoString) => {
+    const date = new Date(isoString);
+    return `${String(date.getDate()).padStart(2, "0")}-${String(
+      date.getMonth() + 1,
+    ).padStart(2, "0")}-${date.getFullYear()}`;
+  };
 
   const validateMaterialSelection = () => {
     let isValid = true;
@@ -1457,7 +1605,7 @@ export default function ViewDprDetail({ route }) {
     return isValid;
   };
 
-  const submitUpdateDpr = async () => {
+  const submitUpdateDpr = async (status) => {
     // if (!validateMaterialSelection()) {
     //   return;
     // }
@@ -1534,9 +1682,12 @@ export default function ViewDprDetail({ route }) {
 
             allowMultiple: dprData?.allowMultiple || false,
 
-            dprStatus: "APPROVED",
+            // dprStatus: "APPROVED",
 
-            currentDprStatus: "APPROVED",
+            // currentDprStatus: "APPROVED",
+            dprStatus: status,
+
+            currentDprStatus: status,
 
             /* ================= AGRICULTURE ================= */
 
@@ -1809,7 +1960,7 @@ export default function ViewDprDetail({ route }) {
       console.log("✅ UPDATE DPR RESPONSE", parsed);
 
       if (parsed?.status === "SUCCESS") {
-        alert("DPR updated successfully ✅");
+        alert("DPR data saved successfully");
         navigation.goBack();
       } else {
         showErrorMessage(parsed?.message || "DPR update failed");
@@ -2040,45 +2191,47 @@ export default function ViewDprDetail({ route }) {
               </ScrollView>
 
               {/* FOOTER */}
-              <View style={styles.modalFooter}>
-                <TouchableOpacity
-                  style={styles.cancelBtn}
-                  onPress={() => setShowMaterialModal(false)}
-                >
-                  <Text>Cancel</Text>
-                </TouchableOpacity>
+              {userData?.unitType == "FARM_BLOCK" && (
+                <View style={styles.modalFooter}>
+                  <TouchableOpacity
+                    style={styles.cancelBtn}
+                    onPress={() => setShowMaterialModal(false)}
+                  >
+                    <Text>Cancel</Text>
+                  </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={styles.saveBtn}
-                  onPress={() => {
-                    const selectedItem = materialTableData.find(
-                      (x) => x.selected,
-                    );
+                  <TouchableOpacity
+                    style={styles.saveBtn}
+                    onPress={() => {
+                      const selectedItem = materialTableData.find(
+                        (x) => x.selected,
+                      );
 
-                    setActivityGroups((prev) =>
-                      prev.map((activity) =>
-                        activity.activityId === selectedActivityId
-                          ? {
-                              ...activity,
-                              agricultures: activity.agricultures.map((ag) =>
-                                ag.id === selectedAgricultureId
-                                  ? {
-                                      ...ag,
-                                      selectedMaterial: selectedItem,
-                                    }
-                                  : ag,
-                              ),
-                            }
-                          : activity,
-                      ),
-                    );
+                      setActivityGroups((prev) =>
+                        prev.map((activity) =>
+                          activity.activityId === selectedActivityId
+                            ? {
+                                ...activity,
+                                agricultures: activity.agricultures.map((ag) =>
+                                  ag.id === selectedAgricultureId
+                                    ? {
+                                        ...ag,
+                                        selectedMaterial: selectedItem,
+                                      }
+                                    : ag,
+                                ),
+                              }
+                            : activity,
+                        ),
+                      );
 
-                    setShowMaterialModal(false);
-                  }}
-                >
-                  <Text style={{ color: "#fff" }}>Save</Text>
-                </TouchableOpacity>
-              </View>
+                      setShowMaterialModal(false);
+                    }}
+                  >
+                    <Text style={{ color: "#fff" }}>Save</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
           </View>
         </Modal>
@@ -2103,19 +2256,25 @@ export default function ViewDprDetail({ route }) {
               >
                 <Text style={styles.label}>Plan Report Date</Text>
                 <View style={styles.input}>
-                  <Text>{dprData?.actualDate}</Text>
+                  <Text>{formatDate(dprData?.actualDate)}</Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity
-                disabled={dprData?.dprLabour?.length > 0}
-                onPress={() => setShow(true)}
-                style={[styles.inputContainer]}
-              >
-                <Text style={styles.label}>Report Completion Date</Text>
-                <View style={styles.input}>
-                  <Text>{date.toLocaleDateString()}</Text>
-                </View>
-              </TouchableOpacity>
+              {dprData?.dprStatus == "PENDING" ? null : (
+                <TouchableOpacity
+                  disabled={
+                    dprData?.dprStatus == "APPROVED" &&
+                    userData?.unitType == "FARM_BLOCK"
+                  }
+                  onPress={() => setShow(true)}
+                  style={[styles.inputContainer]}
+                >
+                  <Text style={styles.label}>Report Completion Date</Text>
+                  <View style={styles.input}>
+                    {/* <Text>{date.toLocaleDateString()}</Text> */}
+                    <Text>{formatDate(date)}</Text>
+                  </View>
+                </TouchableOpacity>
+              )}
             </View>
           )}
 
@@ -2128,22 +2287,35 @@ export default function ViewDprDetail({ route }) {
           {userData?.unitType == "CHAK"
             ? null
             : dprData?.currentDprStatus == "PENDING" && (
-                <CustomButton
-                  text="Submit"
-                  buttonStyle={styles.buttonStyle}
-                  textStyle={styles.buttonTextStyle}
-                  handleAction={submitUpdateDpr}
-                />
+                <>
+                  <CustomButton
+                    text="Approve"
+                    buttonStyle={styles.buttonStyle}
+                    textStyle={styles.buttonTextStyle}
+                    handleAction={() => {
+                      submitUpdateDpr("APPROVED");
+                    }}
+                  />
+                  <CustomButton
+                    text="Reject"
+                    buttonStyle={[styles.buttonStyle, { marginTop: 0 }]}
+                    textStyle={styles.buttonTextStyle}
+                    handleAction={() => {
+                      submitUpdateDpr("REJECTED");
+                    }}
+                  />
+                </>
               )}
 
-          {dprData?.currentDprStatus == "APPROVED" && (
-            <CustomButton
-              text="Update"
-              buttonStyle={styles.buttonStyle}
-              textStyle={styles.buttonTextStyle}
-              handleAction={handleUpdateDpr}
-            />
-          )}
+          {dprData?.currentDprStatus == "APPROVED" &&
+            userData?.unitType == "CHAK" && (
+              <CustomButton
+                text="Create DPR"
+                buttonStyle={styles.buttonStyle}
+                textStyle={styles.buttonTextStyle}
+                handleAction={handleUpdateDpr}
+              />
+            )}
         </ScrollView>
       </KeyboardAvoidingView>
     </WrapperContainer>

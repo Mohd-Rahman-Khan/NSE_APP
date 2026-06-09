@@ -44,7 +44,6 @@ export const API_ROUTES = {
   Announcement: "master/ANNOUNCEMENT_MASTER/public",
   PLAN_FOR_SQURE_LIST: "prod_farm/DP_REPORT/find-plan-for-square",
   GET_DPR_HISTORY: "prod_farm/dpr/find-by-filter",
-  GET_OPERATION_LIST: "master/operation-master/dd",
   UPDATE_DPR: "prod_farm/dp-report/update",
   SQUARE_LIST: "prod_farm/DPR/find-current-plans-squares",
   CONTRACTOR: "master/contractor-agreement/contractors/dd",
@@ -81,4 +80,7 @@ export const API_ROUTES = {
   SELECTED_UNIT_LOGIN: "userauth/authenticate/selected-unit-login",
   CONTRACTOR_LIST: "master/contractor-agreement/dd",
   EMPLOYEE_LIST: "master/employee-master/dd",
+  FARM_BLOK_LIST: "master/farm-block-master/dd",
+  CHUK_LIST: "master/farm-chak-master/dd",
+  PLAN_LIST: "prod_farm/farm-production/find-by-filter/dd",
 };

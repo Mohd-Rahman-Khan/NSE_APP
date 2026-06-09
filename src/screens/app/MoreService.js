@@ -25,6 +25,7 @@ import { useIsFocused } from "@react-navigation/native";
 const MoreService = () => {
   const [searchText, setSearchText] = useState("");
   const [userData, setUserData] = useState("");
+  const [isLoading, setisLoading] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
@@ -36,88 +37,6 @@ const MoreService = () => {
   const [browseProductList, setbrowseProductList] = useState([]);
 
   const isFocused = useIsFocused();
-
-  const bannerImageList = [
-    {
-      id: 1,
-      name: "Ashish Ranjan",
-      image: ImagePath.bannerImage,
-    },
-    {
-      id: 2,
-      name: "Ashish Ranjan",
-      image: ImagePath.bannerImage,
-    },
-    {
-      id: 3,
-      name: "Ashish Ranjan",
-      image: ImagePath.bannerImage,
-    },
-    {
-      id: 4,
-      name: "Ashish Ranjan",
-      image: ImagePath.bannerImage,
-    },
-    {
-      id: 5,
-      name: "Ashish Ranjan",
-      image: ImagePath.bannerImage,
-    },
-    {
-      id: 6,
-      name: "Ashish Ranjan",
-      image: ImagePath.bannerImage,
-    },
-  ];
-
-  // const browseProductList = [
-  //   {
-  //     id: 1,
-  //     name: "Field Inspection Reports",
-  //     icon: ImagePath.complaint,
-  //     backgroundColor: Colors.bg1,
-  //     navigationScreenName: "FieldInspectionReport",
-  //   },
-  //   {
-  //     id: 2,
-  //     name: "Daily Progress Reports",
-  //     icon: ImagePath.registrationIcon,
-  //     backgroundColor: Colors.bg2,
-  //     //navigationScreenName: "DailyProgressReportList",
-  //     navigationScreenName: "SquarePlanList",
-  //     //navigationScreenName: "AddNewDpr",
-  //   },
-
-  //   {
-  //     id: 3,
-  //     name: "Dealer Indent",
-  //     icon: ImagePath.complaint,
-  //     backgroundColor: Colors.bg3,
-  //     navigationScreenName: "DealerIndentsList",
-  //   },
-  //   // {
-  //   //   id: 2,
-  //   //   name: "Old DPR",
-  //   //   icon: ImagePath.registrationIcon,
-  //   //   backgroundColor: Colors.bg2,
-  //   //   //navigationScreenName: "DailyProgressReportList",
-  //   //   navigationScreenName: "DailyProgressReportList",
-  //   // },
-  //   // {
-  //   //   id: 3,
-  //   //   name: "Crop",
-  //   //   icon: ImagePath.complaint,
-  //   //   backgroundColor: Colors.bg3,
-  //   //   // navigationScreenName: "Crop",
-  //   // },
-  //   // {
-  //   //   id: 4,
-  //   //   name: "Daily Progress Reports",
-  //   //   icon: ImagePath.registrationIcon,
-  //   //   backgroundColor: Colors.bg4,
-  //   //   // navigationScreenName: "FieldInspectionReport",
-  //   // },
-  // ];
 
   useEffect(() => {
     // Sequence of animations when component mounts
@@ -186,6 +105,7 @@ const MoreService = () => {
   }, [isFocused]);
 
   const fethchUserprofileData = async () => {
+    setisLoading(true);
     const userData = await getUserData();
     console.log("userData", userData);
     setUserData(userData);
@@ -325,10 +245,11 @@ const MoreService = () => {
     ];
 
     setbrowseProductList(updatedMenu);
+    setisLoading(false);
   };
 
   return (
-    <WrapperContainer isLoading={false}>
+    <WrapperContainer isLoading={isLoading}>
       <View style={styles.main}>
         <Animated.View
           style={{

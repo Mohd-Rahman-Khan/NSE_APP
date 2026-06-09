@@ -36,6 +36,7 @@ import en from "../../../../../constants/en";
 import WrapperContainer from "../../../../../utils/WrapperContainer";
 import InnerHeader from "../../../../../components/InnerHeader";
 import DropDown from "../../../../../components/DropDown";
+import { getCurrentFinancialYearObj } from "../../../../../utils/getCurrentFinancialYearObj";
 
 const AnimatedCard = ({ item, index, getStatusColor, formatDate, onPress }) => {
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
@@ -120,20 +121,39 @@ const SquarePlanList = () => {
   const [selectedFinancialYear, setselectedFinancialYear] = useState([]);
   const [operationList, setoperationList] = useState([]);
   const [selectedActivity, setselectedActivity] = useState("");
-  const [selectedStatus, setselectedStatus] = useState("");
+  const [selectedStatus, setselectedStatus] = useState({
+    id: 1,
+    name: "All",
+    value: null,
+  });
+  const [squareList, setsquareList] = useState([]);
+  const [selectedSquare, setselectedSquare] = useState("");
+  const [planList, setPlanList] = useState([]);
+  const [selectedPlan, setselectedPlan] = useState("");
 
   useEffect(() => {
     fetchUserData();
-    getFinacialYears();
-    getActivityList();
   }, []);
 
   const fetchUserData = async () => {
     setLoading(true);
     const userData = await getUserData();
     setUserData(userData);
-    await fetchDPRList(userData);
   };
+
+  useEffect(() => {
+    if (userData) {
+      getFinacialYears();
+      getActivityList();
+      getSquareList();
+    }
+  }, [userData]);
+
+  useEffect(() => {
+    if (financialYear?.length > 0 && userData) {
+      fetchDPRList();
+    }
+  }, [financialYear, userData]);
 
   const getFinacialYears = async () => {
     try {
@@ -154,8 +174,40 @@ const SquarePlanList = () => {
           parsedDecrypted?.statusCode === "201")
       ) {
         setfinancialYear(parsedDecrypted?.data);
-        setselectedFinancialYear(parsedDecrypted?.data[0]);
+        let finnYr = getCurrentFinancialYearObj(parsedDecrypted?.data);
+        setselectedFinancialYear(finnYr);
       } else {
+        showErrorMessage(parsedDecrypted?.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.log(error, "line error");
+      showErrorMessage("something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getSquareList = async () => {
+    try {
+      const payloadData = { chakId: userData?.chakId };
+      const encryptedPayload = encryptWholeObject(payloadData);
+      const response = await apiRequest(
+        API_ROUTES.SQUARE_MASTER_DD,
+        "post",
+        encryptedPayload,
+      );
+      const decrypted = decryptAES(response);
+      const parsedDecrypted = JSON.parse(decrypted);
+      console.log("getFinacialYears", parsedDecrypted);
+
+      if (
+        parsedDecrypted &&
+        (parsedDecrypted?.statusCode === "200" ||
+          parsedDecrypted?.statusCode === "201")
+      ) {
+        setsquareList(parsedDecrypted?.data);
+      } else {
+        setsquareList([]);
         showErrorMessage(parsedDecrypted?.message || "Something went wrong");
       }
     } catch (error) {
@@ -197,15 +249,24 @@ const SquarePlanList = () => {
     }
   };
 
-  const fetchDPRList = async (userData) => {
-    console.log("userData___", userData);
+  const fetchDPRList = async (filter = null) => {
+    // console.log("userData___", userData);
+    // console.log("userData___", financialYear);
+    const currentFY = getCurrentFinancialYearObj(financialYear);
     setLoading(false);
     try {
       const payloadData = {
-        blockId: userData?.unitType === "BLOCK" ? userData?.blockId : null,
-        chakId: userData?.unitType === "CHAK" ? userData?.chakId : null,
-        page: 0,
-        pageSize: 25,
+        chakId: userData?.chakId,
+        farmBlockId: userData?.farmBlockId,
+        squareId: "",
+        planId: "",
+        activityId: "",
+        dprStatus: null,
+        farmId: userData?.farmId,
+        finYearId: currentFY?.id,
+        lastActivityName: "",
+        lastActivityStatus: "",
+        ...filter,
       };
 
       console.log("parsedDecrypted", payloadData);
@@ -225,6 +286,9 @@ const SquarePlanList = () => {
         parsedDecrypted?.statusCode === "200"
       ) {
         setDpReportList(parsedDecrypted?.data);
+        setselectedActivity("");
+        setselectedSquare("");
+        setselectedPlan("");
       } else {
         showErrorMessage(parsedDecrypted?.message || "Not getting Data");
       }
@@ -257,6 +321,42 @@ const SquarePlanList = () => {
         return Colors.gray;
     }
   };
+  const getPlanList = async (selectedSquare) => {
+    setLoading(true);
+
+    try {
+      const payloadData = {
+        squareId: selectedSquare?.id,
+      };
+      console.log("parsed", payloadData);
+
+      const encryptedPayload = encryptWholeObject(payloadData);
+
+      const response = await apiRequest(
+        API_ROUTES.PLAN_LIST,
+        "post",
+        encryptedPayload,
+      );
+
+      const decrypted = decryptAES(response);
+      const parsed = JSON.parse(decrypted);
+
+      console.log("parsed", parsed);
+
+      if (parsed?.status === "SUCCESS" && parsed?.statusCode === "200") {
+        const newData = parsed?.data;
+
+        setPlanList(newData);
+      } else {
+        setPlanList([]);
+        showErrorMessage(parsed?.message || "Invalid response");
+      }
+    } catch (err) {
+      console.log("Fetch error", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <WrapperContainer isLoading={loading}>
@@ -285,6 +385,26 @@ const SquarePlanList = () => {
             selectItem={(item) => setselectedFinancialYear(item)}
           />
           <DropDown
+            fieldName={"squareName"}
+            label="Square"
+            data={squareList}
+            value={selectedSquare?.squareName}
+            selectItem={(item) => {
+              setselectedSquare(item);
+              getPlanList(item);
+              setselectedPlan("");
+            }}
+          />
+          <DropDown
+            fieldName="planId"
+            label="Plan"
+            data={planList}
+            value={selectedPlan?.planId}
+            selectItem={(item) => {
+              setselectedPlan(item);
+            }}
+          />
+          <DropDown
             label="Activity"
             data={operationList}
             value={selectedActivity?.operationName || ""}
@@ -295,11 +415,11 @@ const SquarePlanList = () => {
           <DropDown
             label="Status"
             data={[
-              { id: 4, name: "All" },
-              { id: 1, name: "Pending" },
-              { id: 2, name: "Approved" },
-              { id: 3, name: "Rejected" },
-              { id: 5, name: "Done" },
+              { id: 1, name: "All", value: null },
+              { id: 2, name: "Pending", value: "PENDING" },
+              { id: 3, name: "Approved", value: "APPROVED" },
+              { id: 4, name: "Rejected", value: "REJECTED" },
+              { id: 5, name: "Done", value: "DONE" },
             ]}
             value={selectedStatus?.name || ""}
             selectItem={(item) => {
@@ -307,10 +427,32 @@ const SquarePlanList = () => {
             }}
           />
           <View style={styles.filterBtns}>
-            <TouchableOpacity style={styles.primaryBtn} onPress={() => {}}>
+            <TouchableOpacity
+              style={styles.primaryBtn}
+              onPress={() => {
+                const data = {
+                  squareId: selectedSquare?.id,
+                  planId: selectedPlan?.id,
+                  activityId: selectedActivity?.id,
+                  dprStatus: selectedStatus?.value,
+                  finYearId: selectedFinancialYear?.id,
+                };
+                fetchDPRList(data);
+                setshowFilter(false);
+              }}
+            >
               <Text style={styles.primaryBtnText}>Search</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.secondaryBtn} onPress={() => {}}>
+            <TouchableOpacity
+              style={styles.secondaryBtn}
+              onPress={() => {
+                setselectedActivity("");
+                setselectedSquare("");
+                setselectedPlan("");
+                fetchDPRList();
+                setshowFilter(false);
+              }}
+            >
               <Text style={styles.secondaryBtnText}>Reset</Text>
             </TouchableOpacity>
           </View>
