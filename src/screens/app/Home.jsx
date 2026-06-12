@@ -9,6 +9,7 @@ import {
   FlatList,
   Animated,
   TextInput,
+  Image,
 } from "react-native";
 import WrapperContainer from "../../utils/WrapperContainer";
 import CustomHeader from "../../components/CustomHeader";
@@ -24,6 +25,8 @@ import { useDispatch } from "react-redux";
 import { useIsFocused } from "@react-navigation/native";
 import { clearUserData } from "../../redux/slice/UserSlice";
 import {
+  height,
+  moderateScale,
   moderateScaleVertical,
   scale,
   textScale,
@@ -45,6 +48,7 @@ import AnimatedNumbers from "react-native-animated-numbers";
 import ProductionFilterComp from "./ProductionFilterComp";
 import { PieChart } from "react-native-gifted-charts";
 import { getCurrentFinancialYearObj } from "../../utils/getCurrentFinancialYearObj";
+import ImagePath from "../../utils/ImagePath";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -930,6 +934,7 @@ export default function Home({ navigation }) {
       <ScrollView
         contentContainerStyle={{ paddingBottom: 80 }}
         style={styles.container}
+        showsVerticalScrollIndicator={false}
       >
         {selectedTab === "Production" && hasPROD && (
           <>
@@ -1305,9 +1310,16 @@ export default function Home({ navigation }) {
           <View
             style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
           >
-            <Text style={{ textAlign: "center", marginTop: 20 }}>
-              No Dashboard Access
-            </Text>
+            <Image
+              style={{
+                width: width,
+                height: 300,
+                backgroundColor: Colors.white,
+                //marginTop: 30,
+              }}
+              source={ImagePath?.bannerImg}
+              resizeMode="cover"
+            />
           </View>
         )}
       </ScrollView>
@@ -1334,7 +1346,7 @@ const StatCard = ({ title, value, subtitle, color }) => {
           >
             <View style={{ width: "49%" }}>
               <Text style={[styles.cardTitle, { marginBottom: -10 }]}>FPO</Text>
-              <Text style={styles.cardValue}>{value[0]?.value}</Text>
+              <Text style={styles.cardValue}>{value[0]?.value || 0}</Text>
             </View>
             <View
               style={{ width: 1, backgroundColor: "#777", height: "100%" }}
@@ -1347,7 +1359,7 @@ const StatCard = ({ title, value, subtitle, color }) => {
               }}
             >
               <Text style={[styles.cardTitle, { marginBottom: -10 }]}>NSC</Text>
-              <Text style={styles.cardValue}>{value[1]?.value}</Text>
+              <Text style={styles.cardValue}>{value[1]?.value || 0}</Text>
             </View>
           </View>
         </View>

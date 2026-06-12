@@ -640,7 +640,6 @@ export default function ViewDprDetail({ route }) {
 
   const renderActivity = ({ item, index }) => {
     const isOpen = expandedActivityId === item.activityId;
-    // console.log("renderActivity", item);
 
     return (
       <View style={styles.activityCard}>
@@ -1007,42 +1006,52 @@ export default function ViewDprDetail({ route }) {
                       </View>
                     )}
 
-                    {console.log("eq____", eq)}
+                    {(dprData?.dprStatus == "APPROVED" ||
+                      dprData?.dprStatus == "SUBMITTED" ||
+                      dprData?.dprStatus == "DONE") &&
+                      eq.inTime && (
+                        <View style={styles.inputContainer}>
+                          <Text style={styles.label}>In Time</Text>
+
+                          <TouchableOpacity
+                            disabled
+                            style={styles.disabledInput}
+                          >
+                            <Text>{eq.inTime || "- - : - -"}</Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
 
                     {(dprData?.dprStatus == "APPROVED" ||
                       dprData?.dprStatus == "SUBMITTED" ||
-                      dprData?.dprStatus == "DONE") && (
-                      <View style={styles.inputContainer}>
-                        <Text style={styles.label}>In Time</Text>
+                      dprData?.dprStatus == "DONE") &&
+                      eq.mechIdleTime && (
+                        <View style={styles.inputContainer}>
+                          <Text style={styles.label}>Idle Hours</Text>
 
-                        <TouchableOpacity disabled style={styles.disabledInput}>
-                          <Text>{eq.inTime || "- - : - -"}</Text>
-                        </TouchableOpacity>
-                      </View>
-                    )}
-
+                          <TouchableOpacity
+                            disabled
+                            style={styles.disabledInput}
+                          >
+                            <Text>{eq.mechIdleTime || ""}</Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
                     {(dprData?.dprStatus == "APPROVED" ||
                       dprData?.dprStatus == "SUBMITTED" ||
-                      dprData?.dprStatus == "DONE") && (
-                      <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Idle Hours</Text>
+                      dprData?.dprStatus == "DONE") &&
+                      eq.mechRunningTime && (
+                        <View style={styles.inputContainer}>
+                          <Text style={styles.label}>Walking Time</Text>
 
-                        <TouchableOpacity disabled style={styles.disabledInput}>
-                          <Text>{eq.mechIdleTime || ""}</Text>
-                        </TouchableOpacity>
-                      </View>
-                    )}
-                    {(dprData?.dprStatus == "APPROVED" ||
-                      dprData?.dprStatus == "SUBMITTED" ||
-                      dprData?.dprStatus == "DONE") && (
-                      <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Working Time</Text>
-
-                        <TouchableOpacity disabled style={styles.disabledInput}>
-                          <Text>{eq.mechRunningTime || ""}</Text>
-                        </TouchableOpacity>
-                      </View>
-                    )}
+                          <TouchableOpacity
+                            disabled
+                            style={styles.disabledInput}
+                          >
+                            <Text>{eq.mechRunningTime || ""}</Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
 
                     <View style={styles.switchRow}>
                       <Text>Operator Required</Text>
@@ -1110,6 +1119,44 @@ export default function ViewDprDetail({ route }) {
                                                     }`,
                                                   }))
                                                 : [],
+                                          }
+                                        : l,
+                                    ),
+                                  }
+                                : act,
+                            ),
+                          );
+                          updateLabourField(
+                            item.activityId,
+                            lab.id,
+                            "labourName",
+                            "",
+                          );
+                          updateLabourField(
+                            item.activityId,
+                            lab.id,
+                            "id",
+                            null,
+                          );
+                          setActivityGroups((prev) =>
+                            prev.map((act) =>
+                              act.activityId === item.activityId
+                                ? {
+                                    ...act,
+                                    labours: act.labours.map((l) =>
+                                      l.id === lab.id
+                                        ? {
+                                            ...l,
+
+                                            selectedAgreement: "",
+
+                                            agreementType: "",
+
+                                            agreementId: "",
+
+                                            workerList: [],
+
+                                            worker: null,
                                           }
                                         : l,
                                     ),
@@ -1281,6 +1328,38 @@ export default function ViewDprDetail({ route }) {
                   ))}
                 </>
               )}
+            {userData?.unitType == "CHAK"
+              ? null
+              : dprData?.currentDprStatus == "PENDING" && (
+                  <>
+                    <CustomButton
+                      text="Approve"
+                      buttonStyle={styles.buttonStyle}
+                      textStyle={styles.buttonTextStyle}
+                      handleAction={() => {
+                        submitUpdateDpr("APPROVED");
+                      }}
+                    />
+                    <CustomButton
+                      text="Reject"
+                      buttonStyle={[styles.buttonStyle, { marginTop: 0 }]}
+                      textStyle={styles.buttonTextStyle}
+                      handleAction={() => {
+                        submitUpdateDpr("REJECTED");
+                      }}
+                    />
+                  </>
+                )}
+
+            {dprData?.currentDprStatus == "APPROVED" &&
+              userData?.unitType == "CHAK" && (
+                <CustomButton
+                  text="Create DPR"
+                  buttonStyle={styles.buttonStyle}
+                  textStyle={styles.buttonTextStyle}
+                  handleAction={handleUpdateDpr}
+                />
+              )}
           </View>
         )}
       </View>
@@ -1305,7 +1384,7 @@ export default function ViewDprDetail({ route }) {
 
         for (const mac of act.mechanicals || []) {
           if (mac?.actualHours == 0) {
-            showErrorMessage(`Please enter actoual number of hours.`);
+            showErrorMessage(`Please enter actual number of hours.`);
             return;
           }
         }
@@ -1318,9 +1397,7 @@ export default function ViewDprDetail({ route }) {
           }
 
           if (!lab?.labourName?.trim()) {
-            showErrorMessage(
-              `Please select Labour/Employee in Please select Category in Labour detail`,
-            );
+            showErrorMessage(`Please select Labour/Employee Name.`);
             return;
           }
 
@@ -2262,8 +2339,13 @@ export default function ViewDprDetail({ route }) {
               {dprData?.dprStatus == "PENDING" ? null : (
                 <TouchableOpacity
                   disabled={
-                    dprData?.dprStatus == "APPROVED" &&
+                    (dprData?.dprStatus == "APPROVED" ||
+                      dprData?.dprStatus == "SUBMITTED") &&
                     userData?.unitType == "FARM_BLOCK"
+                      ? true
+                      : dprData?.dprStatus == "SUBMITTED"
+                      ? true
+                      : false
                   }
                   onPress={() => setShow(true)}
                   style={[styles.inputContainer]}
@@ -2284,37 +2366,27 @@ export default function ViewDprDetail({ route }) {
             renderItem={renderActivity}
           />
 
-          {userData?.unitType == "CHAK"
-            ? null
-            : dprData?.currentDprStatus == "PENDING" && (
-                <>
-                  <CustomButton
-                    text="Approve"
-                    buttonStyle={styles.buttonStyle}
-                    textStyle={styles.buttonTextStyle}
-                    handleAction={() => {
-                      submitUpdateDpr("APPROVED");
-                    }}
-                  />
-                  <CustomButton
-                    text="Reject"
-                    buttonStyle={[styles.buttonStyle, { marginTop: 0 }]}
-                    textStyle={styles.buttonTextStyle}
-                    handleAction={() => {
-                      submitUpdateDpr("REJECTED");
-                    }}
-                  />
-                </>
-              )}
-
-          {dprData?.currentDprStatus == "APPROVED" &&
-            userData?.unitType == "CHAK" && (
-              <CustomButton
-                text="Create DPR"
-                buttonStyle={styles.buttonStyle}
-                textStyle={styles.buttonTextStyle}
-                handleAction={handleUpdateDpr}
-              />
+          {userData?.unitType == "FARM_BLOCK" &&
+            dprData?.currentDprStatus == "PENDING" &&
+            activityGroups?.length == 0 && (
+              <>
+                <CustomButton
+                  text="Approve"
+                  buttonStyle={styles.buttonStyle}
+                  textStyle={styles.buttonTextStyle}
+                  handleAction={() => {
+                    submitUpdateDpr("APPROVED");
+                  }}
+                />
+                <CustomButton
+                  text="Reject"
+                  buttonStyle={[styles.buttonStyle, { marginTop: 0 }]}
+                  textStyle={styles.buttonTextStyle}
+                  handleAction={() => {
+                    submitUpdateDpr("REJECTED");
+                  }}
+                />
+              </>
             )}
         </ScrollView>
       </KeyboardAvoidingView>

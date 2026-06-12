@@ -606,14 +606,17 @@ export default function AddNewDpr({ route }) {
     }));
   };
 
-  const getContractorName = async (id) => {
+  const getContractorName = async (
+    id,
+    agreementType = "ACTIVITY_WISE_CONTRACTOR",
+  ) => {
     setLoading(true);
     try {
       const payloadData = {
         squareId: null,
         epoId: null,
         activityId: id,
-        agreementType: "ACTIVITY_WISE_CONTRACTOR",
+        agreementType: agreementType,
       };
       const encryptPayloadData = encryptWholeObject(payloadData);
       const getContractorList = await apiRequest(
@@ -634,6 +637,7 @@ export default function AddNewDpr({ route }) {
       ) {
         setcontractorNameList(parsedDecryptedContractorList?.data || []);
       } else {
+        setcontractorNameList([]);
         showErrorMessage("Unable to get the Contractor List.");
       }
     } catch (error) {
@@ -1316,6 +1320,66 @@ export default function AddNewDpr({ route }) {
         </Modal>
       )}
 
+      {Platform.OS === "android" && show && (
+        <DateTimePicker
+          value={date}
+          mode="date" // "time" or "datetime"
+          display="default"
+          onChange={onChangeDate}
+          maximumDate={new Date(2030, 11, 31)}
+          minimumDate={new Date(2020, 0, 1)}
+        />
+      )}
+
+      {Platform.OS === "ios" && show && (
+        <Modal transparent={true} animationType="slide">
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "flex-end",
+              backgroundColor: "rgba(0,0,0,0.3)",
+            }}
+          >
+            <View
+              style={{
+                backgroundColor: "#fff",
+                padding: 20,
+                borderTopLeftRadius: 20,
+                borderTopRightRadius: 20,
+              }}
+            >
+              <View style={{ alignItems: "flex-end" }}>
+                <TouchableOpacity onPress={() => setShow(false)}>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      color: "blue",
+                      marginBottom: 10,
+                    }}
+                  >
+                    Done
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <DateTimePicker
+                value={date}
+                mode="date"
+                display="spinner"
+                onChange={(event, selectedDate) => {
+                  if (selectedDate) {
+                    setDate(selectedDate);
+                  }
+                }}
+                style={{ width: "100%" }}
+                maximumDate={new Date(2030, 11, 31)}
+                minimumDate={new Date(2020, 0, 1)}
+              />
+            </View>
+          </View>
+        </Modal>
+      )}
+
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -1351,66 +1415,6 @@ export default function AddNewDpr({ route }) {
                 <Icon name="add" size={24} color="#fff" />
                 <Text style={styles.addEntryText}>Add Activity</Text>
               </TouchableOpacity>
-
-              {Platform.OS === "android" && show && (
-                <DateTimePicker
-                  value={date}
-                  mode="date" // "time" or "datetime"
-                  display="default"
-                  onChange={onChangeDate}
-                  maximumDate={new Date(2030, 11, 31)}
-                  minimumDate={new Date(2020, 0, 1)}
-                />
-              )}
-
-              {Platform.OS === "ios" && show && (
-                <Modal transparent={true} animationType="slide">
-                  <View
-                    style={{
-                      flex: 1,
-                      justifyContent: "flex-end",
-                      backgroundColor: "rgba(0,0,0,0.3)",
-                    }}
-                  >
-                    <View
-                      style={{
-                        backgroundColor: "#fff",
-                        padding: 20,
-                        borderTopLeftRadius: 20,
-                        borderTopRightRadius: 20,
-                      }}
-                    >
-                      <View style={{ alignItems: "flex-end" }}>
-                        <TouchableOpacity onPress={() => setShow(false)}>
-                          <Text
-                            style={{
-                              fontSize: 16,
-                              color: "blue",
-                              marginBottom: 10,
-                            }}
-                          >
-                            Done
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-
-                      <DateTimePicker
-                        value={date}
-                        mode="date"
-                        display="spinner"
-                        onChange={(event, selectedDate) => {
-                          if (selectedDate) {
-                            setDate(selectedDate);
-                          }
-                        }}
-                        style={{ width: "100%" }}
-                        maximumDate={new Date(2030, 11, 31)}
-                        minimumDate={new Date(2020, 0, 1)}
-                      />
-                    </View>
-                  </View>
-                </Modal>
-              )}
 
               <View
                 style={{
@@ -1554,12 +1558,17 @@ export default function AddNewDpr({ route }) {
                           data={contractorTypeList}
                           value={act.contractorType?.name || ""}
                           selectItem={(item) => {
-                            console.log(item);
                             updateActivity(entry.id, act.id, (a) => ({
                               ...a,
                               contractorType: item,
                               contractorName: null,
                             }));
+                            if (act?.activity?.id) {
+                              getContractorName(
+                                act.activity.id,
+                                item.agreementType,
+                              );
+                            }
                             setErrors((prev) => {
                               const copy = { ...prev };
                               delete copy[`contractorType_${ei}_${ai}`];
@@ -1693,7 +1702,7 @@ export default function AddNewDpr({ route }) {
 
                         {/* TOTAL */}
                         <View style={styles.inputContainer}>
-                          <Text style={styles.label}>Total</Text>
+                          <Text style={styles.label}>Total Output</Text>
 
                           <TextInput
                             style={[
@@ -1872,7 +1881,7 @@ export default function AddNewDpr({ route }) {
                               </View>
                               <View style={styles.divider} />
                               <DropDown
-                                label="Equipment"
+                                label="Group"
                                 data={equipmentList}
                                 value={eq.equipment}
                                 selectItem={(item) => {

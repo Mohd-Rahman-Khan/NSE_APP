@@ -83,6 +83,15 @@ export default function DprProcessAllocation({ route }) {
     fetchActivityList(data);
   };
 
+  const hasActualHours = (hours) => {
+    return (
+      hours !== null &&
+      hours !== undefined &&
+      String(hours).trim() !== "" &&
+      Number(hours) > 0
+    );
+  };
+
   // ------------------- API: FETCH ACTIVITY LIST -------------------
   const fetchActivityList = async (uData) => {
     setLoading(true);
@@ -122,11 +131,15 @@ export default function DprProcessAllocation({ route }) {
         const newData = parsed?.data || [];
         setAllActivityList(newData);
 
+        // const indentData = newData.filter(
+        //   (item) =>
+        //     !item?.dprMechanicals?.some(
+        //       (m) => m?.actualHours > 0 && m?.actualHours > 0?.trim() !== "",
+        //     ),
+        // );
         const indentData = newData.filter(
           (item) =>
-            !item?.dprMechanicals?.some(
-              (m) => m?.actualHours > 0 && m?.actualHours > 0?.trim() !== "",
-            ),
+            !item?.dprMechanicals?.some((m) => hasActualHours(m?.actualHours)),
         );
 
         setActivityList(indentData);
@@ -419,35 +432,58 @@ export default function DprProcessAllocation({ route }) {
           //   setdprType(item);
           // }}
 
+          // selectItem={(item) => {
+          //   setdprType(item);
+
+          //   //     const indentData = newData.filter(
+          //   //   (item) =>
+          //   //     !item?.dprMechanicals?.some(
+          //   //       (m) => m?.actualHours > 0 && m?.actualHours > 0?.trim() !== "",
+          //   //     ),
+          //   // );
+
+          //   if (item.name === "Indent Request") {
+          //     const indentData = allActivityList.filter(
+          //       (row) =>
+          //         !row?.dprMechanicals?.some(
+          //           (m) =>
+          //             m?.actualHours ||
+          //             (0 > 0 && m?.actualHours) ||
+          //             0 > 0?.trim() !== "",
+          //         ),
+          //     );
+
+          //     setActivityList(indentData);
+          //   } else {
+          //     const dprData = allActivityList?.filter((row) =>
+          //       row?.dprMechanicals?.some(
+          //         (m) =>
+          //           m?.actualHours ||
+          //           (0 > 0 && m?.actualHours) ||
+          //           0 > 0?.trim() !== "",
+          //       ),
+          //     );
+
+          //     setActivityList(dprData);
+          //   }
+          // }}
+
           selectItem={(item) => {
             setdprType(item);
 
-            //     const indentData = newData.filter(
-            //   (item) =>
-            //     !item?.dprMechanicals?.some(
-            //       (m) => m?.actualHours > 0 && m?.actualHours > 0?.trim() !== "",
-            //     ),
-            // );
-
-            if (item.name === "Indent Request") {
+            if (item?.name === "Indent Request") {
               const indentData = allActivityList.filter(
                 (row) =>
-                  !row?.dprMechanicals?.some(
-                    (m) =>
-                      m?.actualHours ||
-                      (0 > 0 && m?.actualHours) ||
-                      0 > 0?.trim() !== "",
+                  !row?.dprMechanicals?.some((m) =>
+                    hasActualHours(m?.actualHours),
                   ),
               );
 
               setActivityList(indentData);
             } else {
               const dprData = allActivityList.filter((row) =>
-                row?.dprMechanicals?.some(
-                  (m) =>
-                    m?.actualHours ||
-                    (0 > 0 && m?.actualHours) ||
-                    0 > 0?.trim() !== "",
+                row?.dprMechanicals?.some((m) =>
+                  hasActualHours(m?.actualHours),
                 ),
               );
 

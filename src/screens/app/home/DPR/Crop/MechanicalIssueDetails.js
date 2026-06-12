@@ -154,6 +154,7 @@ export default function MechanicalIssueDetails({ route }) {
         ...me,
         isIdleLocked: me.mechIdleTime,
         isRunningLocked: me.mechRunningTime,
+        enableInTime: me?.inTime ? false : true,
       });
     });
 
@@ -312,6 +313,16 @@ export default function MechanicalIssueDetails({ route }) {
 
       if (macItem.operatorRequired && !macItem.operatorName?.trim()) {
         showErrorMessage("Please enter Operator Name");
+        return;
+      }
+
+      if (!macItem?.outTime) {
+        showErrorMessage("Please enter out time.");
+        return;
+      }
+
+      if (!macItem?.remarks) {
+        showErrorMessage("Please enter remark.");
         return;
       }
 
@@ -565,7 +576,12 @@ export default function MechanicalIssueDetails({ route }) {
               {/* CP & OPERATOR */}
               <View style={styles.dropdownContainer}>
                 <DropDown
-                  disabled={macItem?.dprMechStatus == "PENDING" ? false : true}
+                  disabled={
+                    macItem?.dprMechStatus == "PENDING" ||
+                    macItem?.dprMechStatus == "FORWARD"
+                      ? false
+                      : true
+                  }
                   label="CP Number"
                   placeholder="Select CP Number"
                   data={macItem?.cpList || []}
@@ -587,9 +603,13 @@ export default function MechanicalIssueDetails({ route }) {
                   <Text style={styles.label}>Out Time</Text>
 
                   <TouchableOpacity
-                    disabled={macItem?.dprMechStatus !== "PENDING"}
+                    disabled={
+                      macItem?.dprMechStatus !== "PENDING" ||
+                      macItem?.dprMechStatus == "FORWARD"
+                    }
                     style={
-                      macItem?.dprMechStatus === "PENDING"
+                      macItem?.dprMechStatus === "PENDING" ||
+                      macItem?.dprMechStatus == "FORWARD"
                         ? styles.timeInput
                         : styles.disabledInput
                     }
@@ -610,14 +630,15 @@ export default function MechanicalIssueDetails({ route }) {
                     )}
                   </TouchableOpacity>
                 </View>
+
                 {dprData?.dprStatus == "SUBMITTED" && (
                   <View style={styles.inputContainer}>
                     <Text style={styles.label}>In Time</Text>
 
                     <TouchableOpacity
-                      disabled={macItem?.inTime ? true : false}
+                      disabled={!macItem?.enableInTime}
                       style={
-                        macItem?.dprMechStatus === "PENDING"
+                        macItem?.enableInTime
                           ? styles.timeInput
                           : styles.disabledInput
                       }
@@ -677,11 +698,15 @@ export default function MechanicalIssueDetails({ route }) {
                     <Text style={styles.label}>Operator Name</Text>
                     <TextInput
                       editable={
-                        macItem?.dprMechStatus == "PENDING" ? true : false
+                        macItem?.dprMechStatus == "PENDING" ||
+                        macItem?.dprMechStatus == "FORWARD"
+                          ? true
+                          : false
                       }
                       value={macItem?.operatorName || ""}
                       style={
-                        macItem?.dprMechStatus == "PENDING"
+                        macItem?.dprMechStatus == "PENDING" ||
+                        macItem?.dprMechStatus == "FORWARD"
                           ? styles.input
                           : styles.disabledInput
                       }
@@ -761,7 +786,7 @@ export default function MechanicalIssueDetails({ route }) {
                       />
                     </View>
                     <View style={styles.inputContainer}>
-                      <Text style={styles.label}>Working Hours</Text>
+                      <Text style={styles.label}>Walking Hours</Text>
                       <TextInput
                         editable={!macItem.isRunningLocked}
                         style={
@@ -769,7 +794,7 @@ export default function MechanicalIssueDetails({ route }) {
                             ? styles.input
                             : styles.disabledInput
                         }
-                        placeholder="Working Hours"
+                        placeholder="Walking Hours"
                         keyboardType="number-pad"
                         value={String(macItem?.mechRunningTime || "")}
                         onChangeText={(val) => {
@@ -807,7 +832,8 @@ export default function MechanicalIssueDetails({ route }) {
 
               {dprData?.currentDprStatus == "PENDING"
                 ? null
-                : macItem?.dprMechStatus == "PENDING" && (
+                : macItem?.dprMechStatus == "PENDING" ||
+                  (macItem?.dprMechStatus == "FORWARD" && (
                     <View style={styles.actionRow}>
                       <TouchableOpacity
                         onPress={() => approveMechanical(macItem, "ISSUE")}
@@ -837,7 +863,7 @@ export default function MechanicalIssueDetails({ route }) {
                         </Text>
                       </TouchableOpacity>
                     </View>
-                  )}
+                  ))}
 
               {!macItem.isIdleLocked &&
                 !macItem.isRunningLocked &&
@@ -1053,8 +1079,9 @@ export default function MechanicalIssueDetails({ route }) {
               label="Farm Block"
               placeholder="Select Farm Block"
               data={farmBlokList}
-              value={selectedForwardBlock?.name || ""}
+              value={selectedForwardBlock?.blockName || ""}
               selectItem={(item) => {
+                console.log(item);
                 setSelectedForwardBlock(item);
               }}
             />

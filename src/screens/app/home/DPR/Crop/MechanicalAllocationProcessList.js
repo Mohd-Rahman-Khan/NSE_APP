@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   View,
   FlatList,
+  ScrollView,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import WrapperContainer from "../../../../../utils/WrapperContainer";
@@ -267,7 +268,10 @@ export default function MechanicalAllocationProcessList({ route }) {
           visible={showFilterSheet}
           onRequestClose={() => setshowFilterSheet(false)}
         >
-          <View style={styles.sheetContainer}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            style={styles.sheetContainer}
+          >
             <MachanicalFilterComp
               chukList={chukList}
               operationActivityList={operationActivityList}
@@ -294,7 +298,7 @@ export default function MechanicalAllocationProcessList({ route }) {
                 // console.log(userData, "filterData");
               }}
             />
-          </View>
+          </ScrollView>
         </CustomBottomSheet>
       )}
 
