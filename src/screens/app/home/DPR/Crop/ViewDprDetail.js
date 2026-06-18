@@ -2037,7 +2037,7 @@ export default function ViewDprDetail({ route }) {
       console.log("✅ UPDATE DPR RESPONSE", parsed);
 
       if (parsed?.status === "SUCCESS") {
-        alert("DPR data saved successfully");
+        alert("Data saved successfully");
         navigation.goBack();
       } else {
         showErrorMessage(parsed?.message || "DPR update failed");
@@ -2354,6 +2354,20 @@ export default function ViewDprDetail({ route }) {
                   <View style={styles.input}>
                     {/* <Text>{date.toLocaleDateString()}</Text> */}
                     <Text>{formatDate(date)}</Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+
+              {console.log("dprData_____", dprData)}
+
+              {dprData?.remarks && (
+                <TouchableOpacity
+                  disabled={true}
+                  style={[styles.inputContainer]}
+                >
+                  <Text style={styles.label}>Remark</Text>
+                  <View style={styles.input}>
+                    <Text>{dprData?.remarks}</Text>
                   </View>
                 </TouchableOpacity>
               )}

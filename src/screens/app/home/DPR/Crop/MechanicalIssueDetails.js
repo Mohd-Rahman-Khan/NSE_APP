@@ -832,8 +832,8 @@ export default function MechanicalIssueDetails({ route }) {
 
               {dprData?.currentDprStatus == "PENDING"
                 ? null
-                : macItem?.dprMechStatus == "PENDING" ||
-                  (macItem?.dprMechStatus == "FORWARD" && (
+                : (macItem?.dprMechStatus == "PENDING" ||
+                    macItem?.dprMechStatus == "FORWARD") && (
                     <View style={styles.actionRow}>
                       <TouchableOpacity
                         onPress={() => approveMechanical(macItem, "ISSUE")}
@@ -863,7 +863,7 @@ export default function MechanicalIssueDetails({ route }) {
                         </Text>
                       </TouchableOpacity>
                     </View>
-                  ))}
+                  )}
 
               {!macItem.isIdleLocked &&
                 !macItem.isRunningLocked &&

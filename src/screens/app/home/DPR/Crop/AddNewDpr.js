@@ -181,6 +181,7 @@ export default function AddNewDpr({ route }) {
         console.log("mappedEntries", mappedEntries);
         setnoActivity(true);
       }
+      setremark(data?.remarks || data?.remark || "");
 
       setEntries(mappedEntries);
     } catch (error) {
@@ -388,7 +389,7 @@ export default function AddNewDpr({ route }) {
     return [
       {
         id: draftData?.id,
-
+        remarks: remark,
         planDate: draftData?.planDate || planDate,
         actualDate: planDate,
 
@@ -627,10 +628,9 @@ export default function AddNewDpr({ route }) {
       const decryptedContractorList = decryptAES(getContractorList);
       const parsedDecryptedContractorList = JSON.parse(decryptedContractorList);
 
-      console.log(
-        "parsedDecryptedContractorList",
-        parsedDecryptedContractorList,
-      );
+      console.log("getContractorName", payloadData);
+
+      console.log("getContractorName", parsedDecryptedContractorList);
       if (
         parsedDecryptedContractorList?.status === "SUCCESS" &&
         parsedDecryptedContractorList?.statusCode === "200"
@@ -878,6 +878,7 @@ export default function AddNewDpr({ route }) {
 
         planDate,
         actualDate: planDate,
+        remarks: remark,
 
         chakId: String(userData?.chakId || ""),
         chakName: userData?.chakName || "",
@@ -1589,6 +1590,7 @@ export default function AddNewDpr({ route }) {
                         )}
 
                         <DropDown
+                          fieldName="name"
                           label="Contractor Name"
                           data={contractorNameList}
                           value={act.contractorName?.name || ""}
@@ -1681,7 +1683,7 @@ export default function AddNewDpr({ route }) {
                             <TextInput
                               maxLength={3}
                               style={styles.input}
-                              placeholder="Iteration"
+                              placeholder="0"
                               keyboardType="number-pad"
                               value={act.noOfIteration}
                               onChangeText={(v) => {
