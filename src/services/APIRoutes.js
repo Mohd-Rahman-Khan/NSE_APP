@@ -83,4 +83,11 @@ export const API_ROUTES = {
   FARM_BLOK_LIST: "master/farm-block-master/dd",
   CHUK_LIST: "master/farm-chak-master/dd",
   PLAN_LIST: "prod_farm/farm-production/find-by-filter/dd",
+  INVT_GODOWN_COUNT: "inventory/dashboard/godown-count",
+  INVT_CONDEMN_COUNT: "inventory/dashboard/condemn-count",
+  INVT_SEEDS_NEAR_EXP_COUNT: "inventory/dashboard/items-near-expiry",
+  INVT_AVAIL_SEEDS_COUNT: "inventory/dashboard/available-items",
+  REGIONAL_OFFICE: "master/regional-office-master/dd",
+  AREA_OFFICE: "master/area-office-master/dd",
+  FARM_MASTER: "master/farm-master/dd",
 };

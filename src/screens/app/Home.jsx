@@ -49,6 +49,7 @@ import ProductionFilterComp from "./ProductionFilterComp";
 import { PieChart } from "react-native-gifted-charts";
 import { getCurrentFinancialYearObj } from "../../utils/getCurrentFinancialYearObj";
 import ImagePath from "../../utils/ImagePath";
+import InventoryDashboard from "./InventoryDashboard";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -63,7 +64,7 @@ export default function Home({ navigation }) {
   const [showToPicker, setShowToPicker] = useState(false);
   const [unit, setUnit] = useState(null);
   const [crop, setCrop] = useState(null);
-  const [variety, setVariety] = useState(null);
+  const [unitType, setunitType] = useState(null);
   const [selectedQC, setselectedQC] = useState({ id: 1, name: "SSCA Seed" });
   const [totalSaleByMonth, setTotalSaleByMonth] = useState([]);
   const [dashbooardData, setdashbooardData] = useState({});
@@ -76,6 +77,22 @@ export default function Home({ navigation }) {
   const [season, setseason] = useState([]);
   const [selectedSlice, setSelectedSlice] = useState(null);
   const [qcComplaintList, setqcComplaintList] = useState([]);
+  const [godownData, setgodownData] = useState("");
+  const [availableSeed, setavailableSeed] = useState("");
+  const [expireSeeds, setexpireSeeds] = useState("");
+  const [condemnSeeds, setcondemnSeeds] = useState("");
+  const [regionalOffice, setregionalOffice] = useState([]);
+  const [selectedRegional, setselectedRegional] = useState("");
+  const [cropListData, setCropListData] = useState([]);
+  const [selectedCrop, setselectedCrop] = useState("");
+  const [selectedClass, setselectedClass] = useState("");
+  const [selectedSeedType, setselectedSeedType] = useState("");
+  const [seedVariety, setseedVariety] = useState([]);
+  const [selectedSeedVariety, setselectedSeedVariety] = useState("");
+  const [areaOffice, setareaOffice] = useState([]);
+  const [selectedAreaOffice, setselectedAreaOffice] = useState("");
+  const [farmList, setfarmList] = useState([]);
+  const [selectedFarm, setselectedFarm] = useState("");
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
 
@@ -104,6 +121,13 @@ export default function Home({ navigation }) {
           break;
 
         case "Inventory":
+          getGodownCount();
+          getAvailableSeed();
+          getExpSeeds();
+          getCondemnSeeds();
+          getRegionalOffice();
+          getCropList();
+          getFarmList();
           break;
 
         case "QC":
@@ -320,7 +344,6 @@ export default function Home({ navigation }) {
         // endDate: "string",
         // cropId: 9007199254740991,
         // varietyId: 9007199254740991,
-        // seedClass: "string",
         // labType: "string",
       };
       const encryptedPayload = encryptWholeObject(payloadData);
@@ -372,6 +395,351 @@ export default function Home({ navigation }) {
         setqcComplaintList(parsedDecrypted?.data);
       } else {
         showErrorMessage(parsedDecrypted?.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.log(error, "line error");
+      showErrorMessage("something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const applyInventoryFilter = () => {
+    const payload = {
+      roId: selectedRegional?.id || null,
+      roName: selectedRegional?.name || "",
+      aoId:
+        unitType?.value === "AREA OFFICE" ? selectedAreaOffice?.id || "" : "",
+      aoName:
+        unitType?.value === "AREA OFFICE" ? selectedAreaOffice?.name || "" : "",
+      farmId: unitType?.value === "FARM" ? selectedFarm?.id || "" : "",
+      farmName: unitType?.value === "FARM" ? selectedFarm?.name || "" : "",
+      unitType: userData?.unitType,
+      cropId: selectedCrop?.id || null,
+      cropName: selectedCrop?.seedCropName,
+      varietyId: selectedSeedVariety?.id || null,
+      cropClass: selectedClass?.value || null,
+      materialType: selectedCrop?.cropGroupName,
+      inventoryType: "MAIN",
+      itemStatus: selectedSeedType?.value,
+      variety: selectedSeedVariety?.id || null,
+    };
+
+    //console.log("Inventory Filter Payload", payload);
+
+    getGodownCount(payload);
+    getAvailableSeed(payload);
+    getExpSeeds(payload);
+    getCondemnSeeds(payload);
+
+    // setshowFilterSheet(false);
+  };
+
+  const getGodownCount = async (filter = {}) => {
+    try {
+      let url = API_ROUTES.INVT_GODOWN_COUNT;
+
+      const payloadData = {
+        hoId: userData?.hoId,
+        roId: userData?.roId,
+        aoId: userData?.aoId,
+        farmId: userData?.farmId,
+        farmBlockId: userData?.farmBlockId,
+        unitName: userData?.unitName,
+        unitType: userData?.unitType,
+        unit: {
+          unitId: userData?.unitId,
+          unitName: userData?.unitName,
+        },
+        startDate: formatDate(fromDate),
+        endDate: formatDate(toDate),
+        ...filter,
+      };
+
+      const encryptedPayload = encryptWholeObject(payloadData);
+      const response = await apiRequest(url, "post", encryptedPayload);
+      const decrypted = decryptAES(response);
+      const parsedDecrypted = JSON.parse(decrypted);
+      console.log("Inventory Filter Payload", payloadData);
+      //console.log("getGodownCount", parsedDecrypted);
+      //console.log("getGodownCount", userData);
+      if (
+        parsedDecrypted &&
+        (parsedDecrypted?.statusCode === "200" ||
+          parsedDecrypted?.statusCode === "201")
+      ) {
+        setgodownData(parsedDecrypted?.data);
+      } else {
+        setgodownData([]);
+        showErrorMessage(parsedDecrypted?.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.log(error, "line error");
+      showErrorMessage("something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const getAvailableSeed = async (filter) => {
+    try {
+      let url = API_ROUTES.INVT_AVAIL_SEEDS_COUNT;
+      const payloadData = {
+        hoId: userData?.hoId,
+        roId: userData?.roId,
+        aoId: userData?.aoId,
+        farmId: userData?.farmId,
+        farmBlockId: userData?.farmBlockId,
+        unitName: userData?.unitName,
+        unitType: userData?.unitType,
+        materialType: "SEED",
+        inventoryType: "MAIN",
+        itemStatus: "STANDARD",
+        unit: {
+          unitId: userData?.unitId,
+          unitName: userData?.unitName,
+        },
+        startDate: formatDate(fromDate),
+        endDate: formatDate(toDate),
+        ...filter,
+      };
+      const encryptedPayload = encryptWholeObject(payloadData);
+      const response = await apiRequest(url, "post", encryptedPayload);
+      const decrypted = decryptAES(response);
+      const parsedDecrypted = JSON.parse(decrypted);
+      console.log("Inventory Filter Payload", payloadData);
+      console.log("getAvailableSeed", parsedDecrypted);
+      if (
+        parsedDecrypted &&
+        (parsedDecrypted?.statusCode === "200" ||
+          parsedDecrypted?.statusCode === "201")
+      ) {
+        setavailableSeed(parsedDecrypted?.data);
+      } else {
+        setavailableSeed([]);
+        showErrorMessage(parsedDecrypted?.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.log(error, "line error");
+      showErrorMessage("something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const getExpSeeds = async (filter) => {
+    try {
+      let url = API_ROUTES.INVT_SEEDS_NEAR_EXP_COUNT;
+      const payloadData = {
+        hoId: userData?.hoId,
+        roId: userData?.roId,
+        aoId: userData?.aoId,
+        farmId: userData?.farmId,
+        farmBlockId: userData?.farmBlockId,
+        unitName: userData?.unitName,
+        unitType: userData?.unitType,
+        materialType: "SEED",
+        inventoryType: "MAIN",
+        itemStatus: "STANDARD",
+        startDate: formatDate(fromDate),
+        endDate: formatDate(toDate),
+        ...filter,
+      };
+      const encryptedPayload = encryptWholeObject(payloadData);
+      const response = await apiRequest(url, "post", encryptedPayload);
+      const decrypted = decryptAES(response);
+      const parsedDecrypted = JSON.parse(decrypted);
+      console.log("Inventory Filter Payload", payloadData);
+      if (
+        parsedDecrypted &&
+        (parsedDecrypted?.statusCode === "200" ||
+          parsedDecrypted?.statusCode === "201")
+      ) {
+        setexpireSeeds(parsedDecrypted?.data);
+      } else {
+        setexpireSeeds([]);
+        showErrorMessage(parsedDecrypted?.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.log(error, "line error");
+      showErrorMessage("something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const getCondemnSeeds = async (filter) => {
+    try {
+      let url = API_ROUTES.INVT_CONDEMN_COUNT;
+      const payloadData = {
+        hoId: userData?.hoId,
+        roId: userData?.roId,
+        aoId: userData?.aoId,
+        farmId: userData?.farmId,
+        farmBlockId: userData?.farmBlockId,
+        unitName: userData?.unitName,
+        unitType: userData?.unitType,
+        materialType: "SEED",
+        inventoryType: "MAIN",
+        itemStatus: "CONDEMN",
+        startDate: formatDate(fromDate),
+        endDate: formatDate(toDate),
+        ...filter,
+      };
+      const encryptedPayload = encryptWholeObject(payloadData);
+      const response = await apiRequest(url, "post", encryptedPayload);
+      const decrypted = decryptAES(response);
+      const parsedDecrypted = JSON.parse(decrypted);
+      console.log("Inventory Filter Payload", payloadData);
+      if (
+        parsedDecrypted &&
+        (parsedDecrypted?.statusCode === "200" ||
+          parsedDecrypted?.statusCode === "201")
+      ) {
+        setcondemnSeeds(parsedDecrypted?.data);
+      } else {
+        setcondemnSeeds([]);
+        showErrorMessage(parsedDecrypted?.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.log(error, "line error");
+      showErrorMessage("something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getRegionalOffice = async () => {
+    try {
+      let url = API_ROUTES.REGIONAL_OFFICE;
+      const payloadData = {};
+      const encryptedPayload = encryptWholeObject(payloadData);
+      const response = await apiRequest(url, "post", encryptedPayload);
+      const decrypted = decryptAES(response);
+      const parsedDecrypted = JSON.parse(decrypted);
+      //console.log("seedData___", payloadData);
+      console.log("getRegionalOffice", parsedDecrypted);
+      if (
+        parsedDecrypted &&
+        (parsedDecrypted?.statusCode === "200" ||
+          parsedDecrypted?.statusCode === "201")
+      ) {
+        setregionalOffice(parsedDecrypted?.data);
+      } else {
+        setregionalOffice([]);
+        showErrorMessage(parsedDecrypted?.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.log(error, "line error");
+      showErrorMessage("something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getFarmList = async () => {
+    try {
+      let url = API_ROUTES.FARM_MASTER;
+      const payloadData = {};
+      const encryptedPayload = encryptWholeObject(payloadData);
+      const response = await apiRequest(url, "post", encryptedPayload);
+      const decrypted = decryptAES(response);
+      const parsedDecrypted = JSON.parse(decrypted);
+      //console.log("seedData___", payloadData);
+      console.log("getRegionalOffice", parsedDecrypted);
+      if (
+        parsedDecrypted &&
+        (parsedDecrypted?.statusCode === "200" ||
+          parsedDecrypted?.statusCode === "201")
+      ) {
+        setfarmList(parsedDecrypted?.data);
+      } else {
+        setfarmList([]);
+        showErrorMessage(parsedDecrypted?.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.log(error, "line error");
+      showErrorMessage("something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const getAreaOffice = async (selectedRegOfficeId) => {
+    setLoading(true);
+    try {
+      let url = API_ROUTES.AREA_OFFICE;
+      const payloadData = { regionalOfficeId: selectedRegOfficeId };
+      const encryptedPayload = encryptWholeObject(payloadData);
+      const response = await apiRequest(url, "post", encryptedPayload);
+      const decrypted = decryptAES(response);
+      const parsedDecrypted = JSON.parse(decrypted);
+      //console.log("seedData___", payloadData);
+      console.log("getAreaOffice", parsedDecrypted);
+      if (
+        parsedDecrypted &&
+        (parsedDecrypted?.statusCode === "200" ||
+          parsedDecrypted?.statusCode === "201")
+      ) {
+        setareaOffice(parsedDecrypted?.data);
+      } else {
+        setareaOffice([]);
+        showErrorMessage(parsedDecrypted?.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.log(error, "line error");
+      showErrorMessage("something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getSeedVariety = async (selectedCropId) => {
+    setLoading(true);
+    try {
+      const payloadData = { cropId: selectedCropId };
+      const encryptedPayload = encryptWholeObject(payloadData);
+      const cropListResp = await apiRequest(
+        API_ROUTES.SEED_VARIETY_MASTER,
+        "POST",
+        encryptedPayload,
+      );
+      const decryptedCropListData = decryptAES(cropListResp);
+      const parsedDecryptedCropListData = JSON.parse(decryptedCropListData);
+      console.log("parsedDecryptedCropListData", parsedDecryptedCropListData);
+      console.log("parsedDecryptedCropListData", payloadData);
+      if (
+        parsedDecryptedCropListData?.status === "SUCCESS" &&
+        parsedDecryptedCropListData?.statusCode === "200"
+      ) {
+        setseedVariety(parsedDecryptedCropListData?.data || []);
+      } else {
+        showErrorMessage("Unable to get the crop List Data");
+        setseedVariety([]);
+      }
+    } catch (error) {
+      console.log(error, "line error");
+      showErrorMessage("something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getCropList = async () => {
+    try {
+      const payloadData = {};
+      const encryptedPayload = encryptWholeObject(payloadData);
+      const cropListResp = await apiRequest(
+        API_ROUTES.CROP_MASTER_DD,
+        "POST",
+        encryptedPayload,
+      );
+      const decryptedCropListData = decryptAES(cropListResp);
+      const parsedDecryptedCropListData = JSON.parse(decryptedCropListData);
+      if (
+        parsedDecryptedCropListData?.status === "SUCCESS" &&
+        parsedDecryptedCropListData?.statusCode === "200"
+      ) {
+        setCropListData(parsedDecryptedCropListData?.data || []);
+      } else {
+        showErrorMessage("Unable to get the crop List Data");
+        setCropListData([]);
       }
     } catch (error) {
       console.log(error, "line error");
@@ -604,20 +972,14 @@ export default function Home({ navigation }) {
   };
 
   const apllyProductionFillterCallback = useCallback(
-    (
-      selectedFinancialYear,
-      selectedSeason,
-      selectedCrop,
-      selectedVariety,
-      selectedClass,
-    ) => {
+    (selectedFinancialYear, selectedSeason, selectedCrop) => {
       if (userData) {
         const filterData = {
           finYearId: selectedFinancialYear?.id || null,
           seasonId: selectedSeason?.id || null,
           cropId: selectedCrop?.id || null,
-          varietyId: selectedVariety?.id || null,
-          class: selectedClass?.name || null,
+          varietyId: null,
+          class: null,
         };
         getProductionDashboardSummary(filterData);
         getProductionGraphData(filterData);
@@ -734,7 +1096,11 @@ export default function Home({ navigation }) {
         data={userData}
         clickOnFilter={() => {
           if (roleTabs.length > 0) {
-            if (selectedTab == "Production" || selectedTab == "Marketing") {
+            if (
+              selectedTab == "Production" ||
+              selectedTab == "Marketing" ||
+              selectedTab == "Inventory"
+            ) {
               setshowFilterSheet(true);
             }
           }
@@ -771,7 +1137,7 @@ export default function Home({ navigation }) {
           visible={showFilterSheet}
           onRequestClose={() => setshowFilterSheet(false)}
         >
-          <View style={styles.sheetContainer}>
+          <ScrollView style={styles.sheetContainer}>
             {selectedTab == "Production" && (
               <ProductionFilterComp
                 applyFilter={apllyProductionFillterCallback}
@@ -829,97 +1195,177 @@ export default function Home({ navigation }) {
                 </View>
               </View>
             )}
-            {/* <Text style={styles.filterTitle}>Filter by:</Text>
-            Date Range
-            <View style={styles.section}>
-              <View style={styles.rowBetween}>
-                <Text style={styles.sectionTitle}>Date Range</Text>
-                <Text style={styles.resetText}>Reset</Text>
-              </View>
+            {selectedTab == "Inventory" && (
+              <>
+                <View style={styles.section}>
+                  <DropDown
+                    label="Unit Type"
+                    data={[
+                      {
+                        id: 1,
+                        name: "Regional Office",
+                        value: "REGIONAL OFFICE",
+                      },
+                      { id: 2, name: "Area Office", value: "AREA OFFICE" },
+                      { id: 3, name: "Farm", value: "FARM" },
+                    ]}
+                    value={unitType?.name}
+                    selectItem={(item) => setunitType(item)}
+                  />
+                </View>
+                {(unitType?.value == "REGIONAL OFFICE" ||
+                  unitType?.value == "AREA OFFICE") && (
+                  <View style={styles.section}>
+                    <DropDown
+                      fieldName={"name"}
+                      label="Regional Office"
+                      data={regionalOffice}
+                      value={
+                        selectedRegional
+                          ? selectedRegional?.name +
+                            `(${selectedRegional?.roShortName})`
+                          : ""
+                      }
+                      selectItem={(item) => {
+                        setselectedRegional(item);
+                        getAreaOffice(item?.id);
+                        setselectedAreaOffice("");
+                      }}
+                    />
+                  </View>
+                )}
+                {unitType?.value == "AREA OFFICE" && (
+                  <View style={styles.section}>
+                    <DropDown
+                      fieldName={"name"}
+                      label="Area Office"
+                      data={areaOffice}
+                      value={
+                        selectedAreaOffice
+                          ? selectedAreaOffice?.name +
+                            `(${selectedAreaOffice?.shortName})`
+                          : ""
+                      }
+                      selectItem={(item) => {
+                        setselectedAreaOffice(item);
+                      }}
+                    />
+                  </View>
+                )}
+                {unitType?.value == "FARM" && (
+                  <View style={styles.section}>
+                    <DropDown
+                      fieldName={"name"}
+                      label="Farm"
+                      data={farmList}
+                      value={selectedFarm?.name}
+                      selectItem={(item) => {
+                        setselectedFarm(item);
+                      }}
+                    />
+                  </View>
+                )}
 
-              <View style={styles.row}>
-                <TouchableOpacity
-                  style={styles.inputBox}
-                  onPress={() => setShowFromPicker(true)}
-                >
-                  <Text style={styles.inputText}>
-                    {fromDate.toLocaleDateString()}
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.inputBox}
-                  onPress={() => setShowToPicker(true)}
-                >
-                  <Text style={styles.inputText}>
-                    {toDate.toLocaleDateString()}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.quickRow}>
-                {["Today", "This Week", "This Month"].map((item) => (
-                  <TouchableOpacity key={item} style={styles.quickBtn}>
-                    <Text>{item}</Text>
+                <View style={styles.section}>
+                  <TouchableOpacity onPress={() => setShowFromPicker(true)}>
+                    <Input
+                      label="From Date"
+                      placeholder="DD/MM/YYYY"
+                      value={fromDate?.toLocaleDateString()}
+                      editable={false}
+                    />
                   </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-            <View style={styles.row}>
-              <View style={{ width: "48%" }}>
-                <DropDown
-                  label="Unit"
-                  data={[
-                    { id: 1, name: "All" },
-                    { id: 2, name: "Unit 1" },
-                  ]}
-                  value={unit?.name}
-                  selectItem={(item) => setUnit(item)}
-                />
-              </View>
+                </View>
 
-              <View style={{ width: "48%" }}>
-                <DropDown
-                  label="Crop"
-                  data={[
-                    { id: 1, name: "All Crops" },
-                    { id: 2, name: "Wheat" },
-                  ]}
-                  value={crop?.name}
-                  selectItem={(item) => setCrop(item)}
-                />
-              </View>
-            </View>
-            <View style={styles.section}>
-              <DropDown
-                label="Variety"
-                data={[
-                  { id: 1, name: "All" },
-                  { id: 2, name: "Variety A" },
-                ]}
-                value={variety?.name}
-                selectItem={(item) => setVariety(item)}
-              />
-              <View style={styles.dropdownFull}>
-                <Text>All</Text>
-              </View>
-            </View>
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Class</Text>
-              <View style={styles.dropdownFull}>
-                <Text>All</Text>
-              </View>
-            </View>
-            <View style={styles.bottomBtns}>
-              <TouchableOpacity style={styles.resetBtn}>
-                <Text style={{ color: "#6b4caf" }}>Reset All</Text>
-              </TouchableOpacity>
+                <View style={styles.section}>
+                  <TouchableOpacity onPress={() => setShowToPicker(true)}>
+                    <Input
+                      label="To Date"
+                      placeholder="DD/MM/YYYY"
+                      value={toDate?.toLocaleDateString()}
+                      editable={false}
+                    />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.section}>
+                  <DropDown
+                    fieldName={"seedCropName"}
+                    label="Crop"
+                    data={cropListData}
+                    value={selectedCrop?.seedCropName}
+                    selectItem={(item) => {
+                      setselectedCrop(item);
+                      getSeedVariety(item?.id);
+                      setselectedSeedVariety("");
+                    }}
+                  />
+                </View>
+                <View style={styles.section}>
+                  <DropDown
+                    fieldName={"seedVarietyName"}
+                    label="Variety"
+                    data={seedVariety}
+                    value={selectedSeedVariety?.seedVarietyName}
+                    selectItem={(item) => {
+                      setselectedSeedVariety(item);
+                    }}
+                  />
+                </View>
+                <View style={styles.section}>
+                  <DropDown
+                    fieldName={"value"}
+                    label="Class"
+                    data={[
+                      {
+                        id: 1,
+                        name: "NS",
+                        value: "NS",
+                      },
+                      { id: 2, name: "BS", value: "BS" },
+                      { id: 3, name: "FS", value: "FS" },
+                      { id: 4, name: "CS", value: "CS" },
+                      { id: 5, name: "TL", value: "FS" },
+                    ]}
+                    value={selectedClass?.name}
+                    selectItem={(item) => setselectedClass(item)}
+                  />
+                </View>
+                <View style={styles.section}>
+                  <DropDown
+                    fieldName={"name"}
+                    label="Seed Type"
+                    data={[
+                      {
+                        id: 1,
+                        name: "Standard",
+                        value: "STANDARD",
+                      },
+                      { id: 2, name: "Sub Standard ", value: " SUB STANDARD" },
+                    ]}
+                    value={selectedSeedType?.name}
+                    selectItem={(item) => setselectedSeedType(item)}
+                  />
+                </View>
+                <View style={styles.bottomBtns}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setshowFilterSheet(false);
+                    }}
+                    style={styles.resetBtn}
+                  >
+                    <Text style={{ color: "#6b4caf" }}>Cancel</Text>
+                  </TouchableOpacity>
 
-              <TouchableOpacity style={styles.applyBtn}>
-                <Text style={{ color: "#fff" }}>Apply Filters</Text>
-              </TouchableOpacity>
-            </View> */}
-          </View>
+                  <TouchableOpacity
+                    onPress={applyInventoryFilter}
+                    style={styles.applyBtn}
+                  >
+                    <Text style={{ color: "#fff" }}>Apply Filters</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+          </ScrollView>
         </CustomBottomSheet>
       )}
 
@@ -1208,7 +1654,14 @@ export default function Home({ navigation }) {
           </View>
         )}
 
-        {selectedTab === "Inventory" && hasINV && <View />}
+        {selectedTab === "Inventory" && hasINV && (
+          <InventoryDashboard
+            godownData={godownData}
+            availableSeed={availableSeed}
+            expireSeeds={expireSeeds}
+            condemnSeeds={condemnSeeds}
+          />
+        )}
 
         {selectedTab === "QC" && hasQC && (
           <ScrollView style={{ marginTop: 20 }}>
@@ -2034,7 +2487,7 @@ const styles = StyleSheet.create({
   bottomBtns: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 20,
+    marginBottom: 30,
   },
 
   resetBtn: {
