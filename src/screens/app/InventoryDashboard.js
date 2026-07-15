@@ -43,7 +43,6 @@ export default function InventoryDashboard({
 
   const renderSeedRow = (item) => {
     const isExpanded = expanded[item.id];
-
     return (
       <View key={item.id}>
         <TouchableOpacity
@@ -59,6 +58,9 @@ export default function InventoryDashboard({
             <Text style={styles.rowText}>{item.name}</Text>
           </View>
 
+          <View style={styles.countColumn}>
+            <Text>{item.unitType}</Text>
+          </View>
           <View style={styles.countColumn}>
             <Text>{item.totalAvailableQty}</Text>
           </View>
@@ -88,8 +90,9 @@ export default function InventoryDashboard({
 
                   <Text style={styles.childText}>{ao.name}</Text>
                 </View>
+                <Text style={{ width: "28%" }}>{ao.unitType}</Text>
 
-                <Text>{ao.totalAvailableQty}</Text>
+                <Text style={{ width: "28%" }}>{ao.totalAvailableQty}</Text>
               </TouchableOpacity>
 
               {/* {expanded[`ao-${ao.id}`] &&
@@ -124,7 +127,6 @@ export default function InventoryDashboard({
             <View key={index} style={styles.childRow}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.childText}>{seed.cropName}</Text>
-
                 <Text
                   style={{
                     fontSize: 12,
@@ -486,10 +488,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#FAFAFA",
     borderBottomWidth: 1,
     borderBottomColor: "#ECECEC",
+    justifyContent: "space-between",
   },
 
   nameColumn: {
-    flex: 2,
+    width: "40%",
     flexDirection: "row",
     alignItems: "center",
   },

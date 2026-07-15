@@ -177,8 +177,8 @@ export default function AddNewDpr({ route }) {
         },
       ];
 
-      if (mappedEntries?.activities?.length == 0) {
-        console.log("mappedEntries", mappedEntries);
+      if (mappedEntries[0].activities?.length == 0) {
+        //console.log("mappedEntries", mappedEntries);
         setnoActivity(true);
       }
       setremark(data?.remarks || data?.remark || "");
@@ -1398,15 +1398,17 @@ export default function AddNewDpr({ route }) {
               setdprType(item);
             }}
           />
-          <View style={[styles.switchRow, { marginBottom: 20 }]}>
-            <Text style={styles.label}>No Activity</Text>
-            <Switch
-              value={noActivity}
-              onValueChange={(v) => {
-                setnoActivity(v);
-              }}
-            />
-          </View>
+          {!draftData && !noActivity && (
+            <View style={[styles.switchRow, { marginBottom: 20 }]}>
+              <Text style={styles.label}>No Activity</Text>
+              <Switch
+                value={noActivity}
+                onValueChange={(v) => {
+                  setnoActivity(v);
+                }}
+              />
+            </View>
+          )}
 
           {!noActivity ? (
             <>
@@ -1484,37 +1486,41 @@ export default function AddNewDpr({ route }) {
 
               {entries.map((entry, ei) => (
                 <View key={entry.id} style={styles.entryCard}>
-                  <View style={styles.entryHeader}>
-                    <TouchableOpacity
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        flex: 1,
-                      }}
-                      onPress={() => toggleEntry(entry.id)}
-                    >
-                      <Text style={styles.entryTitle}>Activity #{ei + 1}</Text>
-                    </TouchableOpacity>
+                  {entry?.activities?.length > 0 && (
+                    <View style={styles.entryHeader}>
+                      <TouchableOpacity
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          flex: 1,
+                        }}
+                        onPress={() => toggleEntry(entry.id)}
+                      >
+                        <Text style={styles.entryTitle}>
+                          Activity #{ei + 1}
+                        </Text>
+                      </TouchableOpacity>
 
-                    <View
-                      style={{ flexDirection: "row", alignItems: "center" }}
-                    >
-                      {/* ❌ DELETE ENTRY (hide for first entry if you want) */}
-                      {entries.length > 1 && (
-                        <TouchableOpacity
-                          onPress={() => deleteEntry(entry.id)}
-                          style={{ marginRight: 8 }}
-                        >
-                          <Icon name="delete" size={22} color="red" />
-                        </TouchableOpacity>
-                      )}
+                      <View
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                      >
+                        {/* ❌ DELETE ENTRY (hide for first entry if you want) */}
+                        {entries.length > 1 && (
+                          <TouchableOpacity
+                            onPress={() => deleteEntry(entry.id)}
+                            style={{ marginRight: 8 }}
+                          >
+                            <Icon name="delete" size={22} color="red" />
+                          </TouchableOpacity>
+                        )}
 
-                      <Icon
-                        name={entry.expanded ? "expand-less" : "expand-more"}
-                        size={28}
-                      />
+                        <Icon
+                          name={entry.expanded ? "expand-less" : "expand-more"}
+                          size={28}
+                        />
+                      </View>
                     </View>
-                  </View>
+                  )}
 
                   {entry.expanded &&
                     entry.activities.map((act, ai) => (
@@ -2113,7 +2119,18 @@ export default function AddNewDpr({ route }) {
                   </TouchableOpacity>
                 </View>
               </View>
-              {!draftData && (
+              <View style={[styles.inputContainer, { marginTop: 20 }]}>
+                <Text style={styles.label}>Remark</Text>
+                <TextInput
+                  style={[styles.input]}
+                  placeholder="Remark"
+                  value={remark}
+                  onChangeText={(v) => {
+                    setremark(v);
+                  }}
+                />
+              </View>
+              {/* {!draftData && (
                 <View style={[styles.inputContainer, { marginTop: 20 }]}>
                   <Text style={styles.label}>Remark</Text>
                   <TextInput
@@ -2125,7 +2142,7 @@ export default function AddNewDpr({ route }) {
                     }}
                   />
                 </View>
-              )}
+              )} */}
             </>
           )}
 

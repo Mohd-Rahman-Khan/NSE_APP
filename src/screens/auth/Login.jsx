@@ -38,7 +38,7 @@ import TextTicker from "react-native-text-ticker";
 import { getFcmToken } from "../../utils/firebaseNotification";
 
 const Login = () => {
-  const [email, setEmail] = useState("117812001");
+  const [email, setEmail] = useState("11790101309");
   const [password, setPassword] = useState("welcome");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -169,7 +169,7 @@ const Login = () => {
       showErrorMessage(error?.message);
       console.log(error, "Error In Login API");
     } finally {
-      //setLoading(false);
+      setLoading(false);
       // setEmail("");
       // setPassword("");
     }

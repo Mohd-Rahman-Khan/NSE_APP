@@ -23,8 +23,11 @@ export default function RejectedPlanList({ data, viewMore = () => {} }) {
       {data?.length > 0 ? (
         data?.map((item) => (
           <View key={item.id} style={styles.planCard}>
+            <Text style={styles.planTitle}>{item.planId}</Text>
             {/* 🔹 Title */}
-            <Text style={styles.planTitle}>{item.name}</Text>
+            <Text style={[styles.planTitle, { marginTop: -25 }]}>
+              {item.name}
+            </Text>
 
             {/* 🔹 Row 1 */}
             <View style={styles.planRow}>

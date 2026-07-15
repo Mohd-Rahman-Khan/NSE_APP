@@ -47,6 +47,7 @@ import BottomNav from "./BottomNav";
 import ViewMorePlansList from "../screens/app/ViewMorePlansList";
 import ViewMoreRejectedPlan from "../screens/app/ViewMoreRejectedPlan";
 import ViewMoreDealerList from "../screens/app/ViewMoreDealerList";
+import LotDetail from "../screens/app/home/LotDetail/LotDetail";
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -167,6 +168,7 @@ const AppNavigation = () => {
           component={ViewMoreRejectedPlan}
         />
         <Stack.Screen name="Chat" component={Chat} />
+        <Stack.Screen name="LotDetail" component={LotDetail} />
       </Stack.Navigator>
       {currentRoute !== "Chat" && isChatAccess && <ChatButton />}
     </View>

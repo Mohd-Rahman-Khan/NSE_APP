@@ -34,6 +34,7 @@ export default function PlanListComp({ data, viewMore = () => {} }) {
 
             {/* 🔹 Row 2 */}
             <View style={styles.planRow}>
+              {console.log("planList___", item)}
               <Text style={styles.label}>Area (Ha)</Text>
               <Text style={styles.value}>{item?.actual?.actualArea}</Text>
             </View>

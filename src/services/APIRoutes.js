@@ -1,8 +1,5 @@
 export const API_ROUTES = {
   BASE_URL: "http://160.25.172.19:9054/api/", //qa url
-  //BASE_URL: "http://160.25.172.19:9052/api/", //client uat
-
-  //BASE_URL: "http://192.168.100.102:7630/api/", //qa url
 
   AUTHORIZE_LOGIN: "userauth/authenticate/login-new",
   GET_PROFILE: "userauth/all/get-profile",
@@ -90,4 +87,5 @@ export const API_ROUTES = {
   REGIONAL_OFFICE: "master/regional-office-master/dd",
   AREA_OFFICE: "master/area-office-master/dd",
   FARM_MASTER: "master/farm-master/dd",
+  GET_LOT_DETAIL: "prod_plan/lot-transaction/get-lot-details",
 };

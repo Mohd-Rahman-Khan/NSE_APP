@@ -5,6 +5,7 @@ import { decryptAES, encryptWholeObject } from "../../utils/decryptData";
 import { apiRequest } from "../../services/APIRequest";
 import { showErrorMessage } from "../../utils/HelperFunction";
 import { API_ROUTES } from "../../services/APIRoutes";
+import { getCurrentFinancialYearObj } from "../../utils/getCurrentFinancialYearObj";
 
 export default function ProductionFilterComp({
   applyFilter,
@@ -29,6 +30,11 @@ export default function ProductionFilterComp({
     { id: 5, name: "TL" },
   ]);
   const [selectedClass, setselectedClass] = useState("");
+
+  useEffect(() => {
+    const getFinYr = getCurrentFinancialYearObj(financialYear);
+    setselectedFinancialYear(getFinYr);
+  }, []);
 
   const getCropList = async (selectedSeasonId) => {
     try {
@@ -128,7 +134,7 @@ export default function ProductionFilterComp({
       />
       <View style={styles.bottomBtns}>
         <TouchableOpacity onPress={onCLose} style={styles.resetBtn}>
-          <Text style={{ color: "#6b4caf" }}>Calncel</Text>
+          <Text style={{ color: "#6b4caf" }}>Cancel</Text>
         </TouchableOpacity>
 
         <TouchableOpacity

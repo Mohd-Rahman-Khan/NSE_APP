@@ -148,7 +148,7 @@ const createDetailItem = (
   label,
   value,
   profileData,
-  fallback = en.PROFILE.NOT_AVAILABLE
+  fallback = en.PROFILE.NOT_AVAILABLE,
 ) => ({
   label,
   value: profileData?.[value] || fallback,
@@ -159,7 +159,7 @@ const createNestedDetailItem = (
   label,
   nestedKeys,
   profileData,
-  fallback = en.PROFILE.NOT_AVAILABLE
+  fallback = en.PROFILE.NOT_AVAILABLE,
 ) => {
   let value = profileData;
   for (const key of nestedKeys) {
@@ -223,7 +223,7 @@ const Profile = () => {
       const response = await apiRequest(
         API_ROUTES.PROFILE_DETAILS,
         "post",
-        encryptedPayload
+        encryptedPayload,
       );
       const decrypted = decryptAES(response);
       const parsedDecrypted = JSON.parse(decrypted);
@@ -250,8 +250,23 @@ const Profile = () => {
     { label: en.PROFILE.EMAIL, key: "emailId" },
   ];
 
+  const formatDate = (date) => {
+    if (!date) return en.PROFILE.NOT_AVAILABLE;
+
+    const d = new Date(date);
+
+    if (isNaN(d.getTime())) return date;
+
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+
+    return `${day}-${month}-${year}`;
+  };
+
   const personalDetailsConfig = [
-    { label: en.PROFILE.DETAILS.FULL_NAME, key: "firstName" },
+    // { label: en.PROFILE.DETAILS.FULL_NAME, key: "firstName" },
+    { label: en.PROFILE.DETAILS.FULL_NAME, key: "fullName" },
     { label: en.PROFILE.DETAILS.GENDER, key: "gender" },
     { label: en.PROFILE.DETAILS.DATE_OF_BIRTH, key: "dob" },
     { label: en.PROFILE.DETAILS.CONTACT, key: "mobileNo" },
@@ -312,11 +327,39 @@ const Profile = () => {
   ];
 
   // Helper function to generate details array from config
+  // const generateDetails = (config) => {
+  //   return config.map((item) => {
+  //     if (item.nestedKeys) {
+  //       return createNestedDetailItem(item.label, item.nestedKeys, profileData);
+  //     }
+  //     return createDetailItem(item.label, item.key, profileData);
+  //   });
+  // };
+
   const generateDetails = (config) => {
     return config.map((item) => {
+      // Full Name
+      if (item.key === "fullName") {
+        return {
+          label: item.label,
+          value:
+            `${profileData?.firstName || ""} ${
+              profileData?.lastName || ""
+            }`.trim() || en.PROFILE.NOT_AVAILABLE,
+        };
+      }
+
       if (item.nestedKeys) {
         return createNestedDetailItem(item.label, item.nestedKeys, profileData);
       }
+
+      if (item.key === "dob") {
+        return {
+          label: item.label,
+          value: formatDate(profileData?.dob),
+        };
+      }
+
       return createDetailItem(item.label, item.key, profileData);
     });
   };

@@ -10,6 +10,7 @@ import {
   Animated,
   TextInput,
   Image,
+  Alert,
 } from "react-native";
 import WrapperContainer from "../../utils/WrapperContainer";
 import CustomHeader from "../../components/CustomHeader";
@@ -833,6 +834,7 @@ export default function Home({ navigation }) {
       const payloadData = {
         roId: userData?.roId,
         finYearId: currentFY?.id,
+        unitType: userData?.unitType,
         ...filter,
       };
       const encryptedPayload = encryptWholeObject(payloadData);
@@ -845,7 +847,7 @@ export default function Home({ navigation }) {
       const parsedDecrypted = JSON.parse(decrypted);
       //console.log("getProductionDashboardSummary___", userData);
       console.log("getProductionDashboardSummary___", payloadData);
-      //console.log("getProductionDashboardSummary___", parsedDecrypted);
+      console.log("getProductionDashboardSummary___", parsedDecrypted);
 
       if (
         parsedDecrypted &&
@@ -908,6 +910,7 @@ export default function Home({ navigation }) {
         pcId: userData?.pcId,
         page: 0,
         pageSize: 100,
+        unitType: userData?.unitType,
         ...filter,
       };
       const encryptedPayload = encryptWholeObject(payloadData);
@@ -919,7 +922,7 @@ export default function Home({ navigation }) {
       const decrypted = decryptAES(response);
       const parsedDecrypted = JSON.parse(decrypted);
       console.log("getProductionPlanDetail_______", parsedDecrypted);
-
+      console.log("getProductionPlanDetail_______", payloadData);
       if (
         parsedDecrypted &&
         (parsedDecrypted?.statusCode === "200" ||
@@ -996,7 +999,14 @@ export default function Home({ navigation }) {
       label: item.month,
       frontColor: "#4f6bdc",
       onPress: () => {
-        alert(`Month: ${item.month}\nQty: ${item.total} qtl`);
+        //alert(`Month: ${item.month}\nQty: ${item.total} qtl`);
+
+        Alert.alert(
+          "Detail",
+          `Month: ${item.month}\nQty: ${item.total} qtl`[
+            { text: "OK", onPress: () => console.log("OK Pressed") }
+          ],
+        );
       },
     }));
   };
@@ -1007,7 +1017,13 @@ export default function Home({ navigation }) {
       label: item.month,
       frontColor: "#22c55e",
       onPress: () => {
-        alert(`Month: ${item.month}\nRevenue: ₹${item.totalAmount}`);
+        //alert(`Month: ${item.month}\nRevenue: ₹${item.totalAmount}`);
+        Alert.alert(
+          "Detail",
+          `Month: ${item.month}\nRevenue: ₹${item.totalAmount}`[
+            { text: "OK", onPress: () => console.log("OK Pressed") }
+          ],
+        );
       },
     }));
   };
@@ -1401,7 +1417,7 @@ export default function Home({ navigation }) {
                 color="#1565c0"
               />
               <StatCard
-                title="PROD PLAN"
+                title="Total Area"
                 value={dashbooardData?.productionPlan?.totalArea}
                 subtitle="Mapped"
                 color="#c62828"
@@ -1528,7 +1544,7 @@ export default function Home({ navigation }) {
                 Region Wise Contribution
               </Text>
 
-              <View
+              {/* <View
                 style={{
                   alignItems: "center", // 🔥 center horizontally
                   justifyContent: "center",
@@ -1597,7 +1613,7 @@ export default function Home({ navigation }) {
                       : marketingDashData?.totalRevenue?.toLocaleString()}
                   </Text>
                 </View>
-              </View>
+              </View> */}
             </View>
 
             {topDealer?.length > 0 && (
@@ -1965,10 +1981,18 @@ const ProductionOverview = ({ graphData }) => {
         frontColor: "#2b6cb0",
         spacing: 4,
         onPress: () => {
-          alert(
-            `RO: ${item.roName || item?.aoName || item?.pcName}\nArea: ${
-              item.area
-            }`,
+          // alert(
+          //   `RO: ${item.roName || item?.aoName || item?.pcName}\nArea: ${
+          //     item.area
+          //   }`,
+          // );
+
+          Alert.alert(
+            "Detail",
+            `RO: ${
+              item.roName || item?.aoName || item?.pcName
+            }\nArea: ${item.area.toFixed(2)} Ha`,
+            [{ text: "OK", onPress: () => console.log("OK Pressed") }],
           );
         },
       },
@@ -1984,10 +2008,18 @@ const ProductionOverview = ({ graphData }) => {
         },
         spacing: 28, // 👈 🔥 BIG GAP between groups
         onPress: () => {
-          alert(
+          // alert(
+          //   `RO: ${
+          //     item.roName || item?.aoName || item?.pcName
+          //   }\nAssigned Area: ${item.assignedArea}`,
+          // );
+
+          Alert.alert(
+            "Detail",
             `RO: ${
               item.roName || item?.aoName || item?.pcName
-            }\nAssigned Area: ${item.assignedArea}`,
+            }\nAssigned Area: ${item.assignedArea.toFixed(2)} Ha`,
+            [{ text: "OK", onPress: () => console.log("OK Pressed") }],
           );
         },
       },
@@ -2006,10 +2038,18 @@ const ProductionOverview = ({ graphData }) => {
         frontColor: "#2f855a",
         spacing: 4,
         onPress: () => {
-          alert(
-            `RO: ${item.roName || item?.aoName || item?.pcName}\nRaw Seed: ${
-              item.rawSeed
-            }`,
+          // alert(
+          //   `RO: ${item.roName || item?.aoName || item?.pcName}\nRaw Seed: ${
+          //     item.rawSeed
+          //   }`,
+          // );
+
+          Alert.alert(
+            "Detail",
+            `RO: ${
+              item.roName || item?.aoName || item?.pcName
+            }\nRaw Seed: ${item.rawSeed.toFixed(2)} Kg`,
+            [{ text: "OK", onPress: () => console.log("OK Pressed") }],
           );
         },
       },
@@ -2025,10 +2065,18 @@ const ProductionOverview = ({ graphData }) => {
         },
         spacing: 28,
         onPress: () => {
-          alert(
+          // alert(
+          //   `RO: ${
+          //     item.roName || item?.aoName || item?.pcName
+          //   }\nReceived Seed: ${item.receivedRawSeed}`,
+          // );
+
+          Alert.alert(
+            "Detail",
             `RO: ${
               item.roName || item?.aoName || item?.pcName
-            }\nReceived Seed: ${item.receivedRawSeed}`,
+            }\nReceived Seed: ${item.receivedRawSeed.toFixed(2)} Kg`,
+            [{ text: "OK", onPress: () => console.log("OK Pressed") }],
           );
         },
       },
@@ -2044,7 +2092,11 @@ const ProductionOverview = ({ graphData }) => {
 
       {/* Legend */}
       <View
-        style={{ flexDirection: "row", marginTop: 8, alignItems: "center" }}
+        style={{
+          flexDirection: "row",
+          marginTop: 8,
+          alignItems: "center",
+        }}
       >
         <View
           style={{
@@ -2061,7 +2113,7 @@ const ProductionOverview = ({ graphData }) => {
               marginRight: 5,
             }}
           />
-          <Text>Area</Text>
+          <Text>Area(Ha)</Text>
         </View>
 
         <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -2073,29 +2125,46 @@ const ProductionOverview = ({ graphData }) => {
               marginRight: 5,
             }}
           />
-          <Text>Assigned</Text>
+          <Text>Assigned(Ha)</Text>
         </View>
       </View>
 
-      <BarChart
-        data={getAreaChartData()}
-        height={220}
-        width={width - 100}
-        barWidth={18}
-        spacing={12}
-        initialSpacing={25}
-        endSpacing={25}
-        roundedTop
-        noOfSections={5}
-        xAxisThickness={1}
-        yAxisThickness={1}
-        hideRules={false}
-        rulesColor="#e5e7eb"
-        xAxisLabelTextStyle={{
-          textAlign: "center",
-          width: 90,
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
         }}
-      />
+      >
+        <View style={{ width: "5%", alignItems: "center" }}>
+          <Text
+            style={{ fontWeight: "bold", transform: [{ rotate: "-90deg" }] }}
+          >
+            Ha
+          </Text>
+        </View>
+        <View style={{ width: "93%" }}>
+          <BarChart
+            data={getAreaChartData()}
+            height={220}
+            width={width - 130}
+            barWidth={18}
+            spacing={12}
+            initialSpacing={25}
+            endSpacing={25}
+            roundedTop
+            noOfSections={5}
+            xAxisThickness={1}
+            yAxisThickness={1}
+            hideRules={false}
+            rulesColor="#e5e7eb"
+            xAxisLabelTextStyle={{
+              textAlign: "center",
+              width: 90,
+            }}
+          />
+        </View>
+      </View>
 
       {/* 🔹 Raw Seed vs Received */}
       <Text style={{ fontWeight: "bold", marginTop: 15 }}>
@@ -2121,7 +2190,7 @@ const ProductionOverview = ({ graphData }) => {
               marginRight: 5,
             }}
           />
-          <Text>Raw Seed</Text>
+          <Text>Raw Seed(Kg)</Text>
         </View>
 
         <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -2133,28 +2202,45 @@ const ProductionOverview = ({ graphData }) => {
               marginRight: 5,
             }}
           />
-          <Text>Received</Text>
+          <Text>Received(Kg)</Text>
         </View>
       </View>
 
-      <BarChart
-        data={getSeedChartData()}
-        height={250}
-        width={width - 100}
-        barWidth={22}
-        roundedTop
-        noOfSections={8}
-        spacing={20}
-        initialSpacing={20}
-        endSpacing={20}
-        xAxisThickness={1}
-        yAxisThickness={1}
-        xAxisLabelTextStyle={{
-          textAlign: "center",
-          width: 70,
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
         }}
-        maxValue={20000}
-      />
+      >
+        <View style={{ width: "5%", alignItems: "center" }}>
+          <Text
+            style={{ fontWeight: "bold", transform: [{ rotate: "-90deg" }] }}
+          >
+            Kg
+          </Text>
+        </View>
+        <View style={{ width: "93%" }}>
+          <BarChart
+            data={getSeedChartData()}
+            height={250}
+            width={width - 100}
+            barWidth={22}
+            roundedTop
+            noOfSections={8}
+            spacing={20}
+            initialSpacing={20}
+            endSpacing={20}
+            xAxisThickness={1}
+            yAxisThickness={1}
+            xAxisLabelTextStyle={{
+              textAlign: "center",
+              width: 70,
+            }}
+            maxValue={20000}
+          />
+        </View>
+      </View>
     </View>
   );
 };

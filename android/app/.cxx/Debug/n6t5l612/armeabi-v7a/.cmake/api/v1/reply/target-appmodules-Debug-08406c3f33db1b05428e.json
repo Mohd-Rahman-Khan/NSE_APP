@@ -437,26 +437,6 @@
 		},
 		{
 			"backtrace" : 4,
-			"id" : "react_codegen_RNMmkvSpec::@7541eabbae598da31a69"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "react-native-mmkv::@4ae6a1e65d3e68ba0197"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "core::@1b9a7d546b295b7d0867"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "react_codegen_pagerview::@7032a8921530ec438d60"
-		},
-		{
-			"backtrace" : 4,
-			"id" : "react_codegen_rnreanimated::@8afabad14bfffa3f8b9a"
-		},
-		{
-			"backtrace" : 4,
 			"id" : "react_codegen_safeareacontext::@7984cd80db47aa7b952a"
 		},
 		{
@@ -478,6 +458,26 @@
 		{
 			"backtrace" : 4,
 			"id" : "react_codegen_rnworklets::@68f58d84d4754f193387"
+		},
+		{
+			"backtrace" : 4,
+			"id" : "react_codegen_RNMmkvSpec::@7541eabbae598da31a69"
+		},
+		{
+			"backtrace" : 4,
+			"id" : "react-native-mmkv::@4ae6a1e65d3e68ba0197"
+		},
+		{
+			"backtrace" : 4,
+			"id" : "core::@1b9a7d546b295b7d0867"
+		},
+		{
+			"backtrace" : 4,
+			"id" : "react_codegen_pagerview::@7032a8921530ec438d60"
+		},
+		{
+			"backtrace" : 4,
+			"id" : "react_codegen_rnreanimated::@8afabad14bfffa3f8b9a"
 		}
 	],
 	"id" : "appmodules::@6890427a1f51a3e7e1df",

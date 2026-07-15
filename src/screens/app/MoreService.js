@@ -242,6 +242,13 @@ const MoreService = () => {
         backgroundColor: "#ffff99",
         navigationScreenName: "ScanQrCode",
       },
+      {
+        id: 12,
+        name: "LOT Detail",
+        icon: ImagePath.complaint,
+        backgroundColor: Colors.bg1,
+        navigationScreenName: "LotDetail",
+      },
     ];
 
     setbrowseProductList(updatedMenu);

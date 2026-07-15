@@ -53,14 +53,17 @@ const CustomHeader = ({
           {showFilter && (
             <TouchableOpacity
               activeOpacity={0.5}
-              style={styles.notificationHolder}
+              style={[
+                styles.notificationHolder,
+                { width: moderateScale(45), height: moderateScale(45) },
+              ]}
               onPress={() => {
                 clickOnFilter();
               }}
             >
               <Feather
                 name="filter"
-                size={moderateScale(25)}
+                size={moderateScale(20)}
                 color={Colors.black}
               />
             </TouchableOpacity>
