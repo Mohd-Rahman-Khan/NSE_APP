@@ -6,6 +6,7 @@ import {
   FlatList,
   Platform,
   Modal,
+  ScrollView,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import WrapperContainer from "../../../../../utils/WrapperContainer";
@@ -31,6 +32,9 @@ import {
   showErrorMessage,
   showSuccessMessage,
 } from "../../../../../utils/HelperFunction";
+import { ROLES } from "../../../../../constants/userRole";
+import FilterComp from "./FilterComp";
+import CustomBottomSheet from "../../../../../components/CustomBottomSheet";
 
 export default function OrchardProcessAllocation({ route }) {
   const navigation = useNavigation();
@@ -38,29 +42,80 @@ export default function OrchardProcessAllocation({ route }) {
   // ------------------- STATES -------------------
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState([]);
-  const [showAddNewButton, setShowAddNewButton] = useState(true);
 
   const [plotList, setPlotList] = useState([]);
+  const [showFilterComp, setshowFilterComp] = useState(false);
+  const [operationActivityList, setoperationActivityList] = useState([]);
 
   const isFocused = useIsFocused();
   // ------------------- INITIAL FETCH -------------------
   useEffect(() => {
     if (isFocused) {
-      fetchPlotList(); // ✅ ONLY THIS
+      fetchPlotList();
+      getOperationsActivityList();
     }
   }, [isFocused]);
 
-  const fetchPlotList = async () => {
+  const getOperationsActivityList = async () => {
+    setLoading(true);
+
+    try {
+      const payloadData = {};
+
+      const encryptedPayload = encryptWholeObject(payloadData);
+
+      const response = await apiRequest(
+        API_ROUTES.OPERATION_MASTER_DD,
+        "post",
+        encryptedPayload,
+      );
+
+      const decrypted = decryptAES(response);
+      const parsed = JSON.parse(decrypted);
+
+      console.log("parsed", parsed);
+
+      if (parsed?.status === "SUCCESS" && parsed?.statusCode === "200") {
+        const newData = parsed?.data;
+
+        setoperationActivityList(newData);
+      } else {
+        setoperationActivityList([]);
+        showErrorMessage(parsed?.message || "Something went wrong");
+      }
+    } catch (err) {
+      console.log("Fetch error", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchPlotList = async (filter = {}) => {
     try {
       setLoading(true);
 
       const userData = await getUserData();
+      setUserData(userData);
+      let payload;
 
-      const payload = {
-        epoId: String(userData?.epoId), // 🔥 IMPORTANT
-      };
+      const findEpoEmployeeRole = userData?.roleName?.includes(
+        ROLES.EPO_EMPLOYEE,
+      );
 
-      console.log("📤 PLOT API PAYLOAD", payload);
+      if (findEpoEmployeeRole) {
+        payload = {
+          epoId: String(userData?.epoId),
+          orchardId: userData?.subUnitId,
+          ...filter,
+        };
+      } else {
+        payload = {
+          epoId: String(userData?.epoId),
+          //orchardId: "7",
+        };
+      }
+
+      console.log("📤 PLOT API PAYLOAD", userData);
 
       const encryptedPayload = encryptWholeObject(payload);
 
@@ -130,21 +185,21 @@ export default function OrchardProcessAllocation({ route }) {
       </View>
 
       <View style={styles.itemRow}>
-        <View style={styles.itemColumn}>
-          <Text style={styles.itemLabel}>Square Name</Text>
-          <Text style={styles.itemValue}>{item?.squareName || "-"}</Text>
-        </View>
+        {/* <View style={styles.itemColumn}>
+          <Text style={styles.itemLabel}>Plot Name</Text>
+          <Text style={styles.itemValue}>{item?.plotName || "-"}</Text>
+        </View> */}
 
-        <View style={styles.itemColumn}>
+        {/* <View style={styles.itemColumn}>
           <Text style={styles.itemLabel}>Total Area (ha)</Text>
           <Text style={styles.itemValue}>{item?.totalArea || "-"}</Text>
-        </View>
+        </View> */}
       </View>
 
       <View style={styles.itemRow}>
         <View style={styles.itemColumn}>
           <Text style={styles.itemLabel}>Last Operation</Text>
-          <Text style={styles.itemValue}>{item?.lastOperationName || "-"}</Text>
+          <Text style={styles.itemValue}>{item?.operationName || "-"}</Text>
         </View>
 
         <View style={styles.itemColumn}>
@@ -155,7 +210,7 @@ export default function OrchardProcessAllocation({ route }) {
               { color: getStatusColor(item?.lastOperationStatus) },
             ]}
           >
-            {item?.lastOperationStatus || "-"}
+            {item?.currentDprStatus || "-"}
           </Text>
         </View>
       </View>
@@ -165,18 +220,43 @@ export default function OrchardProcessAllocation({ route }) {
   // ------------------- UI -------------------
   return (
     <WrapperContainer isLoading={loading}>
+      {showFilterComp && (
+        <CustomBottomSheet
+          visible={showFilterComp}
+          onRequestClose={() => setshowFilterComp(false)}
+        >
+          <ScrollView>
+            <FilterComp
+              operationActivityList={operationActivityList}
+              userData={userData}
+              applyFilter={(data) => {
+                let filterData = {
+                  activityId: data?.selectedActivity?.id || null,
+                  plotId: data?.selectedPlot?.id,
+                  dprStatus:
+                    data?.selectedStatus?.value == "ALL"
+                      ? null
+                      : data?.selectedStatus?.value,
+                };
+                fetchPlotList(filterData);
+                setshowFilterComp(false);
+              }}
+            />
+          </ScrollView>
+        </CustomBottomSheet>
+      )}
       <InnerHeader
         title={"Orchard Process Allocation"}
-        // rightIcon={
-        //   showAddNewButton && (
-        //     <TouchableOpacity
-        //       onPress={() => navigation.navigate("AddNewDpr", { landData })}
-        //       style={styles.notificationHolder}
-        //     >
-        //       <Icon name="add" size={25} color={Colors.white} />
-        //     </TouchableOpacity>
-        //   )
-        // }
+        rightIcon={
+          <TouchableOpacity
+            onPress={() => {
+              setshowFilterComp(true);
+            }}
+            style={styles.filterBtn}
+          >
+            <Icon name="filter-list" size={24} color="#fff" />
+          </TouchableOpacity>
+        }
       />
 
       <FlatList
@@ -311,5 +391,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "blue",
     marginBottom: 10,
+  },
+  filterBtn: {
+    width: 45,
+    height: 45,
+    borderRadius: 22,
+    backgroundColor: Colors.greenColor,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

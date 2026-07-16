@@ -115,17 +115,21 @@ const BrowseProduct = ({ browseProductList, userData }) => {
                 if (item?.navigationScreenName) {
                   if (item?.name == "Daily Progress Reports") {
                     console.log("_____", userData?.roleName);
-                    // const findMachenicalRole = userData?.roleName?.includes(
-                    //   "FARM_BLOCK_ENGG_INCHARGE",
-                    // );
+
                     const findMachenicalRole = userData?.roleName?.includes(
                       ROLES.MECHANICAL_BLOCK_ENGG,
                     );
 
-                    // const findEPOIncharge =
-                    //   userData?.roleName?.includes("EPO_INCHARGE");
+                    const findEpoEmployeeRole = userData?.roleName?.includes(
+                      ROLES.EPO_EMPLOYEE,
+                    );
+
                     const findEPOIncharge = userData?.roleName?.includes(
                       ROLES.EPO_INCHARGE,
+                    );
+
+                    const findEpoEngIncharge = userData?.roleName?.includes(
+                      ROLES.EPO_ENG_INCHARGE,
                     );
 
                     if (findMachenicalRole) {
@@ -133,9 +137,19 @@ const BrowseProduct = ({ browseProductList, userData }) => {
                       navigation.navigate("MechanicalAllocationProcessList");
                       return;
                     }
+
+                    if (findEpoEmployeeRole) {
+                      navigation.navigate("OrchardProcessAllocation");
+                      return;
+                    }
+
                     if (findEPOIncharge) {
-                      //setBottomSheetVisible(true);
-                      //alert("Orchard DPR not implemented.");
+                      setBottomSheetVisible(true);
+                      return;
+                    }
+
+                    if (findEpoEngIncharge) {
+                      navigation.navigate("OrchardMechanicalProcessList");
                       return;
                     }
                     navigation.navigate(item.navigationScreenName);

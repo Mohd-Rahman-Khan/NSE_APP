@@ -48,6 +48,9 @@ import ViewMorePlansList from "../screens/app/ViewMorePlansList";
 import ViewMoreRejectedPlan from "../screens/app/ViewMoreRejectedPlan";
 import ViewMoreDealerList from "../screens/app/ViewMoreDealerList";
 import LotDetail from "../screens/app/home/LotDetail/LotDetail";
+import ViewOrchardDprDetail from "../screens/app/home/DPR/Orchard/ViewOrchardDprDetail";
+import OrchardMechanicalIssueDetails from "../screens/app/home/DPR/Orchard/OrchardMechanicalIssueDetails";
+import OrchardMechanicalProcessList from "../screens/app/home/DPR/Orchard/OrchardMechanicalProcessList";
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -155,6 +158,18 @@ const AppNavigation = () => {
           component={OrchardProcessAllocation}
         />
         <Stack.Screen name="AddOrchardDpr" component={AddOrchardDpr} />
+        <Stack.Screen
+          name="ViewOrchardDprDetail"
+          component={ViewOrchardDprDetail}
+        />
+        <Stack.Screen
+          name="OrchardMechanicalIssueDetails"
+          component={OrchardMechanicalIssueDetails}
+        />
+        <Stack.Screen
+          name="OrchardMechanicalProcessList"
+          component={OrchardMechanicalProcessList}
+        />
         <Stack.Screen name="AddNurseryDpr" component={AddNurseryDpr} />
         <Stack.Screen name="AddNewDpr" component={AddNewDpr} />
         <Stack.Screen name="ScanQrCode" component={ScanQrCode} />

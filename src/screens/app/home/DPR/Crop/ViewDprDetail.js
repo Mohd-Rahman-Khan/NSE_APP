@@ -1906,9 +1906,9 @@ export default function ViewDprDetail({ route }) {
 
             allowMultiple: dprData?.allowMultiple || false,
 
-            dprStatus: "APPROVED",
+            dprStatus: status,
 
-            currentDprStatus: "APPROVED",
+            currentDprStatus: status,
 
             /* ================= AGRICULTURE ================= */
 

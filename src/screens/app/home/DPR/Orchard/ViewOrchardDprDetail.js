@@ -35,6 +35,7 @@ import CustomButton from "../../../../../components/CustomButton";
 import DateTimePicker, {
   DateTimePickerAndroid,
 } from "@react-native-community/datetimepicker";
+import { ROLES } from "../../../../../constants/userRole";
 
 /* ================= MATERIAL TYPE ================= */
 
@@ -53,7 +54,7 @@ const materialTypeList = [
 
 /* ================= COMPONENT ================= */
 
-export default function ViewDprDetail({ route }) {
+export default function ViewOrchardDprDetail({ route }) {
   const navigation = useNavigation();
   const isFocused = useIsFocused();
   const dprId = route?.params?.item?.id;
@@ -73,13 +74,13 @@ export default function ViewDprDetail({ route }) {
   const [selectedAgricultureId, setSelectedAgricultureId] = useState(null);
   const [contractortList, setcontractortList] = useState([]);
   const [employeeList, setEmployeeList] = useState([]);
+  const [showOutTimePicker, setShowOutTimePicker] = useState(false);
+  const [selectedOutTime, setSelectedOutTime] = useState({
+    activityId: null,
+    mechId: null,
+  });
 
   const landData = route?.params?.landData;
-
-  //console.log("userData", userData);
-
-  //const USER_ROLE = userData?.roleName?.includes("FARM_BLOCK_ENGG_INCHARGE");
-  const USER_ROLE = userData?.unitType == "FARM_BLOCK";
 
   const categoryList = [
     { id: 1, name: "PRW" },
@@ -173,6 +174,9 @@ export default function ViewDprDetail({ route }) {
             );
           });
         }, 0);
+        if (parsed?.data?.actualDate) {
+          setDate(new Date(parsed.data.actualDate));
+        }
       } else {
         showErrorMessage(parsed?.message || "Failed to load DPR");
       }
@@ -181,6 +185,32 @@ export default function ViewDprDetail({ route }) {
       showErrorMessage("Something went wrong");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const openOutTimePicker = (activityId, mechId) => {
+    if (Platform.OS === "android") {
+      DateTimePickerAndroid.open({
+        value: new Date(),
+        mode: "time",
+        is24Hour: true,
+        onChange: (event, selectedTime) => {
+          if (!selectedTime) return;
+
+          const hours = String(selectedTime.getHours()).padStart(2, "0");
+          const minutes = String(selectedTime.getMinutes()).padStart(2, "0");
+
+          updateMechanicalField(
+            activityId,
+            mechId,
+            "outTime",
+            `${hours}:${minutes}`,
+          );
+        },
+      });
+    } else {
+      setSelectedOutTime({ activityId, mechId });
+      setShowOutTimePicker(true);
     }
   };
 
@@ -248,6 +278,7 @@ export default function ViewDprDetail({ route }) {
     data.activities.forEach((a) => {
       const existingLabour =
         data.dprLabour?.filter((l) => l.activityId === a.activityId) || [];
+      console.log("existingLabour", existingLabour);
 
       const labours =
         existingLabour.length > 0
@@ -259,7 +290,7 @@ export default function ViewDprDetail({ route }) {
               agreementType: l.agreementType || "",
               worker: l.worker || null,
               workerList: [],
-              category: "",
+              category: l.category,
             }))
           : Array.from({ length: a.noOfLabour || 0 }).map((_, i) => ({
               id: `${a.id}-${i}`, // 🔥 use a.id
@@ -605,7 +636,6 @@ export default function ViewDprDetail({ route }) {
 
   const renderActivity = ({ item, index }) => {
     const isOpen = expandedActivityId === item.activityId;
-    // console.log("renderActivity", item);
 
     return (
       <View style={styles.activityCard}>
@@ -667,9 +697,13 @@ export default function ViewDprDetail({ route }) {
                 <TextInput
                   maxLength={2}
                   keyboardType="number-pad"
-                  editable={dprData?.currentDprStatus === "APPROVED"}
+                  editable={
+                    dprData?.currentDprStatus === "APPROVED" &&
+                    userData?.roleName?.includes(ROLES.EPO_EMPLOYEE)
+                  }
                   style={
-                    dprData?.currentDprStatus === "APPROVED"
+                    dprData?.currentDprStatus === "APPROVED" &&
+                    userData?.roleName?.includes(ROLES.EPO_EMPLOYEE)
                       ? styles.input
                       : styles.disabledInput
                   }
@@ -688,6 +722,30 @@ export default function ViewDprDetail({ route }) {
                 />
               </View>
             )}
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Area</Text>
+              <TextInput
+                editable={false}
+                style={styles.disabledInput}
+                value={String(item.basic?.area || "")}
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>No Of Iteration</Text>
+              <TextInput
+                editable={false}
+                style={styles.disabledInput}
+                value={String(item.basic?.noOfIteration || "")}
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Total Output</Text>
+              <TextInput
+                editable={false}
+                style={styles.disabledInput}
+                value={String(item.basic?.totalOutput || "")}
+              />
+            </View>
 
             {/* AGRICULTURE */}
             {item.agricultures.length > 0 && (
@@ -732,7 +790,7 @@ export default function ViewDprDetail({ route }) {
                     <View style={styles.divider} />
                     <DropDown
                       disabled={
-                        userData?.unitType == "CHAK"
+                        userData?.roleName?.includes(ROLES.EPO_EMPLOYEE)
                           ? true
                           : dprData?.currentDprStatus == "PENDING"
                           ? false
@@ -763,7 +821,7 @@ export default function ViewDprDetail({ route }) {
 
                     <DropDown
                       disabled={
-                        userData?.unitType == "CHAK"
+                        userData?.roleName?.includes(ROLES.EPO_EMPLOYEE)
                           ? true
                           : dprData?.currentDprStatus == "PENDING"
                           ? false
@@ -797,23 +855,23 @@ export default function ViewDprDetail({ route }) {
                       // }}
 
                       onPress={async () => {
-                        if (userData?.unitType == "CHAK") {
-                        } else {
-                          if (!ag?.material?.itemCode) {
-                            alert("Please select item first");
-                            return;
-                          }
-
-                          // await fetchMaterialListByItemCode(
-                          //   ag.material.materialType,
-                          // );
-
-                          setSelectedActivityId(item.activityId);
-
-                          setSelectedAgricultureId(ag.id);
-
-                          setShowMaterialModal(true);
+                        // if (userData?.unitType == "CHAK") {
+                        // } else {
+                        if (!ag?.material?.itemCode) {
+                          alert("Please select item first");
+                          return;
                         }
+
+                        // await fetchMaterialListByItemCode(
+                        //   ag.material.materialType,
+                        // );
+
+                        setSelectedActivityId(item.activityId);
+
+                        setSelectedAgricultureId(ag.id);
+
+                        setShowMaterialModal(true);
+                        // }
                       }}
                     >
                       <Text style={styles.selectMaterialText}>
@@ -838,11 +896,7 @@ export default function ViewDprDetail({ route }) {
                   <View key={eq.id} style={styles.rowBox}>
                     <Text style={styles.serial}>S.N. {i + 1}</Text>
                     <View style={styles.divider} />
-                    <DropDown
-                      disabled
-                      label="Equipment"
-                      value={eq.equipmentName}
-                    />
+                    <DropDown disabled label="Group" value={eq.equipmentName} />
                     <DropDown
                       disabled
                       label="Sub Group"
@@ -863,58 +917,137 @@ export default function ViewDprDetail({ route }) {
                       />
                     </View>
 
-                    <View style={styles.inputContainer}>
-                      <Text style={styles.label}>Actual Hours</Text>
-                      <TextInput
-                        maxLength={2}
-                        keyboardType="numeric"
-                        value={String(eq.actualHours || "")}
-                        placeholder="Actual Hours"
-                        editable={dprData?.currentDprStatus == "APPROVED"}
-                        style={
-                          dprData?.currentDprStatus == "APPROVED"
-                            ? styles.input
-                            : styles.disabledInput
-                        }
-                        onChangeText={(val) =>
-                          updateMechanicalField(
-                            item.activityId,
-                            eq.id,
-                            "actualHours",
-                            val,
-                          )
-                        }
-                      />
-                    </View>
+                    {dprData?.dprStatus == "PENDING" &&
+                    userData?.roleName?.includes(ROLES.EPO_INCHARGE) ? null : (
+                      <View style={styles.inputContainer}>
+                        <Text style={styles.label}>Actual Hours</Text>
+                        <TextInput
+                          maxLength={2}
+                          keyboardType="numeric"
+                          value={String(eq.actualHours || "")}
+                          placeholder="Actual Hours"
+                          editable={
+                            dprData?.currentDprStatus == "APPROVED" &&
+                            userData?.roleName?.includes(ROLES.EPO_EMPLOYEE)
+                          }
+                          style={
+                            dprData?.currentDprStatus == "APPROVED" &&
+                            userData?.roleName?.includes(ROLES.EPO_EMPLOYEE)
+                              ? styles.input
+                              : styles.disabledInput
+                          }
+                          onChangeText={(val) =>
+                            updateMechanicalField(
+                              item.activityId,
+                              eq.id,
+                              "actualHours",
+                              val,
+                            )
+                          }
+                        />
+                      </View>
+                    )}
 
-                    <View style={styles.inputContainer}>
-                      <Text style={styles.label}>Operator Name</Text>
-                      <TextInput
-                        editable={false}
-                        style={styles.disabledInput}
-                        value={String(eq.operatorName || "")}
-                        placeholder="Operator Name"
-                      />
-                    </View>
+                    {(dprData?.dprStatus == "APPROVED" ||
+                      dprData?.dprStatus == "SUBMITTED" ||
+                      dprData?.dprStatus == "DONE") &&
+                      eq.operatorName && (
+                        <View style={styles.inputContainer}>
+                          <Text style={styles.label}>Operator Name</Text>
+                          <TextInput
+                            editable={false}
+                            style={styles.disabledInput}
+                            value={String(eq.operatorName || "")}
+                            placeholder="Operator Name"
+                          />
+                        </View>
+                      )}
 
-                    <View style={styles.inputContainer}>
-                      <Text style={styles.label}>CP Number</Text>
-                      <TextInput
-                        editable={false}
-                        style={styles.disabledInput}
-                        value={String(eq.cpNumber || "")}
-                        placeholder="CP Number"
-                      />
-                    </View>
-                    <View style={styles.inputContainer}>
-                      <Text style={styles.label}>Out Time</Text>
-                      <TextInput
-                        editable={false}
-                        style={styles.disabledInput}
-                        value={String(eq.outTime || "")}
-                        placeholder="Out Time"
-                      />
-                    </View>
+                    {(dprData?.dprStatus == "APPROVED" ||
+                      dprData?.dprStatus == "SUBMITTED" ||
+                      dprData?.dprStatus == "DONE") && (
+                      <View style={styles.inputContainer}>
+                        <Text style={styles.label}>CP Number</Text>
+                        <TextInput
+                          editable={false}
+                          style={styles.disabledInput}
+                          value={String(eq.cpNumber || "")}
+                          placeholder="CP Number"
+                        />
+                      </View>
+                    )}
+
+                    {(dprData?.dprStatus == "APPROVED" ||
+                      dprData?.dprStatus == "SUBMITTED" ||
+                      dprData?.dprStatus == "DONE") && (
+                      <View style={styles.inputContainer}>
+                        <Text style={styles.label}>Out Time</Text>
+
+                        <TouchableOpacity
+                          disabled
+                          // style={
+                          //   eq.outTime
+                          //     ? styles.disabledInput
+                          //     : styles.timeContainer
+                          // }
+                          style={styles.disabledInput}
+                          onPress={() => {
+                            if (!eq.outTime) {
+                              openOutTimePicker(item.activityId, eq.id);
+                            }
+                          }}
+                        >
+                          <Text>{eq.outTime || "- - : - -"}</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+
+                    {(dprData?.dprStatus == "APPROVED" ||
+                      dprData?.dprStatus == "SUBMITTED" ||
+                      dprData?.dprStatus == "DONE") &&
+                      eq.inTime && (
+                        <View style={styles.inputContainer}>
+                          <Text style={styles.label}>In Time</Text>
+
+                          <TouchableOpacity
+                            disabled
+                            style={styles.disabledInput}
+                          >
+                            <Text>{eq.inTime || "- - : - -"}</Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
+
+                    {(dprData?.dprStatus == "APPROVED" ||
+                      dprData?.dprStatus == "SUBMITTED" ||
+                      dprData?.dprStatus == "DONE") &&
+                      eq.mechIdleTime && (
+                        <View style={styles.inputContainer}>
+                          <Text style={styles.label}>Idle Hours</Text>
+
+                          <TouchableOpacity
+                            disabled
+                            style={styles.disabledInput}
+                          >
+                            <Text>{eq.mechIdleTime || ""}</Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                    {(dprData?.dprStatus == "APPROVED" ||
+                      dprData?.dprStatus == "SUBMITTED" ||
+                      dprData?.dprStatus == "DONE") &&
+                      eq.mechRunningTime && (
+                        <View style={styles.inputContainer}>
+                          <Text style={styles.label}>Walking Time</Text>
+
+                          <TouchableOpacity
+                            disabled
+                            style={styles.disabledInput}
+                          >
+                            <Text>{eq.mechRunningTime || ""}</Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
 
                     <View style={styles.switchRow}>
                       <Text>Operator Required</Text>
@@ -939,7 +1072,8 @@ export default function ViewDprDetail({ route }) {
             {/* LABOUR */}
             {item.labours.length > 0 &&
               (dprData?.currentDprStatus == "APPROVED" ||
-                dprData?.currentDprStatus == "SUBMITTED") && (
+                dprData?.currentDprStatus == "SUBMITTED") &&
+              userData?.roleName?.includes(ROLES.EPO_EMPLOYEE) && (
                 <>
                   <View style={styles.sectionHeader}>
                     <Text style={styles.sectionTitle}>Labour Details</Text>
@@ -949,6 +1083,7 @@ export default function ViewDprDetail({ route }) {
                     <View key={lab.id} style={styles.rowBox}>
                       <Text style={styles.serial}>S.N. {i + 1}</Text>
                       <View style={styles.divider} />
+
                       <DropDown
                         label="Category"
                         data={categoryList}
@@ -980,6 +1115,44 @@ export default function ViewDprDetail({ route }) {
                                                     }`,
                                                   }))
                                                 : [],
+                                          }
+                                        : l,
+                                    ),
+                                  }
+                                : act,
+                            ),
+                          );
+                          updateLabourField(
+                            item.activityId,
+                            lab.id,
+                            "labourName",
+                            "",
+                          );
+                          updateLabourField(
+                            item.activityId,
+                            lab.id,
+                            "id",
+                            null,
+                          );
+                          setActivityGroups((prev) =>
+                            prev.map((act) =>
+                              act.activityId === item.activityId
+                                ? {
+                                    ...act,
+                                    labours: act.labours.map((l) =>
+                                      l.id === lab.id
+                                        ? {
+                                            ...l,
+
+                                            selectedAgreement: "",
+
+                                            agreementType: "",
+
+                                            agreementId: "",
+
+                                            workerList: [],
+
+                                            worker: null,
                                           }
                                         : l,
                                     ),
@@ -1043,15 +1216,20 @@ export default function ViewDprDetail({ route }) {
 
                       <DropDown
                         label="Labour/Employee"
+                        fieldName={
+                          lab.category === "RW" ? "firstName" : "workerName"
+                        }
                         data={lab.workerList || []}
                         value={lab.labourName || ""}
                         disabled={dprData?.currentDprStatus != "APPROVED"}
                         selectItem={(selectedWorker) => {
+                          //console.log("selectedWorker", selectedWorker);
                           updateLabourField(
                             item.activityId,
                             lab.id,
                             "labourName",
-                            selectedWorker?.firstName,
+                            selectedWorker?.firstName ||
+                              selectedWorker?.workerName,
                           );
                           updateLabourField(
                             item.activityId,
@@ -1146,6 +1324,38 @@ export default function ViewDprDetail({ route }) {
                   ))}
                 </>
               )}
+            {userData?.roleName?.includes(ROLES.EPO_EMPLOYEE)
+              ? null
+              : dprData?.currentDprStatus == "PENDING" && (
+                  <>
+                    <CustomButton
+                      text="Approve"
+                      buttonStyle={styles.buttonStyle}
+                      textStyle={styles.buttonTextStyle}
+                      handleAction={() => {
+                        submitUpdateDpr("APPROVED");
+                      }}
+                    />
+                    <CustomButton
+                      text="Reject"
+                      buttonStyle={[styles.buttonStyle, { marginTop: 0 }]}
+                      textStyle={styles.buttonTextStyle}
+                      handleAction={() => {
+                        submitUpdateDpr("REJECTED");
+                      }}
+                    />
+                  </>
+                )}
+
+            {dprData?.currentDprStatus == "APPROVED" &&
+              userData?.roleName?.includes(ROLES.EPO_EMPLOYEE) && (
+                <CustomButton
+                  text="Create DPR"
+                  buttonStyle={styles.buttonStyle}
+                  textStyle={styles.buttonTextStyle}
+                  handleAction={handleUpdateDpr}
+                />
+              )}
           </View>
         )}
       </View>
@@ -1154,6 +1364,51 @@ export default function ViewDprDetail({ route }) {
 
   const handleUpdateDpr = async () => {
     try {
+      // ✅ Validation Start
+      for (const act of activityGroups) {
+        // Actual No Of Labour
+        console.log(act);
+        if (
+          act?.basic?.actualNoOfLabour === "" ||
+          act?.basic?.actualNoOfLabour === null ||
+          act?.basic?.actualNoOfLabour === undefined ||
+          Number(act?.basic?.actualNoOfLabour) <= 0
+        ) {
+          showErrorMessage(`Please enter Actual No Of Labour`);
+          return;
+        }
+
+        for (const mac of act.mechanicals || []) {
+          if (mac?.actualHours == 0) {
+            showErrorMessage(`Please enter actual number of hours.`);
+            return;
+          }
+        }
+
+        // Labour Details
+        for (const lab of act.labours || []) {
+          if (!lab?.category) {
+            showErrorMessage(`Please select Category in Labour detail`);
+            return;
+          }
+
+          if (!lab?.labourName?.trim()) {
+            showErrorMessage(`Please select Labour/Employee Name.`);
+            return;
+          }
+
+          if (
+            lab?.actualHours === "" ||
+            lab?.actualHours === null ||
+            lab?.actualHours === undefined ||
+            Number(lab?.actualHours) <= 0
+          ) {
+            showErrorMessage(`Please enter Working Hours for Labour`);
+            return;
+          }
+        }
+      }
+
       setLoading(true);
 
       // const payload = [
@@ -1280,14 +1535,18 @@ export default function ViewDprDetail({ route }) {
           dprType: dprData?.dprType,
           dprMechanicalSubmit: dprData?.dprMechanicalSubmit,
           farmId: dprData?.farmId,
-          engineeringId: dprData?.farmBlockId,
-          engineeringName: dprData?.farmBlockName,
+          engineeringId: dprData?.epoId,
+          engineeringName: dprData?.epoName,
           farmName: dprData?.farmName,
           epoId: dprData?.epoId,
           epoName: dprData?.epoName,
           squareId: dprData?.squareId,
           squareName: dprData?.squareName,
           allowMultiple: dprData?.allowMultiple,
+          plotId: dprData?.plotId,
+          plotName: dprData?.plotName,
+          orchardId: dprData?.orchardId,
+          orchardName: dprData?.orchardName,
           dprStatus: "SUBMITTED",
           currentDprStatus: "SUBMITTED",
 
@@ -1360,7 +1619,6 @@ export default function ViewDprDetail({ route }) {
           ),
         },
       ];
-      console.log("UPDATE DPR SUBMIT PAYLOAD", payload);
 
       const encryptedPayload = encryptWholeObject(payload);
 
@@ -1384,6 +1642,12 @@ export default function ViewDprDetail({ route }) {
     } finally {
       setLoading(false);
     }
+  };
+  const formatDate = (isoString) => {
+    const date = new Date(isoString);
+    return `${String(date.getDate()).padStart(2, "0")}-${String(
+      date.getMonth() + 1,
+    ).padStart(2, "0")}-${date.getFullYear()}`;
   };
 
   const validateMaterialSelection = () => {
@@ -1417,10 +1681,10 @@ export default function ViewDprDetail({ route }) {
     return isValid;
   };
 
-  const submitUpdateDpr = async () => {
-    if (!validateMaterialSelection()) {
-      return;
-    }
+  const submitUpdateDpr = async (status) => {
+    // if (!validateMaterialSelection()) {
+    //   return;
+    // }
     try {
       setLoading(true);
       let payload;
@@ -1470,13 +1734,13 @@ export default function ViewDprDetail({ route }) {
 
             farmBlockName: dprData?.farmBlockName || "",
 
-            engineeringId: dprData?.farmBlockId || "",
+            engineeringId: dprData?.epoId || "",
 
-            engineeringName: dprData?.farmBlockName || "",
+            engineeringName: dprData?.epoName || "",
 
             farmPlanId: dprData?.farmPlanId || null,
 
-            dprType: dprData?.dprType || "CROP",
+            dprType: dprData?.dprType || "ORCHARD",
 
             dprMechanicalSubmit: false,
 
@@ -1484,9 +1748,13 @@ export default function ViewDprDetail({ route }) {
 
             farmName: dprData?.farmName || null,
 
-            epoId: dprData?.epoId || null,
+            epoId: dprData?.epoId || "",
 
-            epoName: dprData?.epoName || null,
+            epoName: dprData?.epoName || "",
+            plotId: dprData?.plotId,
+            plotName: dprData?.plotName,
+            orchardId: dprData?.orchardId,
+            orchardName: dprData?.orchardName,
 
             squareId: dprData?.squareId || null,
 
@@ -1494,9 +1762,12 @@ export default function ViewDprDetail({ route }) {
 
             allowMultiple: dprData?.allowMultiple || false,
 
-            dprStatus: "APPROVED",
+            // dprStatus: "APPROVED",
 
-            currentDprStatus: "APPROVED",
+            // currentDprStatus: "APPROVED",
+            dprStatus: status,
+
+            currentDprStatus: status,
 
             /* ================= AGRICULTURE ================= */
 
@@ -1565,10 +1836,6 @@ export default function ViewDprDetail({ route }) {
             /* ================= LABOUR ================= */
 
             dprLabour: [],
-
-            epoId: null,
-
-            epoName: null,
           },
         ];
       } else {
@@ -1614,13 +1881,13 @@ export default function ViewDprDetail({ route }) {
 
             farmBlockName: dprData?.farmBlockName || "",
 
-            engineeringId: dprData?.farmBlockId || "",
+            engineeringId: dprData?.epoId || "",
 
-            engineeringName: dprData?.farmBlockName || "",
+            engineeringName: dprData?.epoName || "",
 
             farmPlanId: dprData?.farmPlanId || null,
 
-            dprType: dprData?.dprType || "CROP",
+            dprType: dprData?.dprType || "ORCHARD",
 
             dprMechanicalSubmit: false,
 
@@ -1628,9 +1895,13 @@ export default function ViewDprDetail({ route }) {
 
             farmName: dprData?.farmName || null,
 
-            epoId: dprData?.epoId || null,
+            epoId: dprData?.epoId || "",
 
-            epoName: dprData?.epoName || null,
+            epoName: dprData?.epoName || "",
+            plotId: dprData?.plotId,
+            plotName: dprData?.plotName,
+            orchardId: dprData?.orchardId,
+            orchardName: dprData?.orchardName,
 
             squareId: dprData?.squareId || null,
 
@@ -1638,9 +1909,9 @@ export default function ViewDprDetail({ route }) {
 
             allowMultiple: dprData?.allowMultiple || false,
 
-            dprStatus: "APPROVED",
+            dprStatus: status,
 
-            currentDprStatus: "APPROVED",
+            currentDprStatus: status,
 
             /* ================= AGRICULTURE ================= */
 
@@ -1742,16 +2013,12 @@ export default function ViewDprDetail({ route }) {
             /* ================= LABOUR ================= */
 
             dprLabour: [],
-
-            epoId: null,
-
-            epoName: null,
           },
         ];
       }
 
       console.log("UPDATE DPR PAYLOAD", payload);
-      //return;
+      return;
 
       /* ================= API CALL ================= */
 
@@ -1769,7 +2036,7 @@ export default function ViewDprDetail({ route }) {
       console.log("✅ UPDATE DPR RESPONSE", parsed);
 
       if (parsed?.status === "SUCCESS") {
-        alert("DPR updated successfully ✅");
+        alert("Data saved successfully");
         navigation.goBack();
       } else {
         showErrorMessage(parsed?.message || "DPR update failed");
@@ -1787,6 +2054,59 @@ export default function ViewDprDetail({ route }) {
   return (
     <WrapperContainer isLoading={loading}>
       <InnerHeader title="Crop DPR" />
+
+      {Platform.OS === "ios" && showOutTimePicker && (
+        <Modal transparent animationType="slide">
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "flex-end",
+              backgroundColor: "rgba(0,0,0,0.4)",
+            }}
+          >
+            <View
+              style={{
+                backgroundColor: "#fff",
+                padding: 20,
+                borderTopLeftRadius: 20,
+                borderTopRightRadius: 20,
+              }}
+            >
+              <TouchableOpacity
+                style={{ alignSelf: "flex-end", marginBottom: 10 }}
+                onPress={() => setShowOutTimePicker(false)}
+              >
+                <Text style={{ color: Colors.greenColor }}>Done</Text>
+              </TouchableOpacity>
+
+              <DateTimePicker
+                value={new Date()}
+                mode="time"
+                display="spinner"
+                onChange={(event, selectedTime) => {
+                  if (!selectedTime) return;
+
+                  const hours = String(selectedTime.getHours()).padStart(
+                    2,
+                    "0",
+                  );
+                  const minutes = String(selectedTime.getMinutes()).padStart(
+                    2,
+                    "0",
+                  );
+
+                  updateMechanicalField(
+                    selectedOutTime.activityId,
+                    selectedOutTime.mechId,
+                    "outTime",
+                    `${hours}:${minutes}`,
+                  );
+                }}
+              />
+            </View>
+          </View>
+        </Modal>
+      )}
 
       {Platform.OS === "android" && show && (
         <DateTimePicker
@@ -1947,45 +2267,47 @@ export default function ViewDprDetail({ route }) {
               </ScrollView>
 
               {/* FOOTER */}
-              <View style={styles.modalFooter}>
-                <TouchableOpacity
-                  style={styles.cancelBtn}
-                  onPress={() => setShowMaterialModal(false)}
-                >
-                  <Text>Cancel</Text>
-                </TouchableOpacity>
+              {userData?.roleName?.includes(ROLES.EPO_INCHARGE) && (
+                <View style={styles.modalFooter}>
+                  <TouchableOpacity
+                    style={styles.cancelBtn}
+                    onPress={() => setShowMaterialModal(false)}
+                  >
+                    <Text>Cancel</Text>
+                  </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={styles.saveBtn}
-                  onPress={() => {
-                    const selectedItem = materialTableData.find(
-                      (x) => x.selected,
-                    );
+                  <TouchableOpacity
+                    style={styles.saveBtn}
+                    onPress={() => {
+                      const selectedItem = materialTableData.find(
+                        (x) => x.selected,
+                      );
 
-                    setActivityGroups((prev) =>
-                      prev.map((activity) =>
-                        activity.activityId === selectedActivityId
-                          ? {
-                              ...activity,
-                              agricultures: activity.agricultures.map((ag) =>
-                                ag.id === selectedAgricultureId
-                                  ? {
-                                      ...ag,
-                                      selectedMaterial: selectedItem,
-                                    }
-                                  : ag,
-                              ),
-                            }
-                          : activity,
-                      ),
-                    );
+                      setActivityGroups((prev) =>
+                        prev.map((activity) =>
+                          activity.activityId === selectedActivityId
+                            ? {
+                                ...activity,
+                                agricultures: activity.agricultures.map((ag) =>
+                                  ag.id === selectedAgricultureId
+                                    ? {
+                                        ...ag,
+                                        selectedMaterial: selectedItem,
+                                      }
+                                    : ag,
+                                ),
+                              }
+                            : activity,
+                        ),
+                      );
 
-                    setShowMaterialModal(false);
-                  }}
-                >
-                  <Text style={{ color: "#fff" }}>Save</Text>
-                </TouchableOpacity>
-              </View>
+                      setShowMaterialModal(false);
+                    }}
+                  >
+                    <Text style={{ color: "#fff" }}>Save</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
           </View>
         </Modal>
@@ -2010,19 +2332,44 @@ export default function ViewDprDetail({ route }) {
               >
                 <Text style={styles.label}>Plan Report Date</Text>
                 <View style={styles.input}>
-                  <Text>{dprData?.actualDate}</Text>
+                  <Text>{formatDate(dprData?.actualDate)}</Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity
-                disabled={dprData?.dprLabour?.length > 0}
-                onPress={() => setShow(true)}
-                style={[styles.inputContainer]}
-              >
-                <Text style={styles.label}>Report Completion Date</Text>
-                <View style={styles.input}>
-                  <Text>{date.toLocaleDateString()}</Text>
-                </View>
-              </TouchableOpacity>
+              {dprData?.dprStatus == "PENDING" ? null : (
+                <TouchableOpacity
+                  disabled={
+                    (dprData?.dprStatus == "APPROVED" ||
+                      dprData?.dprStatus == "SUBMITTED") &&
+                    userData?.roleName?.includes(ROLES.EPO_INCHARGE)
+                      ? true
+                      : dprData?.dprStatus == "SUBMITTED"
+                      ? true
+                      : false
+                  }
+                  onPress={() => setShow(true)}
+                  style={[styles.inputContainer]}
+                >
+                  <Text style={styles.label}>Report Completion Date</Text>
+                  <View style={styles.input}>
+                    {/* <Text>{date.toLocaleDateString()}</Text> */}
+                    <Text>{formatDate(date)}</Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+
+              {console.log("dprData_____", dprData)}
+
+              {dprData?.remarks && (
+                <TouchableOpacity
+                  disabled={true}
+                  style={[styles.inputContainer]}
+                >
+                  <Text style={styles.label}>Remark</Text>
+                  <View style={styles.input}>
+                    <Text>{dprData?.remarks}</Text>
+                  </View>
+                </TouchableOpacity>
+              )}
             </View>
           )}
 
@@ -2032,25 +2379,28 @@ export default function ViewDprDetail({ route }) {
             renderItem={renderActivity}
           />
 
-          {userData?.unitType == "CHAK"
-            ? null
-            : dprData?.currentDprStatus == "PENDING" && (
+          {userData?.roleName?.includes(ROLES.EPO_INCHARGE) &&
+            dprData?.currentDprStatus == "PENDING" &&
+            activityGroups?.length == 0 && (
+              <>
                 <CustomButton
-                  text="Submit"
+                  text="Approve"
                   buttonStyle={styles.buttonStyle}
                   textStyle={styles.buttonTextStyle}
-                  handleAction={submitUpdateDpr}
+                  handleAction={() => {
+                    submitUpdateDpr("APPROVED");
+                  }}
                 />
-              )}
-
-          {dprData?.currentDprStatus == "APPROVED" && (
-            <CustomButton
-              text="Update"
-              buttonStyle={styles.buttonStyle}
-              textStyle={styles.buttonTextStyle}
-              handleAction={handleUpdateDpr}
-            />
-          )}
+                <CustomButton
+                  text="Reject"
+                  buttonStyle={[styles.buttonStyle, { marginTop: 0 }]}
+                  textStyle={styles.buttonTextStyle}
+                  handleAction={() => {
+                    submitUpdateDpr("REJECTED");
+                  }}
+                />
+              </>
+            )}
         </ScrollView>
       </KeyboardAvoidingView>
     </WrapperContainer>
@@ -2262,5 +2612,17 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 8,
     marginBottom: 5,
+  },
+  timeContainer: {
+    borderWidth: 1,
+    borderColor: Colors.disableFieldColor,
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 6,
+    backgroundColor: "#fff",
   },
 });

@@ -78,6 +78,7 @@ export const API_ROUTES = {
   CONTRACTOR_LIST: "master/contractor-agreement/dd",
   EMPLOYEE_LIST: "master/employee-master/dd",
   FARM_BLOK_LIST: "master/farm-block-master/dd",
+  EPO_MASTER: "master/epo-master/dd",
   CHUK_LIST: "master/farm-chak-master/dd",
   PLAN_LIST: "prod_farm/farm-production/find-by-filter/dd",
   INVT_GODOWN_COUNT: "inventory/dashboard/godown-count",
@@ -88,4 +89,8 @@ export const API_ROUTES = {
   AREA_OFFICE: "master/area-office-master/dd",
   FARM_MASTER: "master/farm-master/dd",
   GET_LOT_DETAIL: "prod_plan/lot-transaction/get-lot-details",
+  ORCHARD_MASTER: "master/orchard-master/dd",
+  NURSERY_MASTER: "master/nursery-master/dd",
+  EPO_PLOT_MASTER: "master/epo-plot-master/dd",
+  PRODUCTION_PLAN_MASTER: "prod_farm/farm-production-plan/dd",
 };
