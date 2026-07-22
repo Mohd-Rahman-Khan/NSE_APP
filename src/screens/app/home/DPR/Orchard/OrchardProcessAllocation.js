@@ -112,6 +112,7 @@ export default function OrchardProcessAllocation({ route }) {
         payload = {
           epoId: String(userData?.epoId),
           //orchardId: "7",
+          ...filter,
         };
       }
 
@@ -237,8 +238,12 @@ export default function OrchardProcessAllocation({ route }) {
                     data?.selectedStatus?.value == "ALL"
                       ? null
                       : data?.selectedStatus?.value,
+                  orchardId: data?.selectedOrchard?.id,
                 };
                 fetchPlotList(filterData);
+                setshowFilterComp(false);
+              }}
+              onCLose={() => {
                 setshowFilterComp(false);
               }}
             />

@@ -10,6 +10,7 @@ import { showErrorMessage } from "../../../../../utils/HelperFunction";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import DropDown from "../../../../../components/DropDown";
 import { API_ROUTES } from "../../../../../services/APIRoutes";
+import { ROLES } from "../../../../../constants/userRole";
 
 export default function FilterComp({
   applyFilter = [],
@@ -228,6 +229,18 @@ export default function FilterComp({
 
   return (
     <View>
+      {userData?.roleName?.includes(ROLES.EPO_INCHARGE) && (
+        <DropDown
+          fieldName="name"
+          label="Orchard"
+          data={orchardList}
+          value={selectedOrchard?.name}
+          selectItem={(item) => {
+            setselectedOrchard(item);
+          }}
+        />
+      )}
+
       <DropDown
         fieldName="name"
         label="Plots"
@@ -334,7 +347,7 @@ export default function FilterComp({
               //selectedDprType,
               //selectedNursery,
               //selectedPlan,
-              //selectedOrchard,
+              selectedOrchard,
               selectedPlot,
             });
           }}

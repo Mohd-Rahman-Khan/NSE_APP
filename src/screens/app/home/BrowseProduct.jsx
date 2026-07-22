@@ -59,9 +59,9 @@ const BrowseProduct = ({ browseProductList, userData }) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.item}
-            onPress={() => {
-              navigation.navigate("NurseryProductionPlan");
-            }}
+            // onPress={() => {
+            //   navigation.navigate("NurseryProductionPlan");
+            // }}
           >
             <View
               style={[
@@ -83,7 +83,7 @@ const BrowseProduct = ({ browseProductList, userData }) => {
             </View>
             <Text style={styles.nameText}>Nursery</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.item} onPress={() => {}}>
+          {/* <TouchableOpacity style={styles.item} onPress={() => {}}>
             <View
               style={[
                 styles.imageView,
@@ -103,7 +103,7 @@ const BrowseProduct = ({ browseProductList, userData }) => {
               />
             </View>
             <Text style={styles.nameText}>Flori/Vege Culture</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </CustomBottomSheet>
       <View style={styles.main} showsVerticalScrollIndicator={false}>

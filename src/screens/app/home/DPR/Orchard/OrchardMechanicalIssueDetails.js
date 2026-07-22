@@ -392,7 +392,6 @@ export default function OrchardMechanicalIssueDetails({ route }) {
       };
 
       console.log("APPROVE PAYLOAD", payload);
-      return;
 
       const encryptedPayload = encryptWholeObject(payload);
 

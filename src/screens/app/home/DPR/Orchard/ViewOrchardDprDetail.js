@@ -2018,7 +2018,6 @@ export default function ViewOrchardDprDetail({ route }) {
       }
 
       console.log("UPDATE DPR PAYLOAD", payload);
-      return;
 
       /* ================= API CALL ================= */
 
