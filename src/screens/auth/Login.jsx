@@ -38,7 +38,7 @@ import TextTicker from "react-native-text-ticker";
 import { getFcmToken } from "../../utils/firebaseNotification";
 
 const Login = () => {
-  const [email, setEmail] = useState("11080500018");
+  const [email, setEmail] = useState("11080100017");
   const [password, setPassword] = useState("welcome");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);

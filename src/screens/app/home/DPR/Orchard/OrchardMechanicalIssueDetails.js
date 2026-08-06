@@ -1159,8 +1159,17 @@ export default function OrchardMechanicalIssueDetails({ route }) {
                 Contractor Name: {dprData.contractorName}(
                 {dprData.contractorType})
               </Text>
-              <Text>Orchard Name: {dprData.orchardName}</Text>
-              <Text>Plot: {dprData.plotName}</Text>
+              {dprData?.dprType == "NURSERY" ? (
+                <>
+                  <Text>Nursery Name: {dprData.nurseryName}</Text>
+                  <Text>Plan Id: {dprData.planId}</Text>
+                </>
+              ) : (
+                <>
+                  <Text>Orchard Name: {dprData.orchardName}</Text>
+                  <Text>Plot: {dprData.plotName}</Text>
+                </>
+              )}
             </View>
           )}
 

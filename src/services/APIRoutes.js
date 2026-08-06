@@ -93,4 +93,5 @@ export const API_ROUTES = {
   NURSERY_MASTER: "master/nursery-master/dd",
   EPO_PLOT_MASTER: "master/epo-plot-master/dd",
   PRODUCTION_PLAN_MASTER: "prod_farm/farm-production-plan/dd",
+  NURSERY_PLAN_MASTER: "prod_farm/dpr/find-plans-by-epoId",
 };

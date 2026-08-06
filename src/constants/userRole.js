@@ -12,4 +12,5 @@ export const ROLES = {
 
   // Field inspection report
   AO_QC_INCHARGE: "AO_QC_INCHARGE",
+  EPO_NURS_CENT_INCH: "EPO_NURSERY_CENTER_INCHARGE",
 };

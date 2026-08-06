@@ -51,6 +51,7 @@ import LotDetail from "../screens/app/home/LotDetail/LotDetail";
 import ViewOrchardDprDetail from "../screens/app/home/DPR/Orchard/ViewOrchardDprDetail";
 import OrchardMechanicalIssueDetails from "../screens/app/home/DPR/Orchard/OrchardMechanicalIssueDetails";
 import OrchardMechanicalProcessList from "../screens/app/home/DPR/Orchard/OrchardMechanicalProcessList";
+import ViewNurseryDprDetail from "../screens/app/home/DPR/Nursery/ViewNurseryDprDetail";
 
 const Stack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -184,6 +185,10 @@ const AppNavigation = () => {
         />
         <Stack.Screen name="Chat" component={Chat} />
         <Stack.Screen name="LotDetail" component={LotDetail} />
+        <Stack.Screen
+          name="ViewNurseryDprDetail"
+          component={ViewNurseryDprDetail}
+        />
       </Stack.Navigator>
       {currentRoute !== "Chat" && isChatAccess && <ChatButton />}
     </View>

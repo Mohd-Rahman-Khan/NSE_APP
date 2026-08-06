@@ -139,7 +139,7 @@ export default function OrchardMechanicalProcessList({ route }) {
 
     try {
       const payloadData = {
-        dprStatus: "APPROVED",
+        dprStatus: null,
         dprType: "NURSERY",
         engineeringId: uData?.epoId,
         isMechanical: true,
@@ -235,8 +235,21 @@ export default function OrchardMechanicalProcessList({ route }) {
 
         <View style={styles.itemRow}>
           <View style={styles.itemColumn}>
-            <Text style={styles.itemLabel}>Square Name</Text>
-            <Text style={styles.itemValue}>{item?.squareName || "N/A"}</Text>
+            {item?.dprType == "NURSERY" ? (
+              <>
+                <Text style={styles.itemLabel}>Nursery</Text>
+                <Text style={styles.itemValue}>
+                  {item?.nurseryName || "N/A"}
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text style={styles.itemLabel}>Square Name</Text>
+                <Text style={styles.itemValue}>
+                  {item?.squareName || "N/A"}
+                </Text>
+              </>
+            )}
           </View>
 
           <View style={styles.itemColumn}>
@@ -247,8 +260,19 @@ export default function OrchardMechanicalProcessList({ route }) {
 
         <View style={styles.itemRow}>
           <View style={styles.itemColumn}>
-            <Text style={styles.itemLabel}>Chak Name</Text>
-            <Text style={styles.itemValue}>{item?.chakName || "N/A"}</Text>
+            {item?.dprType == "NURSERY" ? (
+              <>
+                <Text style={styles.itemLabel}>Operation</Text>
+                <Text style={styles.itemValue}>
+                  {item?.lastOperationName || "N/A"}
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text style={styles.itemLabel}>Chak Name</Text>
+                <Text style={styles.itemValue}>{item?.chakName || "N/A"}</Text>
+              </>
+            )}
           </View>
 
           <View style={styles.itemColumn}>

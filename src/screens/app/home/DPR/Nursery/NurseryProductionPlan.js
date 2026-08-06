@@ -59,16 +59,18 @@ export default function NurseryProductionPlan({ route }) {
       }
 
       const payload = {
-        epoId: String(userData.epoId), // 🔥 IMPORTANT
+        epoId: String(userData.epoId),
         dprType: "NURSERY",
+        nurseryId: userData?.subUnitId,
       };
 
-      console.log("📤 NURSERY PLAN PAYLOAD", payload);
+      // console.log("NURSERY PLAN PAYLOAD", payload);
+      // console.log("NURSERY PLAN PAYLOAD", JSON.parse(userData?.subUnits));
 
       const encryptedPayload = encryptWholeObject(payload);
 
       const response = await apiRequest(
-        "prod_farm/dpr/find-plans-by-epoId",
+        API_ROUTES.NURSERY_PLAN_MASTER,
         "POST",
         encryptedPayload,
       );
@@ -76,7 +78,7 @@ export default function NurseryProductionPlan({ route }) {
       const decrypted = decryptAES(response);
       const parsed = JSON.parse(decrypted);
 
-      console.log("📥 NURSERY PLAN RESPONSE", parsed);
+      console.log("NURSERY PLAN RESPONSE", parsed);
 
       if (parsed?.status === "SUCCESS") {
         setPlanList(parsed?.data || []);

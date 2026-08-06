@@ -59,9 +59,9 @@ const BrowseProduct = ({ browseProductList, userData }) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.item}
-            // onPress={() => {
-            //   navigation.navigate("NurseryProductionPlan");
-            // }}
+            onPress={() => {
+              navigation.navigate("NurseryProductionPlan");
+            }}
           >
             <View
               style={[
@@ -132,6 +132,9 @@ const BrowseProduct = ({ browseProductList, userData }) => {
                       ROLES.EPO_ENG_INCHARGE,
                     );
 
+                    const findEpoNurseryCentIncharge =
+                      userData?.roleName?.includes(ROLES.EPO_NURS_CENT_INCH);
+
                     if (findMachenicalRole) {
                       //setBottomSheetVisible(true);
                       navigation.navigate("MechanicalAllocationProcessList");
@@ -150,6 +153,10 @@ const BrowseProduct = ({ browseProductList, userData }) => {
 
                     if (findEpoEngIncharge) {
                       navigation.navigate("OrchardMechanicalProcessList");
+                      return;
+                    }
+                    if (findEpoNurseryCentIncharge) {
+                      navigation.navigate("NurseryProductionPlan");
                       return;
                     }
                     navigation.navigate(item.navigationScreenName);
