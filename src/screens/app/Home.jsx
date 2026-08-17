@@ -51,6 +51,7 @@ import { PieChart } from "react-native-gifted-charts";
 import { getCurrentFinancialYearObj } from "../../utils/getCurrentFinancialYearObj";
 import ImagePath from "../../utils/ImagePath";
 import InventoryDashboard from "./InventoryDashboard";
+import FarmDashboard from "./FarmDashboard";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -94,6 +95,10 @@ export default function Home({ navigation }) {
   const [selectedAreaOffice, setselectedAreaOffice] = useState("");
   const [farmList, setfarmList] = useState([]);
   const [selectedFarm, setselectedFarm] = useState("");
+  const [farmExecutiveData, setFarmExecutiveData] = useState({});
+  const [farmActivities, setFarmActivities] = useState([]);
+  const [farmYieldData, setFarmYieldData] = useState([]);
+  const [farmProductionSummary, setFarmProductionSummary] = useState({});
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
 
@@ -134,6 +139,12 @@ export default function Home({ navigation }) {
         case "QC":
           getQCData();
           getComplaintDashboardData();
+          break;
+        case "Farm":
+          getFarmExecutiveSummary();
+          getFarmActivities();
+          getYieldComparison();
+          getFarmProductionSummary();
           break;
 
         default:
@@ -400,6 +411,185 @@ export default function Home({ navigation }) {
     } catch (error) {
       console.log(error, "line error");
       showErrorMessage("something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getFarmExecutiveSummary = async (filter = {}) => {
+    try {
+      setLoading(true);
+
+      const payloadData = {
+        roId: userData?.roId,
+        aoId: userData?.aoId,
+        farmId: userData?.farmId,
+        unitId: userData?.unitId,
+        unitType: userData?.unitType,
+        hoId: userData?.hoId,
+        farmBlockId: userData?.farmBlockId,
+        unitName: userData?.unitName,
+        unit: {
+          unitId: userData?.unitId,
+          unitName: userData?.unitName,
+        },
+        startDate: fromDate,
+        endDate: toDate,
+      };
+
+      console.log("Farm Executive Summary Payload =>", payloadData);
+
+      const encryptedPayload = encryptWholeObject(payloadData);
+
+      const response = await apiRequest(
+        API_ROUTES.FARM_EXECUTIVE_SUMMARY,
+        "post",
+        encryptedPayload,
+      );
+
+      const decrypted = decryptAES(response);
+
+      const parsedDecrypted = JSON.parse(decrypted);
+
+      console.log("Farm Executive Summary Response =>", parsedDecrypted);
+
+      const result = parsedDecrypted?.data || {};
+
+      console.log("Farm Executive Final Data =>", result);
+
+      setFarmExecutiveData(result);
+    } catch (error) {
+      console.log("Farm Executive Summary Error =>", error);
+
+      setFarmExecutiveData({});
+    } finally {
+      setLoading(false);
+    }
+  };
+  const getFarmActivities = async (filter = {}) => {
+    try {
+      setLoading(true);
+
+      const payloadData = {
+        roId: userData?.roId,
+        aoId: userData?.aoId,
+        farmId: userData?.farmId,
+        unitId: userData?.unitId,
+        unitType: userData?.unitType,
+        ...filter,
+      };
+
+      console.log("Farm Activities Payload =>", payloadData);
+
+      const encryptedPayload = encryptWholeObject(payloadData);
+
+      const response = await apiRequest(
+        API_ROUTES.FARM_ACTIVITIES,
+        "post",
+        encryptedPayload,
+      );
+
+      const decrypted = decryptAES(response);
+
+      const parsedDecrypted = JSON.parse(decrypted);
+
+      console.log("Farm Activities Response =>", parsedDecrypted);
+
+      const result = parsedDecrypted?.data || {};
+
+      console.log("Farm Activities Final Data =>", result);
+
+      setFarmActivities(result?.activities || []);
+    } catch (error) {
+      console.log("Farm Activities Error =>", error);
+
+      setFarmActivities([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const getYieldComparison = async (filter = {}) => {
+    try {
+      setLoading(true);
+
+      const payloadData = {
+        roId: userData?.roId,
+        aoId: userData?.aoId,
+        farmId: userData?.farmId,
+        unitId: userData?.unitId,
+        unitType: userData?.unitType,
+        hoId: userData?.hoId,
+        ...filter,
+      };
+
+      console.log("Farm Activities Payload =>", payloadData);
+
+      const encryptedPayload = encryptWholeObject(payloadData);
+
+      const response = await apiRequest(
+        API_ROUTES.YIELD_COMPARISON,
+        "post",
+        encryptedPayload,
+      );
+
+      const decrypted = decryptAES(response);
+
+      const parsedDecrypted = JSON.parse(decrypted);
+
+      console.log("Farm Activities Response =>", parsedDecrypted);
+
+      const result = parsedDecrypted?.data || [];
+
+      console.log("Farm Activities Final Data =>", result);
+
+      setFarmYieldData(result || []);
+    } catch (error) {
+      console.log("Farm Activities Error =>", error);
+
+      setFarmYieldData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const getFarmProductionSummary = async (filter = {}) => {
+    try {
+      setLoading(true);
+
+      const payloadData = {
+        roId: userData?.roId,
+        aoId: userData?.aoId,
+        farmId: userData?.farmId,
+        unitId: userData?.unitId,
+        unitType: userData?.unitType,
+        hoId: userData?.hoId,
+        ...filter,
+      };
+
+      console.log("Farm Activities Payload =>", payloadData);
+
+      const encryptedPayload = encryptWholeObject(payloadData);
+
+      const response = await apiRequest(
+        API_ROUTES.FARM_PRODUCTION_SUMMARY,
+        "post",
+        encryptedPayload,
+      );
+
+      const decrypted = decryptAES(response);
+
+      const parsedDecrypted = JSON.parse(decrypted);
+
+      console.log("Farm Production Summary Response =>", parsedDecrypted);
+
+      const result = parsedDecrypted?.data || {};
+
+      console.log("Farm Production Summary Data =>", result);
+
+      setFarmProductionSummary(result || []);
+    } catch (error) {
+      console.log("Farm Production Summary Error =>", error);
+
+      setFarmProductionSummary([]);
     } finally {
       setLoading(false);
     }
@@ -1097,7 +1287,7 @@ export default function Home({ navigation }) {
     if (hasMKT) tabs.push("Marketing");
     if (hasINV) tabs.push("Inventory");
     if (hasQC) tabs.push("QC");
-    //if (hasFARM) tabs.push("Farm");
+    if (hasFARM) tabs.push("Farm");
 
     console.log("getTabsByRole", tabs);
 
@@ -1773,6 +1963,14 @@ export default function Home({ navigation }) {
               </View>
             </View>
           </ScrollView>
+        )}
+        {selectedTab === "Farm" && hasFARM && (
+          <FarmDashboard
+            executiveData={farmExecutiveData}
+            activities={farmActivities}
+            farmYieldData={farmYieldData}
+            productionSummary={farmProductionSummary}
+          />
         )}
 
         {roleTabs.length === 0 && (

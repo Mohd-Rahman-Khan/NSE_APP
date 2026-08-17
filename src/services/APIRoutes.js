@@ -1,5 +1,6 @@
 export const API_ROUTES = {
-  BASE_URL: "http://160.25.172.19:9054/api/", //qa url
+  BASE_URL: "http://160.25.172.19:9053/api/", //qa url
+  //BASE_URL: "http://49.50.119.93/api/",
 
   AUTHORIZE_LOGIN: "userauth/authenticate/login-new",
   GET_PROFILE: "userauth/all/get-profile",
@@ -94,4 +95,8 @@ export const API_ROUTES = {
   EPO_PLOT_MASTER: "master/epo-plot-master/dd",
   PRODUCTION_PLAN_MASTER: "prod_farm/farm-production-plan/dd",
   NURSERY_PLAN_MASTER: "prod_farm/dpr/find-plans-by-epoId",
+  FARM_EXECUTIVE_SUMMARY: "prod_farm/dashboard/kpi",
+  FARM_ACTIVITIES: "prod_farm/dashboard/seed-production-activity",
+  YIELD_COMPARISON: "prod_farm/dashboard/yield-comparison",
+  FARM_PRODUCTION_SUMMARY: "prod_farm/dashboard/seed-production-info",
 };
